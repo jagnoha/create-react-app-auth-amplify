@@ -1,5 +1,7 @@
 import React,{ useState } from 'react'
+import Home from './components/Home/Home'
 import Main from './components/Main/Main'
+
 import './App.css'
 import Amplify, { Auth } from 'aws-amplify';
 import { withAuthenticator } from '@aws-amplify/ui-react'
@@ -23,7 +25,9 @@ function App( { signOut, user }) {
   return (
       <> 
         <header>          
-          <Main user={userLogged} />     
+          
+          <Main user={userLogged} />  
+        
         </header>
       </>
     );
@@ -32,28 +36,3 @@ function App( { signOut, user }) {
 
 export default withAuthenticator(App);
 
-
-/*import { Amplify } from 'aws-amplify';
-
-import { Authenticator } from '@aws-amplify/ui-react';
-
-import '@aws-amplify/ui-react/styles.css';
-
-import awsExports from './aws-exports';
-Amplify.configure(awsExports);
-
-export default function App() {
-  return (
-    <Authenticator>
-      {({ signOut, user }) => (
-        <> 
-        <header>
-        <h1>Hello {user.username}</h1> 
-          <Main />     
-        </header>
-        </>
-        
-      )}
-    </Authenticator>
-  );
-}*/

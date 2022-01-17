@@ -21,7 +21,7 @@ export default function HeaderMenu(props) {
           name='title'
           
         >
-          <h3>Dashboard</h3>
+          <h3>{props.title}</h3>
         </Menu.Item>
 
         
