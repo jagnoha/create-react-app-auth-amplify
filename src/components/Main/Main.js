@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import { Route, Routes, Link, useLocation } from "react-router-dom"
+import { Route, Routes, Link, useLocation, useNavigate  } from "react-router-dom"
 import Home from "../Home/Home"
 import Products from "../Products/Products"
 import Header from "../Header/Header"
@@ -36,6 +36,7 @@ export default function Main(props) {
       ];
 
       const location = useLocation();
+      const navigate = useNavigate()
       const menuItem = location.pathname.split('/')[1]; 
       console.log(location.pathname);
 
@@ -44,6 +45,7 @@ export default function Main(props) {
 
       function handleItemClick(item) {          
         setActiveItem(item);
+        navigate(`/${item}`)
       }
 
       function getTitle(){
@@ -76,7 +78,7 @@ export default function Main(props) {
         >
           
           <Icon size='large' name='home' /><br></br>
-          <Link to="/">Dashboard</Link>
+          Dashboard
         </Menu.Item>
 
         <Menu.Item
@@ -86,7 +88,8 @@ export default function Main(props) {
         >
           <Icon size='large' name='tags' />
           <br></br>
-          <Link to="/products">Products</Link>
+          Products
+          
           
         </Menu.Item>
 
@@ -141,7 +144,7 @@ export default function Main(props) {
 
 
       </Grid.Column>
-      <Grid.Column stretched width={14}>
+      <Grid.Column stretched width={13}>
         <Container fluid>
         <Routes>
         {routes.map(({ path, main }) => (
