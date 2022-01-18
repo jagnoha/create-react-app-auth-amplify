@@ -13,12 +13,12 @@ export default function HeaderMenu(props) {
     
   return (
     <div>      
-      <Menu stackable>
+      <Menu>
         <Menu.Item>
           <Image size='tiny' src='https://cdn.shopify.com/s/files/1/0338/9682/4876/files/demoncycle-logo-red_130x.png?v=1594169278' />
         </Menu.Item>
         <Menu.Item
-          name='title'
+          name='title' 
           
         >
           <h3>{props.title}</h3>
