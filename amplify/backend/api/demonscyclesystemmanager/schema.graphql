@@ -1,0 +1,143 @@
+type PriceType {
+  MSRP: Float
+  MAP: Float
+  store: Float
+  ebay: Float
+  amazon: Float
+  wholesaleLow: Float
+  wholesaleHigh: Float
+  scratchLow: Float
+  scratchHigh: Float
+}
+
+type DimensionsType {
+  height: Float
+  length: Float
+  width: Float
+}
+
+type ImagesType {
+  image1: String
+  image2: String
+  image3: String
+  image4: String
+  image5: String
+  image6: String
+  image7: String
+  image8: String
+  image9: String
+  image10: String
+}
+
+type BulletPointsType {
+  bullet1: String
+  bullet2: String
+  bullet3: String
+  bullet4: String
+  bullet5: String
+  bullet6: String
+  bullet7: String
+}
+
+type DescriptionType {
+  store: String
+  ebay: String
+  amazon: String
+}
+
+type TitleType {
+  store: String
+  ebay: String
+  amazon: String
+}
+
+type SourceType {
+  warehouse: Boolean
+  dropship: Boolean
+}
+
+type Product @model @auth(rules: [{allow: public}]) @key(name: "byBrand", fields: ["brandID"]) @key(name: "byManufacturer", fields: ["manufacturerID"]) @key(name: "byCategory", fields: ["categoryID"]) @key(name: "bySubCategory", fields: ["subcategoryID"]) @key(name: "bySubCategory2", fields: ["subcategory2ID"]) @key(name: "byEbayStoreCategory", fields: ["ebaystorecategoryID"]) {
+  id: ID!
+  SKU: String
+  legacyID: String
+  mpn: String
+  Attributes: String
+  parentSKU: String
+  source: SourceType
+  brandID: ID
+  manufacturerID: ID
+  categoryID: ID
+  subcategoryID: ID
+  subcategory2ID: ID
+  ebaystorecategoryID: ID
+  binLocation: String
+  title: TitleType
+  description: DescriptionType
+  bulletPoints: BulletPointsType
+  images: ImagesType
+  handle: String
+  weight: Float
+  dimensionalWeight: Float
+  appliedWeight: Float
+  dimensions: DimensionsType
+  shopifyFitmentTags: String
+  shopifyOnlyTags: String
+  price: PriceType
+  cost: Float
+  options: String
+  updateFlag: Boolean
+}
+
+type Attribute @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  name: String
+  AttributeSubCategories: [AttributeSubCategory] @connection(keyName: "byAttribute", fields: ["id"])
+}
+
+type SubCategory2 @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  name: String
+  Products: [Product] @connection(keyName: "bySubCategory2", fields: ["id"])
+}
+
+type SubCategory @model @auth(rules: [{allow: public}]) @key(name: "byCategory", fields: ["categoryID"]) {
+  id: ID!
+  name: String
+  categoryID: ID
+  attributes: [AttributeSubCategory] @connection(keyName: "bySubCategory", fields: ["id"])
+  Products: [Product] @connection(keyName: "bySubCategory", fields: ["id"])
+}
+
+type Category @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  name: String
+  SubCategories: [SubCategory] @connection(keyName: "byCategory", fields: ["id"])
+  Products: [Product] @connection(keyName: "byCategory", fields: ["id"])
+}
+
+type Brand @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  name: String
+  Products: [Product] @connection(keyName: "byBrand", fields: ["id"])
+}
+
+type Manufacturer @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  name: String
+  Products: [Product] @connection(keyName: "byManufacturer", fields: ["id"])
+}
+
+type EbayStoreCategory @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  name: String
+  code: String
+  Products: [Product] @connection(keyName: "byEbayStoreCategory", fields: ["id"])
+}
+
+type AttributeSubCategory @model(queries: null) @key(name: "byAttribute", fields: ["attributeID", "subcategoryID"]) @key(name: "bySubCategory", fields: ["subcategoryID", "attributeID"]) @auth(rules: [{allow: public}]) {
+  id: ID!
+  attributeID: ID!
+  subcategoryID: ID!
+  attribute: Attribute! @connection(fields: ["attributeID"])
+  subcategory: SubCategory! @connection(fields: ["subcategoryID"])
+}
