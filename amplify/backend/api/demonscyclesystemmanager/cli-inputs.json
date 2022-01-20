@@ -5,18 +5,14 @@
     "serviceName": "AppSync",
     "gqlSchemaPath": "C:\\Users\\gonza_r\\demons_cycle_projects\\create-react-app-auth-amplify\\amplify\\backend\\api\\demonscyclesystemmanager\\schema.graphql",
     "defaultAuthType": {
-      "mode": "API_KEY",
-      "expirationTime": 365,
-      "apiKeyExpirationDate": "2023-01-20T04:05:33.211Z",
-      "keyDescription": "da2-xjzlbnywoja3bdpgoupcmathhm"
+      "mode": "AWS_IAM"
     },
     "additionalAuthTypes": [
       {
-        "mode": "AWS_IAM"
-      },
-      {
-        "mode": "AMAZON_COGNITO_USER_POOLS",
-        "cognitoUserPoolId": "authcognitocf0c6096"
+        "mode": "API_KEY",
+        "expirationTime": 365,
+        "apiKeyExpirationDate": "2023-01-20T05:31:46.303Z",
+        "keyDescription": "da2-xjzlbnywoja3bdpgoupcmathhm"
       }
     ],
     "conflictResolution": {
