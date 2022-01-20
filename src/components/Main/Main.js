@@ -4,11 +4,14 @@ import Home from "../Home/Home"
 import Products from "../Products/Products"
 import Brands from "../Brands/Brands"
 import Header from "../Header/Header"
-import { Menu, Segment, Grid, Icon, Divider, Container, Tab, Label, Input, Popup} from 'semantic-ui-react'
+import { Menu, Segment, Grid, Icon, Divider, Container, Tab, Label, Dropdown, Input, Popup} from 'semantic-ui-react'
 import Manufacturers from '../Manufacturers/Manufacturers'
 import Categories from '../Categories/Categories'
 import Reports from '../Reports/Reports'
 import Settings from '../Settings/Settings'
+import SubCategories from '../SubCategories/SubCategories'
+import SubCategories2 from '../SubCategories2/SubCategories2'
+import EbayStoreCategories from '../EbayStoreCategories/EbayStoreCategories'
 
 //const Home = () => <h1>Home</h1>;
 //const Products = () => <h1>Products</h1>;
@@ -39,7 +42,7 @@ export default function Main(props) {
         {
           path: "/categories",
           main: () => <Categories />,          
-        },
+        },                
         {
           path: "/reports",
           main: () => <Reports />,          
@@ -47,7 +50,19 @@ export default function Main(props) {
         {
           path: "/settings",
           main: () => <Settings />,          
-        }            
+        },
+        {
+          path: "/subcategories",
+          main: () => <SubCategories />,          
+        },
+        {
+          path: "/subcategories2",
+          main: () => <SubCategories2 />,          
+        },
+        {
+          path: "/ebaystorecategories",
+          main: () => <EbayStoreCategories />,          
+        }                 
       ];
 
       const location = useLocation();
@@ -74,7 +89,13 @@ export default function Main(props) {
         } else if (menuItem === 'manufacturers'){
           return 'Manufacturers'
         } else if (menuItem === 'categories'){
-          return 'Categories & Subcategories'
+          return 'Categories'
+        } else if (menuItem === 'subcategories'){
+          return 'Subcategories'
+        } else if (menuItem === 'subcategories2'){
+          return 'Subcategories 2'
+        } else if (menuItem === 'ebaystorecategories'){
+          return 'eBay Store Categories'          
         } else if (menuItem === 'reports'){
           return 'Reports'
         } else if (menuItem === 'settings'){
@@ -103,10 +124,6 @@ export default function Main(props) {
           onClick={()=>handleItemClick('')}
         >
          <Popup content='Home' position='right center' style={style} offset={[0, 15]} inverted trigger={<Icon size='large' name='home' />} />
-          
-          
-          
-          
         </Menu.Item>
 
         <Menu.Item
@@ -115,17 +132,7 @@ export default function Main(props) {
           onClick={()=>handleItemClick('products')}
         >
           <Popup content='Products' position='right center' style={style} offset={[0, 15]} inverted trigger={<Icon size='large' name='tags' />} />
-         
-          
-          
-          
-          
-          
         </Menu.Item>
-
-        
-
-        
 
         <Menu.Item
           name='brands'
@@ -144,14 +151,20 @@ export default function Main(props) {
           <Popup content='Manufacturers' position='right center' style={style} offset={[0, 15]} inverted trigger={<Icon size='large' name='factory' />} />
          
         </Menu.Item>
-        <Menu.Item
-          name='categories'
-          active={activeItem === 'categories'}
-          onClick={()=>handleItemClick('categories')}
-        >
-          <Popup content='Categories & SubCategories' position='right center' style={style} offset={[0, 15]} inverted trigger={<Icon size='large' name='sitemap' />} />
-         
-        </Menu.Item>
+        
+
+        <Popup content='Categories & SubCategories' position='right center' style={style} offset={[0, 0]} inverted 
+        trigger= { <Dropdown item trigger={<Icon size='large' name='sitemap' />}>
+        <Dropdown.Menu>
+          <Dropdown.Item text='Main Categories' onClick={()=>handleItemClick('categories')} active={activeItem === 'categories'} />
+          <Dropdown.Item text='SubCategories' onClick={()=>handleItemClick('subcategories')} active={activeItem === 'subcategories'} />
+          <Dropdown.Item text='SubCategories 2' onClick={()=>handleItemClick('subcategories2')} active={activeItem === 'subcategories2'} />
+          <Dropdown.Item text='eBay Store Categories' onClick={()=>handleItemClick('ebaystorecategories')} active={activeItem === 'ebaystorecategories'} />
+        </Dropdown.Menu>
+      </Dropdown> } /> 
+        
+        
+
       </Menu>
 
       <Menu icon vertical pointing borderless={true} fixed={'bottom'} >
@@ -175,18 +188,6 @@ export default function Main(props) {
         </Menu.Item>
 
         </Menu>
-
-      
-
-      
-
-
-      
-
-
-
-
-
       </Grid.Column>
       <Grid.Column width={15} >
         <Container fluid>

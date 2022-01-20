@@ -3,11 +3,12 @@
   "serviceConfiguration": {
     "apiName": "demonscyclesystemmanager",
     "serviceName": "AppSync",
-    "gqlSchemaPath": "/tmp/amplify-fe1c631f-b37d-4d4c-9ccd-88a02edc551d/amplify/backend/api/demonscyclesystemmanager/schema.graphql",
+    "gqlSchemaPath": "C:\\Users\\gonza_r\\demons_cycle_projects\\create-react-app-auth-amplify\\amplify\\backend\\api\\demonscyclesystemmanager\\schema.graphql",
     "defaultAuthType": {
       "mode": "API_KEY",
-      "keyDescription": "api key description",
-      "expirationTime": 30
+      "expirationTime": 365,
+      "apiKeyExpirationDate": "2023-01-20T04:05:33.211Z",
+      "keyDescription": "da2-xjzlbnywoja3bdpgoupcmathhm"
     },
     "additionalAuthTypes": [
       {
