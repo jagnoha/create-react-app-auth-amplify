@@ -23,6 +23,7 @@ export default function Brands() {
   
   useEffect(() => {
     fetchBrands()
+    //fetchInitialBrands()
 }, [])
 
 
@@ -35,6 +36,28 @@ const sliceIntoChunks = (arr, chunkSize) => {
   return res;
 }
 
+const fetchInitialBrands = async () => {
+  try {
+      //const brandData = await API.graphql(graphqlOperation(listBrands))
+      const brandData = await API.graphql({
+        query: listBrands,
+        /*variables: {
+          limit: 6,
+          //_deleted: null,
+          //filter: {name: {eq:"Demon's Cycle"}}
+          //filter: {_deleted: {eq: null}}
+          
+          //{_deleted: {ne: true}}
+          //nextToken: nextToken
+        }*/
+      })      
+      
+      const brands = brandData.data.listBrands.items.filter(item => !item._deleted)     
+      setChunkBrands( sliceIntoChunks(brands, 10 ))
+      setBrands(brands)
+      
+
+  } catch (err) { console.log(err) }}
 
 
 const fetchBrands = async () => {
@@ -59,7 +82,7 @@ const fetchBrands = async () => {
       setBrands(brands)
       
 
-  } catch (err) { console.log('error fetching brands') }}
+  } catch (err) { console.log(err) }}
 
     let dataChunks = ((chunckBrands === null ? [] : chunckBrands ))
     
