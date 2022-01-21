@@ -73,10 +73,16 @@ export default function Main(props) {
       
       const [activeItem, setActiveItem] = useState(menuItem);
 
-      function handleItemClick(item) {          
+      /*function handleItemClick(item) {          
+        setActiveItem(item);
+        navigate(`/${item}`)
+      }*/
+
+      const handleItemClick = (item) => {
         setActiveItem(item);
         navigate(`/${item}`)
       }
+      
 
       function getTitle(){
         let newTitle = '';
