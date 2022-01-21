@@ -1,5 +1,5 @@
 import React, { useState, useEffect }from 'react'
-import { Icon, Label, Menu, Table, Button, Checkbox } from 'semantic-ui-react'
+import { Icon, Label, Menu, Table, Button, Checkbox, Loader, Dimmer, Container } from 'semantic-ui-react'
 
 
 export default function SimpleTable(props) {
@@ -7,20 +7,29 @@ export default function SimpleTable(props) {
     if (!props.data) {  
 
     return (
-        <>
-            <p>processing</p>
-        </>
+        
+        <Container>
+
+            <Loader active style = {{top:350}} />        
+        </Container>
+        
     );
 
     } 
 
     return (
         
-            <Table celled>
+            <Table sortable celled>
         <Table.Header>
+
+
+            
           <Table.Row>
             <Table.HeaderCell width={4}>Id</Table.HeaderCell>
-            <Table.HeaderCell>Name</Table.HeaderCell>
+            <Table.HeaderCell 
+                sorted={props.orderColumn.column === 'name' ? props.orderColumn.direction : null}
+                onClick={() => props.handleOrder('name')}
+            >Name</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
     
