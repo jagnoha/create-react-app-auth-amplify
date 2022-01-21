@@ -2,5 +2,11 @@
   "AppSyncApiName": "demonscyclesystemmanager",
   "DynamoDBBillingMode": "PAY_PER_REQUEST",
   "DynamoDBEnableServerSideEncryption": false,
-  "AuthModeLastUpdated": "2022-01-20T05:31:47.615Z"
+  "AuthModeLastUpdated": "2022-01-21T17:18:32.513Z",
+  "AuthCognitoUserPoolId": {
+    "Fn::GetAtt": [
+      "authcognitocf0c6096",
+      "Outputs.UserPoolId"
+    ]
+  }
 }

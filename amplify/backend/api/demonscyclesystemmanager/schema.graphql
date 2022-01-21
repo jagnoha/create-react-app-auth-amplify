@@ -141,3 +141,4 @@ type AttributeSubCategory @model(queries: null) @key(name: "byAttribute", fields
   attribute: Attribute! @connection(fields: ["attributeID"])
   subcategory: SubCategory! @connection(fields: ["subcategoryID"])
 }
+ 
