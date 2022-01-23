@@ -1,18 +1,23 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from 'react'
+import ReactDOM from 'react-dom'
 import { 
     BrowserRouter  
-} from "react-router-dom";
-import './index.css';
+} from "react-router-dom"
+
+import './index.css'
 import 'semantic-ui-css/semantic.min.css'
 import App from './App';
-import * as serviceWorker from './serviceWorker';
+import * as serviceWorker from './serviceWorker'
+
 import Products from './components/Products/Products'
+
+
 
 ReactDOM.render(
     <BrowserRouter>
-        <App />
-    </BrowserRouter>, 
+    <App />
+    </BrowserRouter>
+    , 
     document.getElementById('root')
 );
 
