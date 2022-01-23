@@ -19,12 +19,12 @@ export default function SimpleTable(props) {
 
     return (
         
-            <Table sortable celled>
+            <Table sortable celled selectable>
         <Table.Header>
 
 
             
-          <Table.Row>
+          <Table.Row >
             <Table.HeaderCell width={4}>Id</Table.HeaderCell>
             <Table.HeaderCell 
                 sorted={props.orderColumn.column === 'name' ? props.orderColumn.direction : null}
@@ -37,7 +37,7 @@ export default function SimpleTable(props) {
             
             {props.data.map((item) => 
             
-            <Table.Row key={item.id}>
+            <Table.Row key={item.id} onClick = {()=>props.openForm(item)}>
             <Table.Cell>
                {item.id}  
             </Table.Cell>

@@ -6,7 +6,7 @@ import { Pagination, Input, Segment, Button, Icon, Grid, Modal, Header, Form, It
 import { SemanticToastContainer, toast } from 'react-semantic-toasts';
 import 'react-semantic-toasts/styles/react-semantic-alert.css';
 import { listBrands } from '../../graphql/queries'
-import { createBrand } from '../../graphql/mutations'
+import { createBrand, updateBrand } from '../../graphql/mutations'
 import SimpleTable from '../SimpleTable/SimpleTable'
 //import { onCreateBrand } from '../../graphql/subscriptions';
 import * as subscriptions from '../../graphql/subscriptions';
@@ -24,8 +24,10 @@ export default function Brands() {
   const [search, setSearch] = useState("")
   const [orderColumn, setOrderColumn] = useState({column: null, direction: 'descending'})
   const [open, setOpen] = useState(false)
+  const [openEdit, setOpenEdit] = useState(false)
   const [brandName, setBrandName] = useState("")
-  
+  //const [brandEdit, setBrandEdit] = useState({})
+   
   
   const addBrand = async () => {
     try {
@@ -56,7 +58,7 @@ export default function Brands() {
           
           return
         }
-        setBrands([...brands, brand])        
+        //setBrands([...brands, brand])        
         await API.graphql(graphqlOperation(createBrand, { input: { name: brand } }))
         setBrandName("")
         setTimeout(() => {
@@ -75,7 +77,9 @@ export default function Brands() {
           })
           setOpen(false)
       
-      }, 200)       
+      }, 200)
+      //subscriptionCreate()
+           
     } catch (err) {
         console.log('error creating brand:', err)
         setBrandName("")
@@ -98,16 +102,26 @@ export default function Brands() {
   }
 
   
-  const subscription = async () => await API.graphql(
+
+  
+  const subscriptionCreate = async () => await API.graphql(
     graphqlOperation(subscriptions.onCreateBrand)
 ).subscribe({
-    next: ({ provider, value }) => { 
-      let brand = value.data.onCreateBrand
-      console.log(value.data.onCreateBrand)
+    next: (item) => { 
+      //fetchBrands()
+      let brand = item.value.data.onCreateBrand;
+      console.log(brand);
+       
+      //let brand = value.data.onCreateBrand
+      //console.log(value.data.onCreateBrand)
+      //console.log("ESTE ES BRAND: ", brand)
+      //console.log(brands)
       setBrands([...brands, brand ]) 
     },
     error: error => console.warn(error)
 });
+
+
     
 
   const handleSubmit = (evt) => {
@@ -116,12 +130,29 @@ export default function Brands() {
       //setOpen(false)
       console.log(brandName)
       addBrand()
-      fetchBrands()
+      //fetchBrands()
   }
-  
-  useEffect(() => {
+
+  const handleUpdate = (evt) => {
+    evt.preventDefault()
+    
+    setOpenEdit(false)
+    //editBrand()
+    //console.log(brandName)
+    //addBrand()
     fetchBrands()
-    subscription()
+}
+
+const onPageRendered = async () => {
+  fetchBrands()
+  subscriptionCreate()
+  
+};
+
+  useEffect(() => {
+    onPageRendered()
+    //subscriptionCreate()
+    //subscriptionUpdate()
     //subscription.unsubscribe()
     
     //fetchInitialBrands()
@@ -159,6 +190,7 @@ const fetchBrands = async () => {
       sortItems(brands, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
       setChunkBrands( sliceIntoChunks(brands, 10 ))
       setBrands(brands)
+      console.log("esta es una prueba *****", brands)
       
 
   } catch (err) { console.log(err) }}
@@ -218,6 +250,13 @@ const fetchBrands = async () => {
       setChunkBrands( sliceIntoChunks(brands, 10 ))
       setBrands(brands)
       
+    }
+
+    const handleOpenEditForm = (item) => {
+      setOpenEdit(!openEdit) 
+      console.log(item)
+      //setBrandEdit({id: item.id, name: item.name})
+      //setBrandName(item.name)     
     }
 
     const handleKeyDown = (event) => {
@@ -302,6 +341,39 @@ const fetchBrands = async () => {
             </Modal>
 
 
+            <Modal
+              onClose={() => setOpenEdit(false)}
+              onOpen={() => setOpenEdit(true)}
+              open={openEdit}
+              
+            >
+              <Modal.Header>Edit Brand</Modal.Header>
+              <Modal.Content>
+                <Modal.Description>
+                  
+                  <Form>
+                    <Form.Field>
+                      <label>Brand Name</label>
+                      <input placeholder='Brand Name' value = {brandName} onChange={e => setBrandName(e.target.value)}/>
+                    </Form.Field>                    
+                  </Form>
+                </Modal.Description>
+              </Modal.Content>
+              <Modal.Actions>
+              <Button positive onClick={handleUpdate}>
+                Save Brand
+              </Button>
+                
+              
+
+
+              </Modal.Actions>
+            </Modal>
+
+            
+
+
+
 
 
 
@@ -329,7 +401,7 @@ const fetchBrands = async () => {
         </Grid>
 
         
-        <SimpleTable data = {dataChunks[activePage - 1]} handleOrder = {handleOrderColumn} orderColumn = {orderColumn} />
+        <SimpleTable data = {dataChunks[activePage - 1]} handleOrder = {handleOrderColumn} orderColumn = {orderColumn} openForm = {handleOpenEditForm} />
          <div style = {paginationStyle}>
           <Pagination
               activePage={activePage}
