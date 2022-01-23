@@ -2,7 +2,7 @@ import React from 'react'
 import { Table, Loader, Container } from 'semantic-ui-react'
 
 
-export default function SimpleTable(props) {
+export default function EbayCategoriesTable(props) {
 
     if (!props.data) {  
 
@@ -30,6 +30,7 @@ export default function SimpleTable(props) {
                 sorted={props.orderColumn.column === 'name' ? props.orderColumn.direction : null}
                 onClick={() => props.handleOrder('name')}
             >Name</Table.HeaderCell>
+            <Table.HeaderCell>Category number</Table.HeaderCell>
           </Table.Row>
         </Table.Header>
     
@@ -42,6 +43,7 @@ export default function SimpleTable(props) {
                {item.id}  
             </Table.Cell>
             <Table.Cell>{item.name}</Table.Cell>
+            <Table.Cell>{item.code}</Table.Cell>
           </Table.Row>
             
             )}
@@ -53,5 +55,3 @@ export default function SimpleTable(props) {
     
     
   }
-
-  

@@ -1,39 +1,31 @@
 import React, { useState, useEffect }from 'react'
-import { DataStore } from '@aws-amplify/datastore'
-import { Brand } from '../../models'
-import Amplify, { API, graphqlOperation } from 'aws-amplify'
+import { API, graphqlOperation } from 'aws-amplify'
 import { Pagination, Input, Segment, Button, Icon, Grid, Modal, Header, Form, ItemContent} from 'semantic-ui-react'
 import { SemanticToastContainer, toast } from 'react-semantic-toasts';
 import 'react-semantic-toasts/styles/react-semantic-alert.css';
 import { listBrands } from '../../graphql/queries'
 import { createBrand, updateBrand } from '../../graphql/mutations'
 import SimpleTable from '../SimpleTable/SimpleTable'
-//import { onCreateBrand } from '../../graphql/subscriptions';
 import * as subscriptions from '../../graphql/subscriptions';
-//import { v4 as uuidv4 } from 'uuid'
-
-
-
-
+import { v4 as uuidv4 } from 'uuid'
 
 
 export default function Brands() {
   const [chunckBrands, setChunkBrands] = useState(null)
-  const [brands, setBrands] = useState(null)
+  const [brands, setBrands] = useState([])
   const [activePage, setActivePage] = useState(1)
   const [search, setSearch] = useState("")
   const [orderColumn, setOrderColumn] = useState({column: null, direction: 'descending'})
   const [open, setOpen] = useState(false)
   const [openEdit, setOpenEdit] = useState(false)
   const [brandName, setBrandName] = useState("")
-  //const [brandEdit, setBrandEdit] = useState({})
+  const [brandEdit, setBrandEdit] = useState({})
+  
    
   
   const addBrand = async () => {
     try {
-        //if (!formState.firstName || !formState.lastName) return
         
-        //const brand = { ...formState }
         const brand = brandName
         console.log(brand);
         if (brands.find(item => item.name.toUpperCase() === brand.toUpperCase() ))  {
@@ -41,44 +33,29 @@ export default function Brands() {
             toast({
                 type: 'error',
                 icon: 'check circle outline',
-                size: 'tiny',
-                //iconSize: 'mini',
-                //title: 'Brand Created',
-                description: 'Brand already exists',
-                //animation: 'jiggle',
-                time: 2000,
-                /*onClose: () => alert('you close this toast'),
-                onClick: () => alert('you click on the toast'),
-                onDismiss: () => alert('you have dismissed this toast')*/
+                size: 'tiny',                
+                description: 'Brand already exists',                
+                time: 2000,                
             });
-        }, 200);   
-        
-       
-          
-          
+        }, 200); 
           return
         }
-        //setBrands([...brands, brand])        
-        await API.graphql(graphqlOperation(createBrand, { input: { name: brand } }))
+        let id = uuidv4()
+        setBrands([...brands, {id, name: brand}])        
+        await API.graphql(graphqlOperation(createBrand, { input: { id, name: brand } }))
+        fetchBrands()
         setBrandName("")
         setTimeout(() => {
           toast({
               type: 'success',
               icon: 'check circle outline',
-              size: 'tiny',
-              //iconSize: 'mini',
-              //title: 'Brand Created',
+              size: 'tiny',              
               description: 'Brand successfully created',
-              //animation: 'jiggle',
-              time: 2000,
-              /*onClose: () => alert('you close this toast'),
-              onClick: () => alert('you click on the toast'),
-              onDismiss: () => alert('you have dismissed this toast')*/
+              time: 2000,              
           })
           setOpen(false)
       
       }, 200)
-      //subscriptionCreate()
            
     } catch (err) {
         console.log('error creating brand:', err)
@@ -87,39 +64,107 @@ export default function Brands() {
           toast({
               type: 'error',
               icon: 'times',
-              size: 'tiny',
-              //iconSize: 'mini',
+              size: 'tiny',              
               title: 'Error creating brand',
-              description: err,
-              //animation: 'jiggle',
-              time: 2000,
-              /*onClose: () => alert('you close this toast'),
-              onClick: () => alert('you click on the toast'),
-              onDismiss: () => alert('you have dismissed this toast')*/
+              description: err,              
+              time: 2000,              
           });
       }, 200);
     }
   }
 
-  
+  const modifyBrand = async () => {
+    try {
+        
+        const brand = brandEdit.name
+        const id = brandEdit.id
+        console.log("AQUI VA BRANDS ********")
+        console.log(brands)
+        let tempBrands = [...brands]
+        let index = tempBrands.findIndex(item => item.id === id)
+        tempBrands[index].name = brand
+        setBrands(tempBrands)
+        console.log("ESTE ES EL BRAND:",brand)
+        console.log("ESTE ES EL ID", id)
+        const version = tempBrands[index]._version
+        console.log("ESTE ES LA VERSION", version)
+        
+        const brandDetails = {
+          id: id,
+          name: brandEdit.name,
+          _version: version
+        };
+        await API.graphql(graphqlOperation(updateBrand, { input: brandDetails }))
+        fetchBrands()
 
+        setBrandEdit({})
+        setTimeout(() => {
+          toast({
+              type: 'success',
+              icon: 'check circle outline',
+              size: 'tiny',              
+              description: 'Brand successfully updated',
+              time: 2000,              
+          })
+          setOpenEdit(false)
+      
+      }, 200)
+           
+    } catch (err) {
+        console.log('error updating brand:', err)
+        setBrandEdit({})
+        setTimeout(() => {
+          toast({
+              type: 'error',
+              icon: 'times',
+              size: 'tiny',              
+              title: 'Error creating brand',
+              description: err,              
+              time: 2000,              
+          });
+      }, 200);
+    }
+  }
   
   const subscriptionCreate = async () => await API.graphql(
     graphqlOperation(subscriptions.onCreateBrand)
 ).subscribe({
     next: (item) => { 
-      //fetchBrands()
+      fetchBrands()
       let brand = item.value.data.onCreateBrand;
-      console.log(brand);
+      console.log(brand)
        
-      //let brand = value.data.onCreateBrand
-      //console.log(value.data.onCreateBrand)
-      //console.log("ESTE ES BRAND: ", brand)
-      //console.log(brands)
-      setBrands([...brands, brand ]) 
+      console.log("QUE HAY AHORA", brands)
+      
+      if (brands) {
+        setBrands([...brands, brand ]) 
+      }
+    
     },
     error: error => console.warn(error)
 });
+
+const subscriptionUpdate = async () => await API.graphql(
+  graphqlOperation(subscriptions.onUpdateBrand)
+).subscribe({
+  next: (item) => { 
+    fetchBrands()
+    console.log(item)
+    let brandTemp = item.value.data.onUpdateBrand;
+    console.log(brandTemp)
+    let tempBrands = [...brands]
+    let index = tempBrands.findIndex(item => item.id === brandTemp.id)
+    
+    if (tempBrands) {
+      tempBrands[index] = brandTemp
+      setBrands(tempBrands)
+    }
+   
+
+  },
+  error: error => console.warn(error)
+});
+
 
 
     
@@ -127,35 +172,27 @@ export default function Brands() {
   const handleSubmit = (evt) => {
       evt.preventDefault()
       
-      //setOpen(false)
       console.log(brandName)
       addBrand()
-      //fetchBrands()
   }
 
   const handleUpdate = (evt) => {
     evt.preventDefault()
-    
-    setOpenEdit(false)
-    //editBrand()
-    //console.log(brandName)
-    //addBrand()
-    fetchBrands()
-}
+    modifyBrand()
+  }
 
 const onPageRendered = async () => {
   fetchBrands()
   subscriptionCreate()
+  subscriptionUpdate()
   
 };
 
+
+
   useEffect(() => {
     onPageRendered()
-    //subscriptionCreate()
-    //subscriptionUpdate()
-    //subscription.unsubscribe()
     
-    //fetchInitialBrands()
 }, [])
 
 
@@ -168,25 +205,33 @@ const sliceIntoChunks = (arr, chunkSize) => {
   return res;
 }
 
+const getOnlyBrands = async () => {
+
+  try {
+    const brandData = await API.graphql({
+      query: listBrands,
+    
+    })      
+    
+    const brands = await brandData.data.listBrands.items.filter(item => !item._deleted)   
+    setBrands(brands)
+    console.log("esta es una prueba *****", brands)
+    
+
+} catch (err) { console.log(err) }}
+
+
 
 
 const fetchBrands = async () => {
   try {
-      //const brandData = await API.graphql(graphqlOperation(listBrands))
       const brandData = await API.graphql({
         query: listBrands,
-        /*variables: {
-          limit: 6,
-          //_deleted: null,
-          //filter: {name: {eq:"Demon's Cycle"}}
-          //filter: {_deleted: {eq: null}}
-          
-          //{_deleted: {ne: true}}
-          //nextToken: nextToken
-        }*/
+      
       })      
       
-      const brands = brandData.data.listBrands.items.filter(item => !item._deleted)     
+      const brands = await brandData.data.listBrands.items.filter(item => !item._deleted)   
+      console.log("QUE TENEMOS AQUI:", brands)  
       sortItems(brands, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
       setChunkBrands( sliceIntoChunks(brands, 10 ))
       setBrands(brands)
@@ -238,9 +283,6 @@ const fetchBrands = async () => {
 
     }
     
-    
-    
-    
     const handleOrderColumn = (column) => {
       console.log(column);
       setOrderColumn({column: column, direction: orderColumn.direction === 'descending' ? 'ascending' : 'descending' })
@@ -254,9 +296,8 @@ const fetchBrands = async () => {
 
     const handleOpenEditForm = (item) => {
       setOpenEdit(!openEdit) 
-      console.log(item)
-      //setBrandEdit({id: item.id, name: item.name})
-      //setBrandName(item.name)     
+      setBrandEdit({id: item.id, name: item.name})
+           
     }
 
     const handleKeyDown = (event) => {
@@ -273,19 +314,14 @@ const fetchBrands = async () => {
         setChunkBrands( sliceIntoChunks(tempBrands, 10 ))
       }
     }
-
+    console.log(brandEdit.name)
+    console.log(brandEdit.id)
 
     return (
       
         <div style={divStyle}>
           <SemanticToastContainer position="top-center" />
         <h1>Brands</h1>
-        
-        
-
-        
-
-        
 
         <Grid>
           <Grid.Column width={12}>
@@ -301,8 +337,6 @@ const fetchBrands = async () => {
               />
           </Grid.Column>
           <Grid.Column width={4}>
-          
-          
           
             <Modal
               onClose={() => setOpen(false)}
@@ -333,10 +367,7 @@ const fetchBrands = async () => {
               <Button positive onClick={handleSubmit}>
                 Add Brand
               </Button>
-                
-              
-
-
+ 
               </Modal.Actions>
             </Modal>
 
@@ -354,7 +385,9 @@ const fetchBrands = async () => {
                   <Form>
                     <Form.Field>
                       <label>Brand Name</label>
-                      <input placeholder='Brand Name' value = {brandName} onChange={e => setBrandName(e.target.value)}/>
+                      <input placeholder='Brand Name' 
+                      value = {brandEdit.name} 
+                      onChange={e => setBrandEdit({id: brandEdit.id, name: e.target.value})}/>
                     </Form.Field>                    
                   </Form>
                 </Modal.Description>
@@ -363,39 +396,9 @@ const fetchBrands = async () => {
               <Button positive onClick={handleUpdate}>
                 Save Brand
               </Button>
-                
-              
-
-
+ 
               </Modal.Actions>
             </Modal>
-
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
           </Grid.Column>          
         </Grid>
@@ -406,7 +409,6 @@ const fetchBrands = async () => {
           <Pagination
               activePage={activePage}
               boundaryRange={0}
-              //defaultActivePage={1}
               ellipsisItem={null}
               firstItem={null}
               lastItem={null}
@@ -414,7 +416,6 @@ const fetchBrands = async () => {
               totalPages={ dataChunks.length }
               onPageChange={handlePaginationChange}              
             />
-
             
             </div>
 
@@ -425,8 +426,6 @@ const fetchBrands = async () => {
 
   const divStyle = {
     margin: '3em'
-    /*marginRight: '3em',
-    marginTop: '3em'*/
   };
 
   const paginationStyle = {

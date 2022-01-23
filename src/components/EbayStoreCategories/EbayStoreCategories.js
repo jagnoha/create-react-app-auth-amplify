@@ -1,10 +1,445 @@
-import React from 'react'
+import React, { useState, useEffect }from 'react'
+import { API, graphqlOperation } from 'aws-amplify'
+import { Pagination, Input, Segment, Button, Icon, Grid, Modal, Header, Form, ItemContent} from 'semantic-ui-react'
+import { SemanticToastContainer, toast } from 'react-semantic-toasts';
+import 'react-semantic-toasts/styles/react-semantic-alert.css';
+import { listEbayStoreCategorys } from '../../graphql/queries'
+import { createEbayStoreCategory, updateEbayStoreCategory } from '../../graphql/mutations'
+import EbayCategoriesTable from '../EbayCategoriesTable/EbayCategoriesTable'
+import * as subscriptions from '../../graphql/subscriptions';
+import { v4 as uuidv4 } from 'uuid'
+
 
 export default function EbayStoreCategories() {
+  const [chunckEbayStoreCategorys, setChunkEbayStoreCategorys] = useState(null)
+  const [ebayStoreCategorys, setEbayStoreCategorys] = useState([])
+  const [activePage, setActivePage] = useState(1)
+  const [search, setSearch] = useState("")
+  const [orderColumn, setOrderColumn] = useState({column: null, direction: 'descending'})
+  const [open, setOpen] = useState(false)
+  const [openEdit, setOpenEdit] = useState(false)
+  const [ebayStoreCategoryName, setEbayStoreCategoryName] = useState("")
+  const [ebayStoreCategoryEdit, setEbayStoreCategoryEdit] = useState({})
+  
+   
+  
+  const addEbayStoreCategory = async () => {
+    try {
+        
+        const ebayStoreCategory = ebayStoreCategoryName
+        console.log(ebayStoreCategory);
+        if (ebayStoreCategorys.find(item => item.name.toUpperCase() === ebayStoreCategory.toUpperCase() ))  {
+          setTimeout(() => {
+            toast({
+                type: 'error',
+                icon: 'check circle outline',
+                size: 'tiny',                
+                description: 'EbayStoreCategory already exists',                
+                time: 2000,                
+            });
+        }, 200); 
+          return
+        }
+        let id = uuidv4()
+        setEbayStoreCategorys([...ebayStoreCategorys, {id, name: ebayStoreCategory}])        
+        await API.graphql(graphqlOperation(createEbayStoreCategory, { input: { id, name: ebayStoreCategory } }))
+        fetchEbayStoreCategorys()
+        setEbayStoreCategoryName("")
+        setTimeout(() => {
+          toast({
+              type: 'success',
+              icon: 'check circle outline',
+              size: 'tiny',              
+              description: 'Ebay Store Category successfully created',
+              time: 2000,              
+          })
+          setOpen(false)
+      
+      }, 200)
+           
+    } catch (err) {
+        console.log('error creating Ebay Store Category:', err)
+        setEbayStoreCategoryName("")
+        setTimeout(() => {
+          toast({
+              type: 'error',
+              icon: 'times',
+              size: 'tiny',              
+              title: 'Error creating Ebay Store Category',
+              description: err,              
+              time: 2000,              
+          });
+      }, 200);
+    }
+  }
+
+  const modifyEbayStoreCategory = async () => {
+    try {
+        
+        const ebayStoreCategory = ebayStoreCategoryEdit.name
+        const id = ebayStoreCategoryEdit.id
+        console.log("AQUI VA EbayStoreCategoryS ********")
+        console.log(ebayStoreCategorys)
+        let tempEbayStoreCategorys = [...ebayStoreCategorys]
+        let index = tempEbayStoreCategorys.findIndex(item => item.id === id)
+        tempEbayStoreCategorys[index].name = ebayStoreCategory
+        setEbayStoreCategorys(tempEbayStoreCategorys)
+        console.log("ESTE ES EL EbayStoreCategory:",ebayStoreCategory)
+        console.log("ESTE ES EL ID", id)
+        const version = tempEbayStoreCategorys[index]._version
+        console.log("ESTE ES LA VERSION", version)
+        
+        const ebayStoreCategoryDetails = {
+          id: id,
+          name: ebayStoreCategoryEdit.name,
+          _version: version
+        };
+        await API.graphql(graphqlOperation(updateEbayStoreCategory, { input: ebayStoreCategoryDetails }))
+        fetchEbayStoreCategorys()
+
+        setEbayStoreCategoryEdit({})
+        setTimeout(() => {
+          toast({
+              type: 'success',
+              icon: 'check circle outline',
+              size: 'tiny',              
+              description: 'Ebay Store Category successfully updated',
+              time: 2000,              
+          })
+          setOpenEdit(false)
+      
+      }, 200)
+           
+    } catch (err) {
+        console.log('error updating Ebay Store Category:', err)
+        setEbayStoreCategoryEdit({})
+        setTimeout(() => {
+          toast({
+              type: 'error',
+              icon: 'times',
+              size: 'tiny',              
+              title: 'Error creating Ebay Store Category',
+              description: err,              
+              time: 2000,              
+          });
+      }, 200);
+    }
+  }
+  
+  const subscriptionCreate = async () => await API.graphql(
+    graphqlOperation(subscriptions.onCreateEbayStoreCategory)
+).subscribe({
+    next: (item) => { 
+      fetchEbayStoreCategorys()
+      let ebayStoreCategory = item.value.data.onCreateEbayStoreCategory;
+      console.log(ebayStoreCategory)
+       
+      console.log("QUE HAY AHORA", ebayStoreCategorys)
+      
+      if (ebayStoreCategorys) {
+        setEbayStoreCategorys([...ebayStoreCategorys, ebayStoreCategory ]) 
+      }
+    
+    },
+    error: error => console.warn(error)
+});
+
+const subscriptionUpdate = async () => await API.graphql(
+  graphqlOperation(subscriptions.onUpdateEbayStoreCategory)
+).subscribe({
+  next: (item) => { 
+    fetchEbayStoreCategorys()
+    console.log(item)
+    let ebayStoreCategoryTemp = item.value.data.onUpdateEbayStoreCategory;
+    console.log(ebayStoreCategoryTemp)
+    let tempEbayStoreCategorys = [...ebayStoreCategorys]
+    let index = tempEbayStoreCategorys.findIndex(item => item.id === ebayStoreCategoryTemp.id)
+    
+    if (tempEbayStoreCategorys) {
+      tempEbayStoreCategorys[index] = ebayStoreCategoryTemp
+      setEbayStoreCategorys(tempEbayStoreCategorys)
+    }
+   
+
+  },
+  error: error => console.warn(error)
+});
+
+
+
+    
+
+  const handleSubmit = (evt) => {
+      evt.preventDefault()
+      
+      console.log(ebayStoreCategoryName)
+      addEbayStoreCategory()
+  }
+
+  const handleUpdate = (evt) => {
+    evt.preventDefault()
+    modifyEbayStoreCategory()
+  }
+
+const onPageRendered = async () => {
+  fetchEbayStoreCategorys()
+  subscriptionCreate()
+  subscriptionUpdate()
+  
+};
+
+
+
+  useEffect(() => {
+    onPageRendered()
+    
+}, [])
+
+
+const sliceIntoChunks = (arr, chunkSize) => {
+  const res = [];
+  for (let i = 0; i < arr.length; i += chunkSize) {
+      const chunk = arr.slice(i, i + chunkSize);
+      res.push(chunk);
+  }
+  return res;
+}
+
+const getOnlyEbayStoreCategorys = async () => {
+
+  try {
+    const ebayStoreCategoryData = await API.graphql({
+      query: listEbayStoreCategorys,
+    
+    })      
+    
+    const ebayStoreCategorys = await ebayStoreCategoryData.data.listEbayStoreCategorys.items.filter(item => !item._deleted)   
+    setEbayStoreCategorys(ebayStoreCategorys)
+    console.log("esta es una prueba *****", ebayStoreCategorys)
+    
+
+} catch (err) { console.log(err) }}
+
+
+
+
+const fetchEbayStoreCategorys = async () => {
+  try {
+      const ebayStoreCategoryData = await API.graphql({
+        query: listEbayStoreCategorys,
+      
+      })      
+      
+      const ebayStoreCategorys = await ebayStoreCategoryData.data.listEbayStoreCategorys.items.filter(item => !item._deleted)   
+      console.log("QUE TENEMOS AQUI:", ebayStoreCategorys)  
+      sortItems(ebayStoreCategorys, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
+      setChunkEbayStoreCategorys( sliceIntoChunks(ebayStoreCategorys, 10 ))
+      setEbayStoreCategorys(ebayStoreCategorys)
+      console.log("esta es una prueba *****", ebayStoreCategorys)
+      
+
+  } catch (err) { console.log(err) }}
+
+  
+
+    let dataChunks = ((chunckEbayStoreCategorys === null ? [] : chunckEbayStoreCategorys ))
+    
+    const handlePaginationChange = (e, { activePage }) => { setActivePage(activePage); fetchEbayStoreCategorys() };
+    
+    
+    const sortItems = (list, direction) => {
+      if (direction === 'ascending'){
+        list.sort(function(a, b) {
+          let nameA = a.name.toUpperCase(); // ignore upper and lowercase
+          let nameB = b.name.toUpperCase(); // ignore upper and lowercase
+          if (nameA < nameB) {
+            return -1;
+          }
+          if (nameA > nameB) {
+            return 1;
+          }
+        
+          // names must be equal
+          return 0;
+        });
+      } else {
+        list.sort(function(a, b) {
+          let nameA = a.name.toUpperCase(); // ignore upper and lowercase
+          let nameB = b.name.toUpperCase(); // ignore upper and lowercase
+          if (nameB < nameA) {
+            return -1;
+          }
+          if (nameB > nameA) {
+            return 1;
+          }
+        
+          // names must be equal
+          return 0;
+        });
+      }
+
+      console.log(list)
+      console.log(direction)
+
+    }
+    
+    const handleOrderColumn = (column) => {
+      console.log(column);
+      setOrderColumn({column: column, direction: orderColumn.direction === 'descending' ? 'ascending' : 'descending' })
+      console.log(ebayStoreCategorys)
+      console.log(orderColumn.direction)
+      sortItems(ebayStoreCategorys, orderColumn.direction);
+      setChunkEbayStoreCategorys( sliceIntoChunks(ebayStoreCategorys, 10 ))
+      setEbayStoreCategorys(ebayStoreCategorys)
+      
+    }
+
+    const handleOpenEditForm = (item) => {
+      setOpenEdit(!openEdit) 
+      setEbayStoreCategoryEdit({id: item.id, name: item.name})
+           
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Enter') {
+        console.log(search);
+        
+
+        setActivePage(1); 
+      
+        let tempEbayStoreCategorys = ebayStoreCategorys.filter(item => item.name.toLowerCase().includes(search.toLowerCase()) )
+        tempEbayStoreCategorys = tempEbayStoreCategorys.length > 0 ? tempEbayStoreCategorys : ebayStoreCategorys
+         
+        
+        setChunkEbayStoreCategorys( sliceIntoChunks(tempEbayStoreCategorys, 10 ))
+      }
+    }
+    console.log(ebayStoreCategoryEdit.name)
+    console.log(ebayStoreCategoryEdit.id)
+
     return (
-        <div>
+      
+        <div style={divStyle}>
+          <SemanticToastContainer position="top-center" />
         <h1>eBay Store Categories</h1>
+
+        <Grid>
+          <Grid.Column width={12}>
+          <Input
+                icon='search'
+                iconPosition='left'
+                placeholder='Search...'
+                fluid = {true}
+                onChange={e => setSearch(e.target.value)}
+                onKeyDown={handleKeyDown}
+                value={search}             
+                //floated='left'
+              />
+          </Grid.Column>
+          <Grid.Column width={4}>
+          
+            <Modal
+              onClose={() => setOpen(false)}
+              onOpen={() => setOpen(true)}
+              open={open}
+              trigger={<Button floated='right'
+                            icon
+                            labelPosition='left'
+                            primary                            
+                            size='small'> 
+                            <Icon name='plus' /> 
+                            Add Ebay Store Category
+                      </Button>}
+            >
+              <Modal.Header>Add Ebay Store Category</Modal.Header>
+              <Modal.Content>
+                <Modal.Description>
+                  
+                  <Form>
+                    <Form.Field>
+                      <label>Category Name</label>
+                      <input placeholder='Ebay Store Category Name' onChange={e => setEbayStoreCategoryName(e.target.value)}/>
+                    </Form.Field>
+                    <Form.Field>
+                      <label>Category Number</label>
+                      <input placeholder='Ebay Store Category Number' onChange={e => setEbayStoreCategoryName(e.target.value)}/>
+                    </Form.Field>                     
+                  </Form>
+                </Modal.Description>
+              </Modal.Content>
+              <Modal.Actions>
+              <Button positive onClick={handleSubmit}>
+                Add Ebay Store Category
+              </Button>
+ 
+              </Modal.Actions>
+            </Modal>
+
+
+            <Modal
+              onClose={() => setOpenEdit(false)}
+              onOpen={() => setOpenEdit(true)}
+              open={openEdit}
+              
+            >
+              <Modal.Header>Edit Ebay Store Category</Modal.Header>
+              <Modal.Content>
+                <Modal.Description>
+                  
+                  <Form>
+                    <Form.Field>
+                      <label>Ebay Store Category Name</label>
+                      <input placeholder='Ebay Store Category Name' 
+                      value = {ebayStoreCategoryEdit.name} 
+                      onChange={e => setEbayStoreCategoryEdit({id: ebayStoreCategoryEdit.id, name: e.target.value})}/>
+                    </Form.Field>
+                    <Form.Field>
+                      <label>Ebay Store Category Number</label>
+                      <input placeholder='Ebay Store Category Number' 
+                      value = {ebayStoreCategoryEdit.code} 
+                      onChange={e => setEbayStoreCategoryEdit({id: ebayStoreCategoryEdit.id, name: e.target.value})}/>
+                    </Form.Field>                        
+                  </Form>
+                </Modal.Description>
+              </Modal.Content>
+              <Modal.Actions>
+              <Button positive onClick={handleUpdate}>
+                Save ebay Store Category
+              </Button>
+ 
+              </Modal.Actions>
+            </Modal>
+
+          </Grid.Column>          
+        </Grid>
+
+        
+        <EbayCategoriesTable data = {dataChunks[activePage - 1]} handleOrder = {handleOrderColumn} orderColumn = {orderColumn} openForm = {handleOpenEditForm} />
+         <div style = {paginationStyle}>
+          <Pagination
+              activePage={activePage}
+              boundaryRange={0}
+              ellipsisItem={null}
+              firstItem={null}
+              lastItem={null}
+              siblingRange={1}
+              totalPages={ dataChunks.length }
+              onPageChange={handlePaginationChange}              
+            />
+            
+            </div>
+
       </div>  
     );
     
+  }
+
+  const divStyle = {
+    margin: '3em'
+  };
+
+  const paginationStyle = {
+    display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
   }
