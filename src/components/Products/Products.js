@@ -28,7 +28,7 @@ export default function Products() {
         
         const product = productForm
         console.log(productForm);
-        if (products.find(item => item.sku.toUpperCase() === product.sku.toUpperCase() ))  {
+        if (products.find(item => item.SKU.toUpperCase() === product.sku.toUpperCase() ))  {
           setTimeout(() => {
             toast({
                 type: 'error',
@@ -41,8 +41,8 @@ export default function Products() {
           return
         }
         let id = uuidv4()
-        setProducts([...products, {id, sku: productForm.sku, mpn: productForm.mpn }])        
-        await API.graphql(graphqlOperation(createProduct, { input: {id, sku: productForm.sku, mpn: productForm.mpn } }))
+        setProducts([...products, {id, SKU: productForm.sku, mpn: productForm.mpn }])        
+        await API.graphql(graphqlOperation(createProduct, { input: {id, SKU: productForm.sku, mpn: productForm.mpn } }))
         fetchProducts()
         setProductForm({})
         setTimeout(() => {
@@ -88,7 +88,7 @@ export default function Products() {
         
         const productDetails = {
           id: id,
-          sku: productEdit.sku,
+          SKU: productEdit.sku,
           mpn: productEdit.mpn,
           _version: version
         };
@@ -147,10 +147,11 @@ const subscriptionUpdate = async () => await API.graphql(
 ).subscribe({
   next: (item) => { 
     fetchProducts()
-    console.log(item)
+    //console.log(item)
     let productTemp = item.value.data.onUpdateProduct;
     console.log(productTemp)
-    let tempProducts = [...Products]
+    
+    let tempProducts = [...products]
     let index = tempProducts.findIndex(item => item.id === productTemp.id)
     
     if (tempProducts) {
@@ -232,7 +233,7 @@ const fetchProducts = async () => {
       
       const products = await productData.data.listProducts.items.filter(item => !item._deleted)   
       //console.log("QUE TENEMOS AQUI:", Products)  
-      sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
+      //sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
       setChunkProducts( sliceIntoChunks(products, 10 ))
       setProducts(products)
       console.log("esta es una prueba *****", products)
@@ -250,8 +251,8 @@ const fetchProducts = async () => {
     const sortItems = (list, direction) => {
       if (direction === 'ascending'){
         list.sort(function(a, b) {
-          let nameA = a.name.toUpperCase(); // ignore upper and lowercase
-          let nameB = b.name.toUpperCase(); // ignore upper and lowercase
+          let nameA = a.SKU.toUpperCase(); // ignore upper and lowercase
+          let nameB = b.SKU.toUpperCase(); // ignore upper and lowercase
           if (nameA < nameB) {
             return -1;
           }
@@ -264,8 +265,8 @@ const fetchProducts = async () => {
         });
       } else {
         list.sort(function(a, b) {
-          let nameA = a.name.toUpperCase(); // ignore upper and lowercase
-          let nameB = b.name.toUpperCase(); // ignore upper and lowercase
+          let nameA = a.SKU.toUpperCase(); // ignore upper and lowercase
+          let nameB = b.SKU.toUpperCase(); // ignore upper and lowercase
           if (nameB < nameA) {
             return -1;
           }
@@ -286,7 +287,7 @@ const fetchProducts = async () => {
     const handleOrderColumn = (column) => {
       console.log(column);
       setOrderColumn({column: column, direction: orderColumn.direction === 'descending' ? 'ascending' : 'descending' })
-      //console.log(products)
+      console.log(products)
       console.log(orderColumn.direction)
       sortItems(products, orderColumn.direction);
       setChunkProducts( sliceIntoChunks(products, 10 ))
@@ -296,7 +297,7 @@ const fetchProducts = async () => {
 
     const handleOpenEditForm = (item) => {
       setOpenEdit(!openEdit) 
-      setProductEdit({id: item.id, sku: item.sku, mpn: item.mpn})
+      setProductEdit({id: item.id, sku: item.SKU, mpn: item.mpn})
            
     }
 
@@ -315,37 +316,37 @@ const fetchProducts = async () => {
       }
     }
 
-    const handleName = (evt) => {
+    const handleSKU = (evt) => {
         evt.persist();
         setProductForm((values) => ({
             ...values,
-            name: evt.target.value,
+            sku: evt.target.value,
         }));
 
     }
 
-    const handleCode = (evt) => {
+    const handleMPN = (evt) => {
         evt.persist();
         setProductForm((values) => ({
             ...values,
-            code: evt.target.value,
+            mpn: evt.target.value,
         }));
     }
 
-    const handleEditName = (evt) => {
+    const handleEditSKU = (evt) => {
         evt.persist();
         setProductEdit((values) => ({
             ...values,
-            name: evt.target.value,
+            sku: evt.target.value,
         }));
 
     }
 
-    const handleEditCode = (evt) => {
+    const handleEditMPN = (evt) => {
         evt.persist();
         setProductEdit((values) => ({
             ...values,
-            code: evt.target.value,
+            mpn: evt.target.value,
         }));
     }
 
@@ -394,13 +395,13 @@ const fetchProducts = async () => {
                     <Form.Field>
                       <label>SKU</label>
                       <input placeholder='Product SKU' 
-                      value = {productForm.sku} onChange={ (e) => handleName(e) }  />
+                      value = {productForm.sku} onChange={ (e) => handleSKU(e) }  />
 
                     </Form.Field>
                     <Form.Field>
                       <label>Manufacturer Part Number</label>
                       <input placeholder='Manufacturer Part Number' 
-                      value = {productForm.mpn} onChange={ (e) => handleCode(e) }/>
+                      value = {productForm.mpn} onChange={ (e) => handleMPN(e) }/>
                     </Form.Field>                     
                   </Form>
                 </Modal.Description>
@@ -429,13 +430,13 @@ const fetchProducts = async () => {
                       <label>SKU</label>
                       <input placeholder='Product SKU' 
                       value = {productEdit.sku} 
-                      onChange={ (e) => handleEditName(e) }/>
+                      onChange={ (e) => handleEditSKU(e) }/>
                     </Form.Field>
                     <Form.Field>
                       <label>Manufacturer Part Number</label>
                       <input placeholder='Manufacturer Part Number' 
                       value = {productEdit.mpn} 
-                      onChange={ (e) => handleEditCode(e) }/>
+                      onChange={ (e) => handleEditMPN(e) }/>
                     </Form.Field>                        
                   </Form>
                 </Modal.Description>
