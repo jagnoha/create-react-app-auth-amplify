@@ -1,56 +1,56 @@
 import React, { useState, useEffect }from 'react'
 import { API, graphqlOperation } from 'aws-amplify'
-import { Pagination, Input, Segment, Button, Icon, Grid, Modal, Header, Form, ItemContent} from 'semantic-ui-react'
+import { Pagination, Input, Button, Icon, Grid, Modal, Form} from 'semantic-ui-react'
 import { SemanticToastContainer, toast } from 'react-semantic-toasts';
 import 'react-semantic-toasts/styles/react-semantic-alert.css';
-import { listEbayStoreCategorys } from '../../graphql/queries'
-import { createEbayStoreCategory, updateEbayStoreCategory } from '../../graphql/mutations'
-import EbayCategoriesTable from '../EbayCategoriesTable/EbayCategoriesTable'
+import { listProducts } from '../../graphql/queries'
+import { createProduct, updateProduct } from '../../graphql/mutations'
 import * as subscriptions from '../../graphql/subscriptions';
 import { v4 as uuidv4 } from 'uuid'
+import ProductTable from '../ProductTable/ProductTable';
 
 
 export default function Products() {
-  const [chunckEbayStoreCategorys, setChunkEbayStoreCategorys] = useState(null)
-  const [ebayStoreCategorys, setEbayStoreCategorys] = useState([])
+  const [chunckProducts, setChunkProducts] = useState(null)
+  const [products, setProducts] = useState([])
   const [activePage, setActivePage] = useState(1)
   const [search, setSearch] = useState("")
   const [orderColumn, setOrderColumn] = useState({column: null, direction: 'descending'})
   const [open, setOpen] = useState(false)
   const [openEdit, setOpenEdit] = useState(false)
-  const [ebayStoreCategoryForm, setEbayStoreCategoryForm] = useState({name:'', code:''})
-  const [ebayStoreCategoryEdit, setEbayStoreCategoryEdit] = useState({id:'', name:'', code:''})
+  const [productForm, setProductForm] = useState({})
+  const [productEdit, setProductEdit] = useState({})
   
    
   
-  const addEbayStoreCategory = async () => {
+  const addProduct = async () => {
     try {
         
-        const ebayStoreCategory = ebayStoreCategoryForm
-        console.log(ebayStoreCategoryForm);
-        if (ebayStoreCategorys.find(item => item.name.toUpperCase() === ebayStoreCategory.name.toUpperCase() ))  {
+        const product = productForm
+        console.log(productForm);
+        if (products.find(item => item.sku.toUpperCase() === product.sku.toUpperCase() ))  {
           setTimeout(() => {
             toast({
                 type: 'error',
                 icon: 'check circle outline',
                 size: 'tiny',                
-                description: 'Ebay Store Category already exists',                
+                description: 'Product already exists',                
                 time: 2000,                
             });
         }, 200); 
           return
         }
         let id = uuidv4()
-        setEbayStoreCategorys([...ebayStoreCategorys, {id, name: ebayStoreCategoryForm.name, code: ebayStoreCategoryForm.code }])        
-        await API.graphql(graphqlOperation(createEbayStoreCategory, { input: { id, name: ebayStoreCategoryForm.name, code: ebayStoreCategoryForm.code } }))
-        fetchEbayStoreCategorys()
-        setEbayStoreCategoryForm({})
+        setProducts([...products, {id, sku: productForm.sku, mpn: productForm.mpn }])        
+        await API.graphql(graphqlOperation(createProduct, { input: {id, sku: productForm.sku, mpn: productForm.mpn } }))
+        fetchProducts()
+        setProductForm({})
         setTimeout(() => {
           toast({
               type: 'success',
               icon: 'check circle outline',
               size: 'tiny',              
-              description: 'Ebay Store Category successfully created',
+              description: 'Product successfully created',
               time: 2000,              
           })
           setOpen(false)
@@ -58,14 +58,14 @@ export default function Products() {
       }, 200)
            
     } catch (err) {
-        console.log('error creating Ebay Store Category:', err)
-        setEbayStoreCategoryForm({})
+        //console.log('error creating Product:', err)
+        setProductForm({})
         setTimeout(() => {
           toast({
               type: 'error',
               icon: 'times',
               size: 'tiny',              
-              title: 'Error creating Ebay Store Category',
+              title: 'Error creating Product',
               description: err,              
               time: 2000,              
           });
@@ -73,35 +73,35 @@ export default function Products() {
     }
   }
 
-  const modifyEbayStoreCategory = async () => {
+  const modifyProduct = async () => {
     try {
         
-        const ebayStoreCategory = ebayStoreCategoryEdit.name
-        const id = ebayStoreCategoryEdit.id
-        console.log("AQUI VA EbayStoreCategoryS ********")
-        console.log(ebayStoreCategorys)
-        let tempEbayStoreCategorys = [...ebayStoreCategorys]
-        let index = tempEbayStoreCategorys.findIndex(item => item.id === id)
-        tempEbayStoreCategorys[index].name = ebayStoreCategory
-        setEbayStoreCategorys(tempEbayStoreCategorys)        
-        const version = tempEbayStoreCategorys[index]._version        
+        const sku = productEdit.sku
+        const id = productEdit.id
+        console.log("AQUI VA ProductS ********")
+        console.log(products)
+        let tempProducts = [...products]
+        let index = tempProducts.findIndex(item => item.id === id)
+        tempProducts[index].sku = sku
+        setProducts(tempProducts)        
+        const version = tempProducts[index]._version        
         
-        const ebayStoreCategoryDetails = {
+        const productDetails = {
           id: id,
-          name: ebayStoreCategoryEdit.name,
-          code: ebayStoreCategoryEdit.code,
+          sku: productEdit.sku,
+          mpn: productEdit.mpn,
           _version: version
         };
-        await API.graphql(graphqlOperation(updateEbayStoreCategory, { input: ebayStoreCategoryDetails }))
-        fetchEbayStoreCategorys()
+        await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+        fetchProducts()
 
-        setEbayStoreCategoryEdit({})
+        setProductEdit({})
         setTimeout(() => {
           toast({
               type: 'success',
               icon: 'check circle outline',              
               size: 'tiny',              
-              description: 'Ebay Store Category successfully updated',
+              description: 'Product successfully updated',
               time: 2000,              
           })
           setOpenEdit(false)
@@ -109,8 +109,8 @@ export default function Products() {
       }, 200)
            
     } catch (err) {
-        console.log('error updating Ebay Store Category:', err)
-        setEbayStoreCategoryEdit({})
+        console.log('error updating Product:', err)
+        setProductEdit({})
         setTimeout(() => {
           toast({
               type: 'error',
@@ -125,17 +125,17 @@ export default function Products() {
   }
   
   const subscriptionCreate = async () => await API.graphql(
-    graphqlOperation(subscriptions.onCreateEbayStoreCategory)
+    graphqlOperation(subscriptions.onCreateProduct)
 ).subscribe({
     next: (item) => { 
-      fetchEbayStoreCategorys()
-      let ebayStoreCategory = item.value.data.onCreateEbayStoreCategory;
-      console.log(ebayStoreCategory)
+      fetchProducts()
+      let product = item.value.data.onCreateProduct;
+      console.log(product)
        
-      console.log("QUE HAY AHORA", ebayStoreCategorys)
+      //console.log("QUE HAY AHORA", products)
       
-      if (ebayStoreCategorys) {
-        setEbayStoreCategorys([...ebayStoreCategorys, ebayStoreCategory ]) 
+      if (products) {
+        setProducts([...products, product ]) 
       }
     
     },
@@ -143,19 +143,19 @@ export default function Products() {
 });
 
 const subscriptionUpdate = async () => await API.graphql(
-  graphqlOperation(subscriptions.onUpdateEbayStoreCategory)
+  graphqlOperation(subscriptions.onUpdateProduct)
 ).subscribe({
   next: (item) => { 
-    fetchEbayStoreCategorys()
+    fetchProducts()
     console.log(item)
-    let ebayStoreCategoryTemp = item.value.data.onUpdateEbayStoreCategory;
-    console.log(ebayStoreCategoryTemp)
-    let tempEbayStoreCategorys = [...ebayStoreCategorys]
-    let index = tempEbayStoreCategorys.findIndex(item => item.id === ebayStoreCategoryTemp.id)
+    let productTemp = item.value.data.onUpdateProduct;
+    console.log(productTemp)
+    let tempProducts = [...Products]
+    let index = tempProducts.findIndex(item => item.id === productTemp.id)
     
-    if (tempEbayStoreCategorys) {
-      tempEbayStoreCategorys[index] = ebayStoreCategoryTemp
-      setEbayStoreCategorys(tempEbayStoreCategorys)
+    if (tempProducts) {
+      tempProducts[index] = productTemp
+      setProducts(tempProducts)
     }
    
 
@@ -170,17 +170,17 @@ const subscriptionUpdate = async () => await API.graphql(
   const handleSubmit = (evt) => {
       evt.preventDefault()
       
-      console.log(ebayStoreCategoryForm)
-      addEbayStoreCategory()
+      console.log(productForm)
+      addProduct()
   }
 
   const handleUpdate = (evt) => {
     evt.preventDefault()
-    modifyEbayStoreCategory()
+    modifyProduct()
   }
 
 const onPageRendered = async () => {
-  fetchEbayStoreCategorys()
+  fetchProducts()
   subscriptionCreate()
   subscriptionUpdate()
   
@@ -203,17 +203,17 @@ const sliceIntoChunks = (arr, chunkSize) => {
   return res;
 }
 
-const getOnlyEbayStoreCategorys = async () => {
+const getOnlyProducts = async () => {
 
   try {
-    const ebayStoreCategoryData = await API.graphql({
-      query: listEbayStoreCategorys,
+    const productData = await API.graphql({
+      query: listProducts,
     
     })      
     
-    const ebayStoreCategorys = await ebayStoreCategoryData.data.listEbayStoreCategorys.items.filter(item => !item._deleted)   
-    setEbayStoreCategorys(ebayStoreCategorys)
-    console.log("esta es una prueba *****", ebayStoreCategorys)
+    const products = await productData.data.listProducts.items.filter(item => !item._deleted)   
+    setProducts(products)
+    //console.log("esta es una prueba *****", products)
     
 
 } catch (err) { console.log(err) }}
@@ -221,28 +221,30 @@ const getOnlyEbayStoreCategorys = async () => {
 
 
 
-const fetchEbayStoreCategorys = async () => {
+const fetchProducts = async () => {
   try {
-      const ebayStoreCategoryData = await API.graphql({
-        query: listEbayStoreCategorys,
+      const productData = await API.graphql({
+        query: listProducts,
       
       })      
+
+      console.log(productData)
       
-      const ebayStoreCategorys = await ebayStoreCategoryData.data.listEbayStoreCategorys.items.filter(item => !item._deleted)   
-      console.log("QUE TENEMOS AQUI:", ebayStoreCategorys)  
-      sortItems(ebayStoreCategorys, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
-      setChunkEbayStoreCategorys( sliceIntoChunks(ebayStoreCategorys, 10 ))
-      setEbayStoreCategorys(ebayStoreCategorys)
-      console.log("esta es una prueba *****", ebayStoreCategorys)
+      const products = await productData.data.listProducts.items.filter(item => !item._deleted)   
+      //console.log("QUE TENEMOS AQUI:", Products)  
+      sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
+      setChunkProducts( sliceIntoChunks(products, 10 ))
+      setProducts(products)
+      console.log("esta es una prueba *****", products)
       
 
   } catch (err) { console.log(err) }}
 
   
 
-    let dataChunks = ((chunckEbayStoreCategorys === null ? [] : chunckEbayStoreCategorys ))
+    let dataChunks = ((chunckProducts === null ? [] : chunckProducts ))
     
-    const handlePaginationChange = (e, { activePage }) => { setActivePage(activePage); fetchEbayStoreCategorys() };
+    const handlePaginationChange = (e, { activePage }) => { setActivePage(activePage); fetchProducts() };
     
     
     const sortItems = (list, direction) => {
@@ -284,17 +286,17 @@ const fetchEbayStoreCategorys = async () => {
     const handleOrderColumn = (column) => {
       console.log(column);
       setOrderColumn({column: column, direction: orderColumn.direction === 'descending' ? 'ascending' : 'descending' })
-      console.log(ebayStoreCategorys)
+      //console.log(products)
       console.log(orderColumn.direction)
-      sortItems(ebayStoreCategorys, orderColumn.direction);
-      setChunkEbayStoreCategorys( sliceIntoChunks(ebayStoreCategorys, 10 ))
-      setEbayStoreCategorys(ebayStoreCategorys)
+      sortItems(products, orderColumn.direction);
+      setChunkProducts( sliceIntoChunks(products, 10 ))
+      setProducts(products)
       
     }
 
     const handleOpenEditForm = (item) => {
       setOpenEdit(!openEdit) 
-      setEbayStoreCategoryEdit({id: item.id, name: item.name, code: item.code})
+      setProductEdit({id: item.id, sku: item.sku, mpn: item.mpn})
            
     }
 
@@ -305,17 +307,17 @@ const fetchEbayStoreCategorys = async () => {
 
         setActivePage(1); 
       
-        let tempEbayStoreCategorys = ebayStoreCategorys.filter(item => item.name.toLowerCase().includes(search.toLowerCase()) )
-        tempEbayStoreCategorys = tempEbayStoreCategorys.length > 0 ? tempEbayStoreCategorys : ebayStoreCategorys
+        let tempProducts = products.filter(item => item.name.toLowerCase().includes(search.toLowerCase()) )
+        tempProducts = tempProducts.length > 0 ? tempProducts : products
          
         
-        setChunkEbayStoreCategorys( sliceIntoChunks(tempEbayStoreCategorys, 10 ))
+        setChunkProducts( sliceIntoChunks(tempProducts, 10 ))
       }
     }
 
     const handleName = (evt) => {
         evt.persist();
-        setEbayStoreCategoryForm((values) => ({
+        setProductForm((values) => ({
             ...values,
             name: evt.target.value,
         }));
@@ -324,7 +326,7 @@ const fetchEbayStoreCategorys = async () => {
 
     const handleCode = (evt) => {
         evt.persist();
-        setEbayStoreCategoryForm((values) => ({
+        setProductForm((values) => ({
             ...values,
             code: evt.target.value,
         }));
@@ -332,7 +334,7 @@ const fetchEbayStoreCategorys = async () => {
 
     const handleEditName = (evt) => {
         evt.persist();
-        setEbayStoreCategoryEdit((values) => ({
+        setProductEdit((values) => ({
             ...values,
             name: evt.target.value,
         }));
@@ -341,14 +343,14 @@ const fetchEbayStoreCategorys = async () => {
 
     const handleEditCode = (evt) => {
         evt.persist();
-        setEbayStoreCategoryEdit((values) => ({
+        setProductEdit((values) => ({
             ...values,
             code: evt.target.value,
         }));
     }
 
-    console.log("************************** ",ebayStoreCategoryForm)
-    //console.log(ebayStoreCategoryEdit.id)
+    //console.log("************************** ",ProductForm)
+    //console.log(ProductEdit.id)
 
     return (
       
@@ -381,31 +383,31 @@ const fetchEbayStoreCategorys = async () => {
                             primary                            
                             size='small'> 
                             <Icon name='plus' /> 
-                            Add Ebay Store Category
+                            Add Product
                       </Button>}
             >
-              <Modal.Header>Add Ebay Store Category</Modal.Header>
+              <Modal.Header>Add Product</Modal.Header>
               <Modal.Content>
                 <Modal.Description>
                   
                   <Form>
                     <Form.Field>
-                      <label>Category Name</label>
-                      <input placeholder='Ebay Store Category Name' 
-                      value = {ebayStoreCategoryForm.name} onChange={ (e) => handleName(e) }  />
+                      <label>SKU</label>
+                      <input placeholder='Product SKU' 
+                      value = {productForm.sku} onChange={ (e) => handleName(e) }  />
 
                     </Form.Field>
                     <Form.Field>
-                      <label>Category Number</label>
-                      <input placeholder='Ebay Store Category Number' 
-                      value = {ebayStoreCategoryForm.code} onChange={ (e) => handleCode(e) }/>
+                      <label>Manufacturer Part Number</label>
+                      <input placeholder='Manufacturer Part Number' 
+                      value = {productForm.mpn} onChange={ (e) => handleCode(e) }/>
                     </Form.Field>                     
                   </Form>
                 </Modal.Description>
               </Modal.Content>
               <Modal.Actions>
               <Button positive onClick={handleSubmit}>
-                Add Ebay Store Category
+                Add Product
               </Button>
  
               </Modal.Actions>
@@ -418,21 +420,21 @@ const fetchEbayStoreCategorys = async () => {
               open={openEdit}
               
             >
-              <Modal.Header>Edit Ebay Store Category</Modal.Header>
+              <Modal.Header>Edit Product</Modal.Header>
               <Modal.Content>
                 <Modal.Description>
                   
                   <Form>
                     <Form.Field>
-                      <label>Category Name</label>
-                      <input placeholder='Ebay Store Category Name' 
-                      value = {ebayStoreCategoryEdit.name} 
+                      <label>SKU</label>
+                      <input placeholder='Product SKU' 
+                      value = {productEdit.sku} 
                       onChange={ (e) => handleEditName(e) }/>
                     </Form.Field>
                     <Form.Field>
-                      <label>Category Number</label>
-                      <input placeholder='Ebay Store Category Number' 
-                      value = {ebayStoreCategoryEdit.code} 
+                      <label>Manufacturer Part Number</label>
+                      <input placeholder='Manufacturer Part Number' 
+                      value = {productEdit.mpn} 
                       onChange={ (e) => handleEditCode(e) }/>
                     </Form.Field>                        
                   </Form>
@@ -440,7 +442,7 @@ const fetchEbayStoreCategorys = async () => {
               </Modal.Content>
               <Modal.Actions>
               <Button positive onClick={handleUpdate}>
-                Save ebay Store Category
+                Save Product
               </Button>
  
               </Modal.Actions>
@@ -450,7 +452,7 @@ const fetchEbayStoreCategorys = async () => {
         </Grid>
 
         
-        <EbayCategoriesTable data = {dataChunks[activePage - 1]} handleOrder = {handleOrderColumn} orderColumn = {orderColumn} openForm = {handleOpenEditForm} />
+        <ProductTable data = {dataChunks[activePage - 1]} handleOrder = {handleOrderColumn} orderColumn = {orderColumn} openForm = {handleOpenEditForm} />
          <div style = {paginationStyle}>
           <Pagination
               activePage={activePage}
