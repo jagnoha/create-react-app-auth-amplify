@@ -321,7 +321,7 @@ const fetchSubCategory2s = async () => {
       
         <div style={divStyle}>
           <SemanticToastContainer position="top-center" />
-        <h1>SubCategories</h1>
+        <h1>SubCategories 2</h1>
 
         <Grid>
           <Grid.Column width={12}>
@@ -351,21 +351,21 @@ const fetchSubCategory2s = async () => {
                             Add SubCategory2
                       </Button>}
             >
-              <Modal.Header>Add SubCategory2</Modal.Header>
+              <Modal.Header>Add SubCategory 2</Modal.Header>
               <Modal.Content>
                 <Modal.Description>
                   
                   <Form>
                     <Form.Field>
-                      <label>SubCategory2 Name</label>
+                      <label>SubCategory 2 Name</label>
                       <input placeholder='SubCategory2 Name' onChange={e => setSubCategory2Name(e.target.value)}/>
                     </Form.Field>                    
                   </Form>
                 </Modal.Description>
               </Modal.Content>
               <Modal.Actions>
-              <Button positive onClick={handleSubmit}>
-                Add SubCategory2
+              <Button positive disabled = { subCategory2Name === "" ? true : false } onClick={handleSubmit}>
+                Add SubCategory 2
               </Button>
  
               </Modal.Actions>
@@ -378,13 +378,13 @@ const fetchSubCategory2s = async () => {
               open={openEdit}
               
             >
-              <Modal.Header>Edit subCategory2</Modal.Header>
+              <Modal.Header>Edit subCategory 2</Modal.Header>
               <Modal.Content>
                 <Modal.Description>
                   
                   <Form>
                     <Form.Field>
-                      <label>SubCategory2 Name</label>
+                      <label>SubCategory 2 Name</label>
                       <input placeholder='SubCategory2 Name' 
                       value = {subCategory2Edit.name} 
                       onChange={e => setSubCategory2Edit({id: subCategory2Edit.id, name: e.target.value})}/>
@@ -393,8 +393,8 @@ const fetchSubCategory2s = async () => {
                 </Modal.Description>
               </Modal.Content>
               <Modal.Actions>
-              <Button positive onClick={handleUpdate}>
-                Save SubCategory2
+              <Button positive disabled = { subCategory2Edit.name === "" ? true : false } onClick={handleUpdate}>
+                Save SubCategory 2
               </Button>
  
               </Modal.Actions>

@@ -40,6 +40,9 @@ export default function Manufacturers() {
         }, 200); 
           return
         }
+
+        
+
         let id = uuidv4()
         setManufacturers([...manufacturers, {id, name: manufacturer}])        
         await API.graphql(graphqlOperation(createManufacturer, { input: { id, name: manufacturer } }))
@@ -316,6 +319,7 @@ const fetchManufacturers = async () => {
     }
     console.log(manufacturerEdit.name)
     console.log(manufacturerEdit.id)
+    console.log(manufacturerName)
 
     return (
       
@@ -364,7 +368,7 @@ const fetchManufacturers = async () => {
                 </Modal.Description>
               </Modal.Content>
               <Modal.Actions>
-              <Button positive onClick={handleSubmit}>
+              <Button positive disabled = { manufacturerName === "" ? true : false } onClick={handleSubmit}>
                 Add manufacturer
               </Button>
  
@@ -393,7 +397,7 @@ const fetchManufacturers = async () => {
                 </Modal.Description>
               </Modal.Content>
               <Modal.Actions>
-              <Button positive onClick={handleUpdate}>
+              <Button positive disabled = { manufacturerEdit.name === "" ? true : false } onClick={handleUpdate}>
                 Save manufacturer
               </Button>
  

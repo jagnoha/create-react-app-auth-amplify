@@ -18,33 +18,33 @@ export default function EbayStoreCategories() {
   const [orderColumn, setOrderColumn] = useState({column: null, direction: 'descending'})
   const [open, setOpen] = useState(false)
   const [openEdit, setOpenEdit] = useState(false)
-  const [ebayStoreCategoryName, setEbayStoreCategoryName] = useState("")
-  const [ebayStoreCategoryEdit, setEbayStoreCategoryEdit] = useState({})
+  const [ebayStoreCategoryForm, setEbayStoreCategoryForm] = useState({name:'', code:''})
+  const [ebayStoreCategoryEdit, setEbayStoreCategoryEdit] = useState({id:'', name:'', code:''})
   
    
   
   const addEbayStoreCategory = async () => {
     try {
         
-        const ebayStoreCategory = ebayStoreCategoryName
-        console.log(ebayStoreCategory);
-        if (ebayStoreCategorys.find(item => item.name.toUpperCase() === ebayStoreCategory.toUpperCase() ))  {
+        const ebayStoreCategory = ebayStoreCategoryForm
+        console.log(ebayStoreCategoryForm);
+        if (ebayStoreCategorys.find(item => item.name.toUpperCase() === ebayStoreCategory.name.toUpperCase() ))  {
           setTimeout(() => {
             toast({
                 type: 'error',
                 icon: 'check circle outline',
                 size: 'tiny',                
-                description: 'EbayStoreCategory already exists',                
+                description: 'Ebay Store Category already exists',                
                 time: 2000,                
             });
         }, 200); 
           return
         }
         let id = uuidv4()
-        setEbayStoreCategorys([...ebayStoreCategorys, {id, name: ebayStoreCategory}])        
-        await API.graphql(graphqlOperation(createEbayStoreCategory, { input: { id, name: ebayStoreCategory } }))
+        setEbayStoreCategorys([...ebayStoreCategorys, {id, name: ebayStoreCategoryForm.name, code: ebayStoreCategoryForm.code }])        
+        await API.graphql(graphqlOperation(createEbayStoreCategory, { input: { id, name: ebayStoreCategoryForm.name, code: ebayStoreCategoryForm.code } }))
         fetchEbayStoreCategorys()
-        setEbayStoreCategoryName("")
+        setEbayStoreCategoryForm({})
         setTimeout(() => {
           toast({
               type: 'success',
@@ -59,7 +59,7 @@ export default function EbayStoreCategories() {
            
     } catch (err) {
         console.log('error creating Ebay Store Category:', err)
-        setEbayStoreCategoryName("")
+        setEbayStoreCategoryForm({})
         setTimeout(() => {
           toast({
               type: 'error',
@@ -83,15 +83,13 @@ export default function EbayStoreCategories() {
         let tempEbayStoreCategorys = [...ebayStoreCategorys]
         let index = tempEbayStoreCategorys.findIndex(item => item.id === id)
         tempEbayStoreCategorys[index].name = ebayStoreCategory
-        setEbayStoreCategorys(tempEbayStoreCategorys)
-        console.log("ESTE ES EL EbayStoreCategory:",ebayStoreCategory)
-        console.log("ESTE ES EL ID", id)
-        const version = tempEbayStoreCategorys[index]._version
-        console.log("ESTE ES LA VERSION", version)
+        setEbayStoreCategorys(tempEbayStoreCategorys)        
+        const version = tempEbayStoreCategorys[index]._version        
         
         const ebayStoreCategoryDetails = {
           id: id,
           name: ebayStoreCategoryEdit.name,
+          code: ebayStoreCategoryEdit.code,
           _version: version
         };
         await API.graphql(graphqlOperation(updateEbayStoreCategory, { input: ebayStoreCategoryDetails }))
@@ -101,7 +99,7 @@ export default function EbayStoreCategories() {
         setTimeout(() => {
           toast({
               type: 'success',
-              icon: 'check circle outline',
+              icon: 'check circle outline',              
               size: 'tiny',              
               description: 'Ebay Store Category successfully updated',
               time: 2000,              
@@ -172,13 +170,15 @@ const subscriptionUpdate = async () => await API.graphql(
   const handleSubmit = (evt) => {
       evt.preventDefault()
       
-      console.log(ebayStoreCategoryName)
+      console.log(ebayStoreCategoryForm)
       addEbayStoreCategory()
+      setEbayStoreCategoryForm({name:'', code:''})
   }
 
   const handleUpdate = (evt) => {
     evt.preventDefault()
     modifyEbayStoreCategory()
+    setEbayStoreCategoryEdit({id:'', name:'', code:''})
   }
 
 const onPageRendered = async () => {
@@ -296,7 +296,7 @@ const fetchEbayStoreCategorys = async () => {
 
     const handleOpenEditForm = (item) => {
       setOpenEdit(!openEdit) 
-      setEbayStoreCategoryEdit({id: item.id, name: item.name})
+      setEbayStoreCategoryEdit({id: item.id, name: item.name, code: item.code})
            
     }
 
@@ -314,8 +314,43 @@ const fetchEbayStoreCategorys = async () => {
         setChunkEbayStoreCategorys( sliceIntoChunks(tempEbayStoreCategorys, 10 ))
       }
     }
-    console.log(ebayStoreCategoryEdit.name)
-    console.log(ebayStoreCategoryEdit.id)
+
+    const handleName = (evt) => {
+        evt.persist();
+        setEbayStoreCategoryForm((values) => ({
+            ...values,
+            name: evt.target.value,
+        }));
+
+    }
+
+    const handleCode = (evt) => {
+        evt.persist();
+        setEbayStoreCategoryForm((values) => ({
+            ...values,
+            code: evt.target.value,
+        }));
+    }
+
+    const handleEditName = (evt) => {
+        evt.persist();
+        setEbayStoreCategoryEdit((values) => ({
+            ...values,
+            name: evt.target.value,
+        }));
+
+    }
+
+    const handleEditCode = (evt) => {
+        evt.persist();
+        setEbayStoreCategoryEdit((values) => ({
+            ...values,
+            code: evt.target.value,
+        }));
+    }
+
+    console.log("************************** ",ebayStoreCategoryForm)
+    //console.log(ebayStoreCategoryEdit.id)
 
     return (
       
@@ -358,17 +393,21 @@ const fetchEbayStoreCategorys = async () => {
                   <Form>
                     <Form.Field>
                       <label>Category Name</label>
-                      <input placeholder='Ebay Store Category Name' onChange={e => setEbayStoreCategoryName(e.target.value)}/>
+                      <input placeholder='Ebay Store Category Name' 
+                      value = {ebayStoreCategoryForm.name} onChange={ (e) => handleName(e) }  />
+
                     </Form.Field>
                     <Form.Field>
                       <label>Category Number</label>
-                      <input placeholder='Ebay Store Category Number' onChange={e => setEbayStoreCategoryName(e.target.value)}/>
+                      <input placeholder='Ebay Store Category Number' 
+                      value = {ebayStoreCategoryForm.code} onChange={ (e) => handleCode(e) }/>
                     </Form.Field>                     
                   </Form>
                 </Modal.Description>
               </Modal.Content>
               <Modal.Actions>
-              <Button positive onClick={handleSubmit}>
+              <Button positive 
+              disabled = { (ebayStoreCategoryForm.name === "" || ebayStoreCategoryForm.code === "") ? true : false } onClick={handleSubmit}>
                 Add Ebay Store Category
               </Button>
  
@@ -388,22 +427,23 @@ const fetchEbayStoreCategorys = async () => {
                   
                   <Form>
                     <Form.Field>
-                      <label>Ebay Store Category Name</label>
+                      <label>Category Name</label>
                       <input placeholder='Ebay Store Category Name' 
                       value = {ebayStoreCategoryEdit.name} 
-                      onChange={e => setEbayStoreCategoryEdit({id: ebayStoreCategoryEdit.id, name: e.target.value})}/>
+                      onChange={ (e) => handleEditName(e) }/>
                     </Form.Field>
                     <Form.Field>
-                      <label>Ebay Store Category Number</label>
+                      <label>Category Number</label>
                       <input placeholder='Ebay Store Category Number' 
                       value = {ebayStoreCategoryEdit.code} 
-                      onChange={e => setEbayStoreCategoryEdit({id: ebayStoreCategoryEdit.id, name: e.target.value})}/>
+                      onChange={ (e) => handleEditCode(e) }/>
                     </Form.Field>                        
                   </Form>
                 </Modal.Description>
               </Modal.Content>
               <Modal.Actions>
-              <Button positive onClick={handleUpdate}>
+              <Button positive 
+              disabled = { (ebayStoreCategoryEdit.name === "" || ebayStoreCategoryEdit.code === "") ? true : false } onClick={handleUpdate}>
                 Save ebay Store Category
               </Button>
  

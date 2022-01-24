@@ -364,7 +364,7 @@ const fetchBrands = async () => {
                 </Modal.Description>
               </Modal.Content>
               <Modal.Actions>
-              <Button positive onClick={handleSubmit}>
+              <Button positive disabled = { brandName === "" ? true : false } onClick={handleSubmit}>
                 Add Brand
               </Button>
  
@@ -393,7 +393,7 @@ const fetchBrands = async () => {
                 </Modal.Description>
               </Modal.Content>
               <Modal.Actions>
-              <Button positive onClick={handleUpdate}>
+              <Button positive disabled = { brandEdit.name === "" ? true : false } onClick={handleUpdate}>
                 Save Brand
               </Button>
  

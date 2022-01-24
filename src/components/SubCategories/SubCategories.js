@@ -364,7 +364,7 @@ const fetchSubCategorys = async () => {
                 </Modal.Description>
               </Modal.Content>
               <Modal.Actions>
-              <Button positive onClick={handleSubmit}>
+              <Button positive disabled = { subCategoryName === "" ? true : false } onClick={handleSubmit}>
                 Add SubCategory
               </Button>
  
@@ -393,7 +393,7 @@ const fetchSubCategorys = async () => {
                 </Modal.Description>
               </Modal.Content>
               <Modal.Actions>
-              <Button positive onClick={handleUpdate}>
+              <Button positive disabled = { subCategoryEdit.name === "" ? true : false } onClick={handleUpdate}>
                 Save SubCategory
               </Button>
  
