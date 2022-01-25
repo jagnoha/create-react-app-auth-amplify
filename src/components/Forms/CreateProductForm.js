@@ -1,7 +1,9 @@
-import React from 'react'
+import React, {useState} from 'react'
 import { Form } from 'semantic-ui-react'
+import { Dropdown } from 'semantic-ui-react'
 
 export default function CreateProductForm(props) {
+  let brands = props.brands.map(item => { return {key: item.id, text: item.name, value: item.id } } )
   
   return (
     <Form>
@@ -56,7 +58,15 @@ export default function CreateProductForm(props) {
                       <input placeholder='Shopify Fitment Tags' 
                         value = {props.shopifyOnlyTags} 
                         onChange={props.handleShopifyOnlyTags }/>
-                    </Form.Field>                                  
+                    </Form.Field>     
+                    <Form.Field>
+                    <label>Brand</label>
+                      <Dropdown placeholder='Select Brand' search searchInput={{ type: 'text' }} selection 
+                         options={brands} 
+                         onChange={props.handleBrand}
+                         value = {props.brand}
+                        />                             
+                    </Form.Field>
                   </Form>  
   );
   
