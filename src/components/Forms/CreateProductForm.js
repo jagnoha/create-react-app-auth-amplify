@@ -1,9 +1,11 @@
 import React, {useState} from 'react'
 import { Form } from 'semantic-ui-react'
 import { Dropdown } from 'semantic-ui-react'
+import Manufacturers from '../Manufacturers/Manufacturers'
 
 export default function CreateProductForm(props) {
   let brands = props.brands.map(item => { return {key: item.id, text: item.name, value: item.id } } )
+  let manufacturers = props.manufacturers.map(item => { return {key: item.id, text: item.name, value: item.id } } )
   
   return (
     <Form>
@@ -58,16 +60,62 @@ export default function CreateProductForm(props) {
                       <input placeholder='Shopify Fitment Tags' 
                         value = {props.shopifyOnlyTags} 
                         onChange={props.handleShopifyOnlyTags }/>
-                    </Form.Field>     
+                    </Form.Field>
                     <Form.Field>
                     <label>Brand</label>
                       <Dropdown placeholder='Select Brand' search searchInput={{ type: 'text' }} selection 
                          options={brands} 
                          onChange={props.handleBrand}
+                         value = {props.valueBrand}
+                         //loading
+                        />                       
+                    </Form.Field>
+                    <Form.Field>
+                    <label>Manufacturer</label>
+                      <Dropdown placeholder='Select Manufacturer' search searchInput={{ type: 'text' }} selection 
+                         options={manufacturers} 
+                         onChange={props.handleManufacturer}
+                         value = {props.valueManufacturer}
+                         //loading
+                        />                       
+                    </Form.Field>     
+                    
+                    
+                    <Form.Field>
+                    <label>Category</label>
+                      <Dropdown placeholder='Select Category' search searchInput={{ type: 'text' }} selection 
+                         options={brands} 
+                         onChange={props.handleBrand}
                          value = {props.value}
                          //loading
-                        />   
-                                                 
+                        />                       
+                    </Form.Field>
+                    <Form.Field>
+                    <label>SubCategory</label>
+                      <Dropdown placeholder='Select SubCategory' search searchInput={{ type: 'text' }} selection 
+                         options={brands} 
+                         onChange={props.handleBrand}
+                         value = {props.value}
+                         //loading
+                        />                       
+                    </Form.Field>
+                    <Form.Field>
+                    <label>SubCategory 2</label>
+                      <Dropdown placeholder='Select SubCategory 2' search searchInput={{ type: 'text' }} selection 
+                         options={brands} 
+                         onChange={props.handleBrand}
+                         value = {props.value}
+                         //loading
+                        />                       
+                    </Form.Field>
+                    <Form.Field>
+                    <label>eBay Store Category</label>
+                      <Dropdown placeholder='Select eBay Store Category' search searchInput={{ type: 'text' }} selection 
+                         options={brands} 
+                         onChange={props.handleBrand}
+                         value = {props.value}
+                         //loading
+                        />                       
                     </Form.Field>
                      
                   </Form>  

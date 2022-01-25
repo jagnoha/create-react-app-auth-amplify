@@ -3,7 +3,7 @@ import { API, graphqlOperation } from 'aws-amplify'
 import { Pagination, Input, Button, Icon, Grid, Modal, Form} from 'semantic-ui-react'
 import { SemanticToastContainer, toast } from 'react-semantic-toasts'
 import 'react-semantic-toasts/styles/react-semantic-alert.css'
-import { listProducts, listBrands } from '../../graphql/queries'
+import { listProducts, listBrands, listManufacturers } from '../../graphql/queries'
 import { createProduct, updateProduct } from '../../graphql/mutations'
 import * as subscriptions from '../../graphql/subscriptions'
 import { v4 as uuidv4 } from 'uuid'
@@ -15,8 +15,13 @@ import CreateProductForm from '../Forms/CreateProductForm'
 export default function Products() {
   const [chunckProducts, setChunkProducts] = useState(null)
   const [products, setProducts] = useState([])
+  
   const [brands, setBrands] = useState([])
   const [brand, setBrand] = useState(null)
+
+  const [manufacturers, setManufacturers] = useState([])
+  const [manufacturer, setManufacturer] = useState(null)
+
   const [activePage, setActivePage] = useState(1)
   const [search, setSearch] = useState("")
   const [orderColumn, setOrderColumn] = useState({column: null, direction: 'descending'})
@@ -187,6 +192,7 @@ const subscriptionUpdate = async () => await API.graphql(
 const onPageRendered = async () => {
   fetchProducts()
   fetchBrands()
+  fetchManufacturers()
   subscriptionCreate()
   subscriptionUpdate()
   
@@ -238,11 +244,31 @@ const fetchBrands = async () => {
     //console.log("QUE TENEMOS AQUI:", Products)  
     //sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
     setBrands(brands)
-    console.log("esta es una prueba *****", products)
+    //console.log("esta es una prueba *****", products)
     
 
 } catch (err) { console.log(err) }
 }
+
+const fetchManufacturers = async () => {
+  try {
+    const manufacturersData = await API.graphql({
+      query: listManufacturers,
+    
+    })      
+
+    console.log(manufacturersData)
+    
+    const manufacturers = await manufacturersData.data.listManufacturers.items.filter(item => !item._deleted)   
+    //console.log("QUE TENEMOS AQUI:", Products)  
+    //sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
+    setManufacturers(manufacturers)
+    //console.log("esta es una prueba *****", products)
+    
+
+} catch (err) { console.log(err) }
+}
+
 
 
 const fetchProducts = async () => {
@@ -362,6 +388,13 @@ const fetchProducts = async () => {
       setBrand(value)
       console.log(value)
       }
+
+      const handleManufacturer = (value) => {
+        //evt.persist();
+        
+        setManufacturer(value)
+        console.log(value)
+        }
   
 
     const handleEditSKU = (evt) => {
@@ -433,7 +466,8 @@ const fetchProducts = async () => {
                       handle = {productForm.mpn} handleHandle = {(e) => handleMPN(e)}
                       shopifyFitmentTags = {productForm.mpn} handleShopifyFitmentTags = {(e) => handleMPN(e)}
                       shopifyOnlyTags = {productForm.mpn} handleShopifyOnlyTags = {(e) => handleMPN(e)}
-                      brands = {brands} value = {brand} handleBrand = {(e, { value }) => handleBrand(value)}
+                      brands = {brands} valueBrand = {brand} handleBrand = {(e, { value }) => handleBrand(value)}
+                      manufacturers = {manufacturers} valueManufacturer = {manufacturer} handleManufacturer = {(e, { value }) => handleManufacturer(value)}
                   />
 
                 </Modal.Description>
