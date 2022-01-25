@@ -97,6 +97,7 @@ export declare class Product {
   readonly cost?: number;
   readonly options?: string;
   readonly updateFlag?: boolean;
+  readonly status?: string;
   constructor(init: ModelInit<Product>);
   static copyOf(source: Product, mutator: (draft: MutableModel<Product>) => MutableModel<Product> | void): Product;
 }

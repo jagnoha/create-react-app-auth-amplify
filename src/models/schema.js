@@ -219,6 +219,13 @@ export const schema = {
                     "type": "Boolean",
                     "isRequired": false,
                     "attributes": []
+                },
+                "status": {
+                    "name": "status",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
                 }
             },
             "syncable": true,
@@ -294,6 +301,15 @@ export const schema = {
                                     "delete",
                                     "read"
                                 ]
+                            },
+                            {
+                                "provider": "userPools",
+                                "ownerField": "owner",
+                                "allow": "owner",
+                                "operations": [
+                                    "create"
+                                ],
+                                "identityClaim": "cognito:username"
                             }
                         ]
                     }
@@ -1132,5 +1148,5 @@ export const schema = {
             }
         }
     },
-    "version": "a79479c26ba031871e6fb7ff1a42d73a"
+    "version": "b6a953057765cd849a313e8df549fb43"
 };

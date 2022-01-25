@@ -3,7 +3,7 @@
   "serviceConfiguration": {
     "apiName": "demonscyclesystemmanager",
     "serviceName": "AppSync",
-    "gqlSchemaPath": "/tmp/amplify-1fca64ed-b38a-4b36-8fe6-72f9d56504ef/amplify/backend/api/demonscyclesystemmanager/schema.graphql",
+    "gqlSchemaPath": "/tmp/amplify-9fd5c4b1-43a8-47ac-b61a-553a9010c9cc/amplify/backend/api/demonscyclesystemmanager/schema.graphql",
     "defaultAuthType": {
       "mode": "API_KEY",
       "keyDescription": "api key description",
