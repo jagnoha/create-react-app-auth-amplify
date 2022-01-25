@@ -356,11 +356,11 @@ const fetchProducts = async () => {
         }));
     }
 
-    const handleBrand = (evt) => {
+    const handleBrand = (value) => {
       //evt.persist();
       
-      setBrand(evt)
-      console.log(brand)
+      setBrand(value)
+      console.log(value)
       }
   
 
@@ -433,7 +433,7 @@ const fetchProducts = async () => {
                       handle = {productForm.mpn} handleHandle = {(e) => handleMPN(e)}
                       shopifyFitmentTags = {productForm.mpn} handleShopifyFitmentTags = {(e) => handleMPN(e)}
                       shopifyOnlyTags = {productForm.mpn} handleShopifyOnlyTags = {(e) => handleMPN(e)}
-                      brands = {brands} value = {brand} handleBrands = {(e, {value}) => handleBrand(e)}
+                      brands = {brands} value = {brand} handleBrand = {(e, { value }) => handleBrand(value)}
                   />
 
                 </Modal.Description>

@@ -64,9 +64,12 @@ export default function CreateProductForm(props) {
                       <Dropdown placeholder='Select Brand' search searchInput={{ type: 'text' }} selection 
                          options={brands} 
                          onChange={props.handleBrand}
-                         value = {props.brand}
-                        />                             
+                         value = {props.value}
+                         //loading
+                        />   
+                                                 
                     </Form.Field>
+                     
                   </Form>  
   );
   
