@@ -77,6 +77,7 @@ export const onCreateProduct = /* GraphQL */ `
       cost
       options
       updateFlag
+      status
       _version
       _deleted
       _lastChangedAt
@@ -161,6 +162,7 @@ export const onUpdateProduct = /* GraphQL */ `
       cost
       options
       updateFlag
+      status
       _version
       _deleted
       _lastChangedAt
@@ -245,6 +247,7 @@ export const onDeleteProduct = /* GraphQL */ `
       cost
       options
       updateFlag
+      status
       _version
       _deleted
       _lastChangedAt

@@ -77,6 +77,7 @@ export const getProduct = /* GraphQL */ `
       cost
       options
       updateFlag
+      status
       _version
       _deleted
       _lastChangedAt
@@ -115,11 +116,63 @@ export const listProducts = /* GraphQL */ `
         cost
         options
         updateFlag
+        status
         _version
         _deleted
         _lastChangedAt
         createdAt
         updatedAt
+        price {
+          MSRP
+          MAP
+          store
+          ebay
+          amazon
+          wholesaleLow
+          wholesaleHigh
+          scratchLow
+          scratchHigh
+        }
+        title {
+          amazon
+          ebay
+          store
+        }
+        bulletPoints {
+          bullet1
+          bullet2
+          bullet3
+          bullet4
+          bullet5
+          bullet6
+          bullet7
+        }
+        description {
+          amazon
+          ebay
+          store
+        }
+        dimensions {
+          height
+          length
+          width
+        }
+        images {
+          image1
+          image10
+          image2
+          image3
+          image4
+          image5
+          image6
+          image7
+          image8
+          image9
+        }
+        source {
+          dropship
+          warehouse
+        }
       }
       nextToken
       startedAt
@@ -162,6 +215,7 @@ export const syncProducts = /* GraphQL */ `
         cost
         options
         updateFlag
+        status
         _version
         _deleted
         _lastChangedAt

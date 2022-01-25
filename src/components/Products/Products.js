@@ -8,6 +8,7 @@ import { createProduct, updateProduct } from '../../graphql/mutations'
 import * as subscriptions from '../../graphql/subscriptions';
 import { v4 as uuidv4 } from 'uuid'
 import ProductTable from '../ProductTable/ProductTable';
+import CreateProductForm from '../Forms/CreateProductForm';
 
 
 export default function Products() {
@@ -308,7 +309,7 @@ const fetchProducts = async () => {
 
         setActivePage(1); 
       
-        let tempProducts = products.filter(item => item.name.toLowerCase().includes(search.toLowerCase()) )
+        let tempProducts = products.filter(item => item.SKU.toLowerCase().includes(search.toLowerCase()) )
         tempProducts = tempProducts.length > 0 ? tempProducts : products
          
         
@@ -391,19 +392,18 @@ const fetchProducts = async () => {
               <Modal.Content>
                 <Modal.Description>
                   
-                  <Form>
-                    <Form.Field>
-                      <label>SKU</label>
-                      <input placeholder='Product SKU' 
-                      value = {productForm.sku} onChange={ (e) => handleSKU(e) }  />
+                  
+                  <CreateProductForm 
+                      sku = {productForm.sku} handleSKU = {(e) => handleSKU(e)}
+                      mpn = {productForm.mpn} handleMPN = {(e) => handleMPN(e)}
+                      legacyId = {productForm.mpn} handleLegacyId = {(e) => handleMPN(e)}
+                      parentSKU = {productForm.mpn} handleParentSKU = {(e) => handleMPN(e)}
+                      binLocation = {productForm.mpn} handleBinLocation = {(e) => handleMPN(e)}
+                      handle = {productForm.mpn} handleHandle = {(e) => handleMPN(e)}
+                      shopifyFitmentTags = {productForm.mpn} handleShopifyFitmentTags = {(e) => handleMPN(e)}
+                      shopifyOnlyTags = {productForm.mpn} handleShopifyOnlyTags = {(e) => handleMPN(e)}
+                  />
 
-                    </Form.Field>
-                    <Form.Field>
-                      <label>Manufacturer Part Number</label>
-                      <input placeholder='Manufacturer Part Number' 
-                      value = {productForm.mpn} onChange={ (e) => handleMPN(e) }/>
-                    </Form.Field>                     
-                  </Form>
                 </Modal.Description>
               </Modal.Content>
               <Modal.Actions>

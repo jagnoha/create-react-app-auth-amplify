@@ -12,6 +12,7 @@ import Settings from '../Settings/Settings'
 import SubCategories from '../SubCategories/SubCategories'
 import SubCategories2 from '../SubCategories2/SubCategories2'
 import EbayStoreCategories from '../EbayStoreCategories/EbayStoreCategories'
+import Attributes from '../Attributes/Attributes'
 
 //const Home = () => <h1>Home</h1>;
 //const Products = () => <h1>Products</h1>;
@@ -62,7 +63,11 @@ export default function Main(props) {
         {
           path: "/ebaystorecategories",
           main: () => <EbayStoreCategories />,          
-        }                 
+        },
+        {
+          path: "/attributes",
+          main: () => <Attributes />,          
+        }                   
       ];
 
       const location = useLocation();
@@ -106,6 +111,8 @@ export default function Main(props) {
           return 'Reports'
         } else if (menuItem === 'settings'){
           return 'Settings'
+        } else if (menuItem === 'attributes'){
+          return 'Product Attributes'
         }
         return newTitle;
       }
@@ -138,6 +145,14 @@ export default function Main(props) {
           onClick={()=>handleItemClick('products')}
         >
           <Popup content='Products' position='right center' style={style} offset={[0, 15]} inverted trigger={<Icon size='large' name='tags' />} />
+        </Menu.Item>
+
+        <Menu.Item
+          name='attributes'
+          active={activeItem === 'attributes'}
+          onClick={()=>handleItemClick('attributes')}
+        >
+          <Popup content='Attributes' position='right center' style={style} offset={[0, 15]} inverted trigger={<Icon size='large' name='options' />} />
         </Menu.Item>
 
         <Menu.Item
