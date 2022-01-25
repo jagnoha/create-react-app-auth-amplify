@@ -248,7 +248,7 @@ const fetchSubCategorys = async () => {
     
     
     const sortItems = (list, direction) => {
-      if (direction === 'ascending'){
+      if (direction === 'descending'){
         list.sort(function(a, b) {
           let nameA = a.name.toUpperCase(); // ignore upper and lowercase
           let nameB = b.name.toUpperCase(); // ignore upper and lowercase

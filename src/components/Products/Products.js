@@ -249,7 +249,7 @@ const fetchProducts = async () => {
     
     
     const sortItems = (list, direction) => {
-      if (direction === 'ascending'){
+      if (direction === 'descending'){
         list.sort(function(a, b) {
           let nameA = a.SKU.toUpperCase(); // ignore upper and lowercase
           let nameB = b.SKU.toUpperCase(); // ignore upper and lowercase
