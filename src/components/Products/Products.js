@@ -3,7 +3,7 @@ import { API, graphqlOperation } from 'aws-amplify'
 import { Pagination, Input, Button, Icon, Grid, Modal, Form} from 'semantic-ui-react'
 import { SemanticToastContainer, toast } from 'react-semantic-toasts'
 import 'react-semantic-toasts/styles/react-semantic-alert.css'
-import { listProducts, listBrands, listManufacturers } from '../../graphql/queries'
+import { listProducts, listBrands, listManufacturers, listCategorys, listSubCategorys, listSubCategory2s, listEbayStoreCategorys } from '../../graphql/queries'
 import { createProduct, updateProduct } from '../../graphql/mutations'
 import * as subscriptions from '../../graphql/subscriptions'
 import { v4 as uuidv4 } from 'uuid'
@@ -21,6 +21,18 @@ export default function Products() {
 
   const [manufacturers, setManufacturers] = useState([])
   const [manufacturer, setManufacturer] = useState(null)
+
+  const [categories, setCategories] = useState([])
+  const [category, setCategory] = useState(null)
+
+  const [subCategories, setSubCategories] = useState([])
+  const [subCategory, setSubCategory] = useState(null)
+
+  const [subCategories2, setSubCategories2] = useState([])
+  const [subCategory2, setSubCategory2] = useState(null)
+
+  const [ebayStoreCategorys, setEbayStoreCategorys] = useState([])
+  const [ebayStoreCategory, setEbayStoreCategory] = useState(null)
 
   const [activePage, setActivePage] = useState(1)
   const [search, setSearch] = useState("")
@@ -50,8 +62,26 @@ export default function Products() {
           return
         }
         let id = uuidv4()
-        setProducts([...products, {id, SKU: productForm.sku, mpn: productForm.mpn }])        
-        await API.graphql(graphqlOperation(createProduct, { input: {id, SKU: productForm.sku, mpn: productForm.mpn } }))
+        let productInput = {
+          id,
+          SKU: productForm.sku, 
+          mpn: productForm.mpn,
+          legacyId: productForm.legacyId,
+          parentSKU: productForm.parentSKU,
+          binLocation: productForm.binLocation,
+          handle: productForm.handle,
+          shopifyFitmentTags: productForm.shopifyFitmentTags,
+          shopifyOnlyTags: productForm.shopifyOnlyTags,
+          brandID: brand,
+          manufacturerID: manufacturer,
+          categoryID: category,
+          subcategoryID: subCategory,
+          subcategory2ID: subCategory2,
+          ebaystorecategoryID: ebayStoreCategory, 
+          
+        }
+        setProducts([...products, productInput])        
+        await API.graphql(graphqlOperation(createProduct, { input: productInput }))
         fetchProducts()
         setProductForm({})
         setTimeout(() => {
@@ -184,6 +214,18 @@ const subscriptionUpdate = async () => await API.graphql(
       addProduct()
   }
 
+  const handleClose = (evt) => {
+    evt.preventDefault()
+    
+    //console.log(productForm)
+    /*setBrand(null)
+    setManufacturer(null)*/
+    setOpen(false)
+    setProductForm({})  
+    //setManufacturer(null)
+    
+}
+
   const handleUpdate = (evt) => {
     evt.preventDefault()
     modifyProduct()
@@ -193,10 +235,14 @@ const onPageRendered = async () => {
   fetchProducts()
   fetchBrands()
   fetchManufacturers()
+  fetchCategories()
+  fetchSubCategories()
+  fetchSubCategories2()
+  fetchEbayStoreCategorys()
   subscriptionCreate()
   subscriptionUpdate()
   
-};
+}
 
 
 
@@ -259,11 +305,72 @@ const fetchManufacturers = async () => {
 
     console.log(manufacturersData)
     
-    const manufacturers = await manufacturersData.data.listManufacturers.items.filter(item => !item._deleted)   
-    //console.log("QUE TENEMOS AQUI:", Products)  
-    //sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
-    setManufacturers(manufacturers)
-    //console.log("esta es una prueba *****", products)
+    const manufacturers = await manufacturersData.data.listManufacturers.items.filter(item => !item._deleted)      
+    setManufacturers(manufacturers)   
+    
+
+} catch (err) { console.log(err) }
+}
+
+const fetchCategories = async () => {
+  try {
+    const categoriesData = await API.graphql({
+      query: listCategorys,
+    
+    })      
+
+    //console.log(manufacturersData)
+    
+    const categories = await categoriesData.data.listCategorys.items.filter(item => !item._deleted)      
+    setCategories(categories)   
+    
+
+} catch (err) { console.log(err) }
+}
+
+const fetchSubCategories = async () => {
+  try {
+    const subCategoriesData = await API.graphql({
+      query: listSubCategorys,
+    
+    })      
+
+    //console.log(manufacturersData)
+    
+    const subCategories = await subCategoriesData.data.listSubCategorys.items.filter(item => !item._deleted)      
+    setSubCategories(subCategories)   
+    
+
+} catch (err) { console.log(err) }
+}
+
+const fetchSubCategories2 = async () => {
+  try {
+    const subCategoriesData2 = await API.graphql({
+      query: listSubCategory2s,
+    
+    })      
+
+    //console.log(manufacturersData)
+    
+    const subCategories2 = await subCategoriesData2.data.listSubCategory2s.items.filter(item => !item._deleted)      
+    setSubCategories2(subCategories2)   
+    
+
+} catch (err) { console.log(err) }
+}
+
+const fetchEbayStoreCategorys = async () => {
+  try {
+    const ebayStoreCategorysData = await API.graphql({
+      query: listEbayStoreCategorys,
+    
+    })      
+
+    console.log("ebay store: ",ebayStoreCategorysData)
+    
+    const ebayStoreCategorys = await ebayStoreCategorysData.data.listEbayStoreCategorys.items.filter(item => !item._deleted)      
+    setEbayStoreCategorys(ebayStoreCategorys)   
     
 
 } catch (err) { console.log(err) }
@@ -395,7 +502,35 @@ const fetchProducts = async () => {
         setManufacturer(value)
         console.log(value)
         }
-  
+
+        const handleCategory = (value) => {
+          //evt.persist();
+          
+          setCategory(value)
+          console.log(value)
+          }
+
+          const handleSubCategory = (value) => {
+            //evt.persist();
+            
+            setSubCategory(value)
+            console.log(value)
+            }
+
+            const handleSubCategory2 = (value) => {
+              //evt.persist();
+              
+              setSubCategory2(value)
+              console.log(value)
+              }
+
+              const handleEbayStoreCategory = (value) => {
+                //evt.persist();
+                
+                setEbayStoreCategory(value)
+                console.log(value)
+                }
+              
 
     const handleEditSKU = (evt) => {
         evt.persist();
@@ -440,6 +575,8 @@ const fetchProducts = async () => {
           <Grid.Column width={4}>
           
             <Modal
+              closeOnEscape={true}
+              closeOnDimmerClick={false}            
               onClose={() => setOpen(false)}
               onOpen={() => setOpen(true)}
               open={open}
@@ -453,26 +590,36 @@ const fetchProducts = async () => {
                       </Button>}
             >
               <Modal.Header>Add Product</Modal.Header>
-              <Modal.Content>
+              <Modal.Content scrolling>
                 <Modal.Description>
                   
                   
                   <CreateProductForm 
                       sku = {productForm.sku} handleSKU = {(e) => handleSKU(e)}
                       mpn = {productForm.mpn} handleMPN = {(e) => handleMPN(e)}
-                      legacyId = {productForm.mpn} handleLegacyId = {(e) => handleMPN(e)}
-                      parentSKU = {productForm.mpn} handleParentSKU = {(e) => handleMPN(e)}
-                      binLocation = {productForm.mpn} handleBinLocation = {(e) => handleMPN(e)}
-                      handle = {productForm.mpn} handleHandle = {(e) => handleMPN(e)}
-                      shopifyFitmentTags = {productForm.mpn} handleShopifyFitmentTags = {(e) => handleMPN(e)}
-                      shopifyOnlyTags = {productForm.mpn} handleShopifyOnlyTags = {(e) => handleMPN(e)}
+                      legacyId = {productForm.legacyId} handleLegacyId = {(e) => handleMPN(e)}
+                      parentSKU = {productForm.parentSKU} handleParentSKU = {(e) => handleMPN(e)}
+                      binLocation = {productForm.binLocation} handleBinLocation = {(e) => handleMPN(e)}
+                      handle = {productForm.handle} handleHandle = {(e) => handleMPN(e)}
+                      shopifyFitmentTags = {productForm.shopifyFitmentTags} handleShopifyFitmentTags = {(e) => handleMPN(e)}
+                      shopifyOnlyTags = {productForm.shopifyOnlyTags} handleShopifyOnlyTags = {(e) => handleMPN(e)}
                       brands = {brands} valueBrand = {brand} handleBrand = {(e, { value }) => handleBrand(value)}
                       manufacturers = {manufacturers} valueManufacturer = {manufacturer} handleManufacturer = {(e, { value }) => handleManufacturer(value)}
+                      categories = {categories} valueCategory = {category} handleCategory = {(e, { value }) => handleCategory(value)}
+                      subCategories = {subCategories} valueSubCategory = {subCategory} handleSubCategory = {(e, { value }) => handleSubCategory(value)}
+                      subCategories2 = {subCategories2} valueSubCategory2 = {subCategory2} handleSubCategory2 = {(e, { value }) => handleSubCategory2(value)}
+                      ebayStoreCategorys = {ebayStoreCategorys} valueEbayStoreCategory = {ebayStoreCategory} handleEbayStoreCategory = {(e, { value }) => handleEbayStoreCategory(value)}
+                 
+
+                      
                   />
 
                 </Modal.Description>
               </Modal.Content>
               <Modal.Actions>
+              <Button negative onClick={handleClose}>
+                Cancel
+              </Button>
               <Button positive onClick={handleSubmit}>
                 Add Product
               </Button>

@@ -6,6 +6,13 @@ import Manufacturers from '../Manufacturers/Manufacturers'
 export default function CreateProductForm(props) {
   let brands = props.brands.map(item => { return {key: item.id, text: item.name, value: item.id } } )
   let manufacturers = props.manufacturers.map(item => { return {key: item.id, text: item.name, value: item.id } } )
+  let categories = props.categories.map(item => { return {key: item.id, text: item.name, value: item.id } } )
+  let subCategories = props.subCategories.map(item => { return {key: item.id, text: item.name, value: item.id } } )
+  let subCategories2 = props.subCategories2.map(item => { return {key: item.id, text: item.name, value: item.id } } )
+  let ebayStoreCategorys = props.ebayStoreCategorys.map(item => { return {key: item.id, text: item.name, value: item.id } } )
+
+
+  
   
   return (
     <Form>
@@ -84,8 +91,8 @@ export default function CreateProductForm(props) {
                     <Form.Field>
                     <label>Category</label>
                       <Dropdown placeholder='Select Category' search searchInput={{ type: 'text' }} selection 
-                         options={brands} 
-                         onChange={props.handleBrand}
+                         options={categories} 
+                         onChange={props.handleCategory}
                          value = {props.value}
                          //loading
                         />                       
@@ -93,8 +100,8 @@ export default function CreateProductForm(props) {
                     <Form.Field>
                     <label>SubCategory</label>
                       <Dropdown placeholder='Select SubCategory' search searchInput={{ type: 'text' }} selection 
-                         options={brands} 
-                         onChange={props.handleBrand}
+                         options={subCategories} 
+                         onChange={props.handleSubCategory}
                          value = {props.value}
                          //loading
                         />                       
@@ -102,8 +109,8 @@ export default function CreateProductForm(props) {
                     <Form.Field>
                     <label>SubCategory 2</label>
                       <Dropdown placeholder='Select SubCategory 2' search searchInput={{ type: 'text' }} selection 
-                         options={brands} 
-                         onChange={props.handleBrand}
+                         options={subCategories2} 
+                         onChange={props.handleSubCategory2}
                          value = {props.value}
                          //loading
                         />                       
@@ -111,8 +118,8 @@ export default function CreateProductForm(props) {
                     <Form.Field>
                     <label>eBay Store Category</label>
                       <Dropdown placeholder='Select eBay Store Category' search searchInput={{ type: 'text' }} selection 
-                         options={brands} 
-                         onChange={props.handleBrand}
+                         options={ebayStoreCategorys} 
+                         onChange={props.handleEbayStoreCategory}
                          value = {props.value}
                          //loading
                         />                       
