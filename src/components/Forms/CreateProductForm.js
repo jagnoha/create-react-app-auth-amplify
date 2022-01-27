@@ -304,7 +304,7 @@ export default function CreateProductForm(props) {
                           <Grid.Column>
                           <Form.Field>
                           <label>Height</label>
-                          <input type='number' placeholder='Height in inches' 
+                          <input type='number' min="0" placeholder='Height in inches' 
                             value = {props.height} 
                             onChange={props.handleHeight }/>
                         </Form.Field>
@@ -312,7 +312,7 @@ export default function CreateProductForm(props) {
                         <Grid.Column>
                           <Form.Field>
                           <label>Length</label>
-                          <input type='number' placeholder='Length in inches' 
+                          <input type='number' min="0" placeholder='Length in inches' 
                             value = {props.length} 
                             onChange={props.handleLength }/>
                         </Form.Field>
@@ -320,7 +320,7 @@ export default function CreateProductForm(props) {
                         <Grid.Column>
                         <Form.Field>
                           <label>Width</label>
-                          <input type='number' placeholder='Width in inches' 
+                          <input type='number' min="0" placeholder='Width in inches' 
                             value = {props.width} 
                             onChange={props.handleWidth }/>
                         </Form.Field>
@@ -339,7 +339,7 @@ export default function CreateProductForm(props) {
                           <Grid.Column>
                           <Form.Field>
                           <label>Weight</label>
-                          <input type='number' placeholder='Weight in pounds' 
+                          <input type='number' min="0" placeholder='Weight in pounds' 
                             value = {props.weight} 
                             onChange={props.handleWeight }/>
                         </Form.Field>
@@ -347,7 +347,7 @@ export default function CreateProductForm(props) {
                         <Grid.Column>
                           <Form.Field>
                           <label>Dimensional Weight</label>
-                          <input type='number' placeholder='Dimensional Weight' 
+                          <input type='number' min="0" placeholder='Dimensional Weight' 
                             value = {props.dimensionalWeight} 
                             onChange={props.handleDimensionalWeight }/>
                         </Form.Field>
@@ -355,12 +355,118 @@ export default function CreateProductForm(props) {
                         <Grid.Column>
                         <Form.Field>
                           <label>Applied Weight</label>
-                          <input type='number' placeholder='Applied Weight' 
+                          <input type='number' min="0" placeholder='Applied Weight' 
                             value = {props.appliedWeight} 
                             onChange={props.handleAppliedWeight }/>
                         </Form.Field>
                         </Grid.Column>
                         </Grid.Row>
+                        </Grid>
+                    
+                    
+                    </Segment>
+                    <Segment raised >
+                    <Form.Field>
+                          <label>Cost</label>
+                          <input type='number' min="0" placeholder='Cost' 
+                            value = {props.cost} 
+                            onChange={props.handleCost }/>
+                        </Form.Field>
+                      </Segment>
+                    <Segment raised >
+                        <Header>Price</Header>
+                        
+                        <Grid columns='equal'>
+                        
+                        <Grid.Row>
+                          <Grid.Column>
+                          <Form.Field>
+                          <label>MSRP</label>
+                          <input type='number' min="0" placeholder='MSRP' 
+                            value = {props.priceMSRP} 
+                            onChange={props.handlePriceMSRP }/>
+                        </Form.Field>
+                        </Grid.Column>
+                        <Grid.Column>
+                          <Form.Field>
+                          <label>MAP</label>
+                          <input type='number' min="0" placeholder='MAP' 
+                            value = {props.priceMAP} 
+                            onChange={props.handlePriceMAP }/>
+                        </Form.Field>
+                        </Grid.Column>
+                        
+                        </Grid.Row>
+
+                        <Grid.Row>
+                          <Grid.Column>
+                          <Form.Field>
+                          <label>Store</label>
+                          <input type='number' min="0" placeholder='Store price' 
+                            value = {props.priceStore} 
+                            onChange={props.handlePriceStore }/>
+                        </Form.Field>
+                        </Grid.Column>
+                        <Grid.Column>
+                          <Form.Field>
+                          <label>eBay</label>
+                          <input type='number' min="0" placeholder='eBay Price' 
+                            value = {props.priceEbay} 
+                            onChange={props.handlePriceEbay }/>
+                        </Form.Field>
+                        </Grid.Column>
+                        <Grid.Column>
+                        <Form.Field>
+                          <label>Amazon</label>
+                          <input type='number' min="0" placeholder='Amazon price' 
+                            value = {props.priceAmazon} 
+                            onChange={props.handlePriceAmazon }/>
+                        </Form.Field>
+                        </Grid.Column>
+                        </Grid.Row>
+                        
+
+                        <Grid.Row>
+                          <Grid.Column>
+                          <Form.Field>
+                          <label>Wholesale Low</label>
+                          <input type='number' min="0" placeholder='Wholesale Low Price' 
+                            value = {props.priceWholesaleLow} 
+                            onChange={props.handlePriceWholesaleLow }/>
+                        </Form.Field>
+                        </Grid.Column>
+                        <Grid.Column>
+                          <Form.Field>
+                          <label>wholesale High</label>
+                          <input type='number' min="0" placeholder='wholesale High Price' 
+                            value = {props.priceWholesaleHigh} 
+                            onChange={props.handlePriceWholesaleHigh }/>
+                        </Form.Field>
+                        </Grid.Column>
+                        
+                        </Grid.Row>
+
+                        <Grid.Row>
+                          <Grid.Column>
+                          <Form.Field>
+                          <label>Scratch Low</label>
+                          <input type='number' min="0" placeholder='Scratch Low Price' 
+                            value = {props.priceScratchLow} 
+                            onChange={props.handlePriceScratchLow }/>
+                        </Form.Field>
+                        </Grid.Column>
+                        <Grid.Column>
+                          <Form.Field>
+                          <label>Scratch High</label>
+                          <input type='number' min="0" placeholder='Scratch High Price' 
+                            value = {props.priceScratchHigh} 
+                            onChange={props.handlePriceScratchHigh }/>
+                        </Form.Field>
+                        </Grid.Column>
+                        
+                        </Grid.Row>
+                        
+                        
                         </Grid>
                     
                     

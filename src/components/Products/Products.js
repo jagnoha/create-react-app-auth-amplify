@@ -106,6 +106,18 @@ export default function Products() {
           weight: productForm.weight,
           dimensionalWeight: productForm.dimensionalWeight,
           appliedWeight: productForm.appliedWeight,
+          price: {
+            MSRP: productForm.priceMSRP,
+            MAP: productForm.priceMAP,
+            store: productForm.priceStore,
+            ebay: productForm.priceEbay,
+            amazon: productForm.priceAmazon,
+            wholesaleLow: productForm.priceWholesaleLow,
+            wholesaleHigh: productForm.priceWholesaleHigh,
+            scratchLow: productForm.priceScratchLow,
+            scratchHigh: productForm.priceScratchHigh,
+          },
+          cost: productForm.cost,
           
         }
         setProducts([...products, productInput])        
@@ -752,21 +764,88 @@ const handleWeight = (evt) => {
   }))
 }
 
-const handleDimensionalWeight = (evt) => {
+const handlePriceMSRP = (evt) => {
   evt.persist();
   setProductForm((values) => ({
       ...values,
-      dimensionalWeight: evt.target.value,
+      priceMSRP: evt.target.value,
   }))
 }
 
-const handleAppliedWeight = (evt) => {
+const handlePriceMAP = (evt) => {
   evt.persist();
   setProductForm((values) => ({
       ...values,
-      appliedWeight: evt.target.value,
+      priceMAP: evt.target.value,
   }))
 }
+
+const handlePriceStore = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      priceStore: evt.target.value,
+  }))
+}
+
+const handlePriceEbay = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      priceEbay: evt.target.value,
+  }))
+}
+
+const handlePriceAmazon = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      priceAmazon: evt.target.value,
+  }))
+}
+
+const handlePriceWholesaleLow = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      priceWholesaleLow: evt.target.value,
+  }))
+}
+
+const handlePriceWholesaleHigh = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      priceWholesaleHigh: evt.target.value,
+  }))
+}
+
+const handlePriceScratchLow = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      priceScratchLow: evt.target.value,
+  }))
+}
+
+const handlePriceScratchHigh = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      priceScratchHigh: evt.target.value,
+  }))
+}
+
+const handleCost = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      cost: evt.target.value,
+  }))
+}
+
+
+
               
 
     const handleEditSKU = (evt) => {
@@ -865,7 +944,17 @@ const handleAppliedWeight = (evt) => {
                       weight = {productForm.weight} handleWeight = {(e) => handleWeight(e)}
                       dimensionalWeight = {productForm.dimensionalWeight} //handleDimensionalWeight = {(e) => handleDimensionalWeight(e)}
                       appliedWeight = {productForm.appliedWeight} //handleAppliedWeight = {(e) => handleAppliedWeight(e)}
-
+                      priceMSRP = {productForm.priceMSRP} handlePriceMSRP = {(e) => handlePriceMSRP(e)}
+                      priceMAP = {productForm.priceMAP} handlePriceMAP = {(e) => handlePriceMAP(e)}
+                      priceStore = {productForm.priceStore} handlePriceStore = {(e) => handlePriceStore(e)}
+                      priceEbay = {productForm.priceEbay} handlePriceEbay = {(e) => handlePriceEbay(e)}
+                      priceAmazon = {productForm.priceAmazon} handlePriceAmazon = {(e) => handlePriceAmazon(e)}
+                      priceWholesaleLow = {productForm.priceWholesaleLow} handlePriceWholesaleLow = {(e) => handlePriceWholesaleLow(e)}
+                      priceWholesaleHigh = {productForm.priceWholesaleHigh} handlePriceWholesaleHigh = {(e) => handlePriceWholesaleHigh(e)}
+                      priceScratchLow = {productForm.pricePriceScratchLow} handlePriceScratchLow = {(e) => handlePriceScratchLow(e)}
+                      priceScratchHigh = {productForm.pricePriceScratchHigh} handlePriceScratchHigh = {(e) => handlePriceScratchHigh(e)}
+                      cost = {productForm.cost} handleCost = {(e) => handleCost(e)}
+                      
                       
                   />
 
