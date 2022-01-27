@@ -118,6 +118,10 @@ export default function Products() {
             scratchHigh: productForm.priceScratchHigh,
           },
           cost: productForm.cost,
+          source: {
+            warehouse: productForm.sourceWarehouse,
+            dropship: productForm.sourceDropship,
+          }
           
         }
         setProducts([...products, productInput])        
@@ -844,6 +848,26 @@ const handleCost = (evt) => {
   }))
 }
 
+const handleSourceWarehouse = (evt) => {
+  evt.persist();
+
+  console.log(!productForm.sourceWarehouse)
+  
+  setProductForm((values) => ({
+      ...values,
+      sourceWarehouse: !productForm.sourceWarehouse,
+  }))
+}
+
+const handleSourceDropship = (evt) => {
+  evt.persist()
+  console.log(!productForm.sourceDropship)
+  setProductForm((values) => ({
+      ...values,
+      sourceDropship: !productForm.sourceDropship,
+  }))
+}
+
 
 
               
@@ -953,9 +977,9 @@ const handleCost = (evt) => {
                       priceWholesaleHigh = {productForm.priceWholesaleHigh} handlePriceWholesaleHigh = {(e) => handlePriceWholesaleHigh(e)}
                       priceScratchLow = {productForm.pricePriceScratchLow} handlePriceScratchLow = {(e) => handlePriceScratchLow(e)}
                       priceScratchHigh = {productForm.pricePriceScratchHigh} handlePriceScratchHigh = {(e) => handlePriceScratchHigh(e)}
-                      cost = {productForm.cost} handleCost = {(e) => handleCost(e)}
-                      
-                      
+                      cost = {productForm.cost} handleCost = {(e) => handleCost(e)}                      
+                      SourceWarehouse = {productForm.SourceWarehouse} handleSourceWarehouse = {(e) => handleSourceWarehouse(e)}
+                      SourceDropship = {productForm.SourceDropship} handleSourceDropship = {(e) => handleSourceDropship(e)}
                   />
 
                 </Modal.Description>

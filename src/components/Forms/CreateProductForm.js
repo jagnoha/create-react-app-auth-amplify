@@ -51,8 +51,8 @@ export default function CreateProductForm(props) {
                     <Segment raised >
                         <Header>Source</Header>
                     <Form.Group >
-                      <Form.Field control={Checkbox} toggle label='Warehouse' />
-                      <Form.Field control={Checkbox} toggle label='Dropship' />
+                      <Form.Field control={Checkbox} toggle label='Warehouse' onChange={props.handleSourceWarehouse} checked={props.sourceWarehouse} />
+                      <Form.Field control={Checkbox} toggle label='Dropship' onChange={props.handleSourceDropship} checked={props.sourceDropship} />
                     </Form.Group>
                     </Segment>
                     </Grid.Column>
