@@ -41,6 +41,7 @@ export default function Products() {
   const [openEdit, setOpenEdit] = useState(false)
   const [productForm, setProductForm] = useState({})
   const [productEdit, setProductEdit] = useState({})
+  const [ebayTitleChars, setEbayTitleChars] = useState(0)
   
    
   
@@ -72,12 +73,39 @@ export default function Products() {
           handle: productForm.handle,
           shopifyFitmentTags: productForm.shopifyFitmentTags,
           shopifyOnlyTags: productForm.shopifyOnlyTags,
-          brandID: brand,
-          manufacturerID: manufacturer,
-          categoryID: category,
-          subcategoryID: subCategory,
-          subcategory2ID: subCategory2,
-          ebaystorecategoryID: ebayStoreCategory, 
+          brandID: productForm.brandID,
+          manufacturerID: productForm.manufacturerID,
+          categoryID: productForm.categoryID,
+          subcategoryID: productForm.subcategoryID,
+          subcategory2ID: productForm.subcategory2ID,
+          ebaystorecategoryID: productForm.ebaystorecategoryID,
+          title: {
+            store: productForm.titleStore,
+            ebay: productForm.titleEbay,
+            amazon: productForm.titleAmazon,
+          },
+          description: {
+            store: productForm.descriptionStore,
+            ebay: productForm.descriptionEbay,
+            amazon: productForm.descriptionAmazon,
+          },
+          bulletPoints: {
+            bullet1: productForm.bullet1,  
+            bullet2: productForm.bullet1,
+            bullet3: productForm.bullet1,
+            bullet4: productForm.bullet1,
+            bullet5: productForm.bullet1,
+            bullet6: productForm.bullet1,
+            bullet7: productForm.bullet1,            
+          },
+          dimensions: {
+            height: productForm.height,
+            length: productForm.length,
+            width: productForm.width,
+          },
+          weight: productForm.weight,
+          dimensionalWeight: productForm.dimensionalWeight,
+          appliedWeight: productForm.appliedWeight,
           
         }
         setProducts([...products, productInput])        
@@ -491,45 +519,254 @@ const fetchProducts = async () => {
 
     const handleBrand = (value) => {
       //evt.persist();
+      setProductForm((values) => ({
+        ...values,
+        brandID: value,
+    }))
       
-      setBrand(value)
+      //setBrand(value)
       console.log(value)
       }
 
       const handleManufacturer = (value) => {
         //evt.persist();
         
-        setManufacturer(value)
+        setProductForm((values) => ({
+          ...values,
+          manufacturerID: value,
+      }))
+
+        //setManufacturer(value)
         console.log(value)
         }
 
         const handleCategory = (value) => {
           //evt.persist();
-          
-          setCategory(value)
+          setProductForm((values) => ({
+            ...values,
+            categoryID: value,
+        }))
+          //setCategory(value)
           console.log(value)
           }
 
           const handleSubCategory = (value) => {
             //evt.persist();
-            
-            setSubCategory(value)
+            setProductForm((values) => ({
+              ...values,
+              subcategoryID: value,
+          }))
+            //setSubCategory(value)
             console.log(value)
             }
 
             const handleSubCategory2 = (value) => {
               //evt.persist();
-              
-              setSubCategory2(value)
+              setProductForm((values) => ({
+                ...values,
+                subcategory2ID: value,
+            }))
+              //setSubCategory2(value)
               console.log(value)
               }
 
               const handleEbayStoreCategory = (value) => {
                 //evt.persist();
-                
-                setEbayStoreCategory(value)
+                setProductForm((values) => ({
+                  ...values,
+                  ebaystorecategoryID: value,
+              }))
+                //setEbayStoreCategory(value)
                 console.log(value)
                 }
+
+                const handleHandle = (evt) => {
+                  evt.persist();
+                  setProductForm((values) => ({
+                      ...values,
+                      handle: evt.target.value,
+                  }));
+              }
+
+              const handleShopifyFitmentTags = (evt) => {
+                evt.persist();
+                setProductForm((values) => ({
+                    ...values,
+                    shopifyFitmentTags: evt.target.value,
+                }));
+            }
+
+            const handleShopifyOnlyTags = (evt) => {
+              evt.persist();
+              setProductForm((values) => ({
+                  ...values,
+                  shopifyOnlyTags: evt.target.value,
+              }));
+          }
+
+          const handleTitleStore = (evt) => {
+            evt.persist();
+            setProductForm((values) => ({
+                ...values,
+                titleStore: evt.target.value,
+            }));
+        }
+
+        const handleTitleEbay = (evt) => {
+          evt.persist();
+
+          setEbayTitleChars(evt.target.value.length)
+
+          if (evt.target.value.length <= 80) {
+          setProductForm((values) => ({
+              ...values,
+              titleEbay: evt.target.value,
+          }))
+        }
+      }
+
+      const handleTitleAmazon = (evt) => {
+        evt.persist();
+        setProductForm((values) => ({
+            ...values,
+            titleAmazon: evt.target.value,
+        }));
+    }
+
+    const handleDescriptionStore = (evt) => {
+      evt.persist();
+      setProductForm((values) => ({
+          ...values,
+          descriptionStore: evt.target.value,
+      }));
+  }
+
+  const handleDescriptionEbay = (evt) => {
+    evt.persist();
+
+    
+    setProductForm((values) => ({
+        ...values,
+        descriptionEbay: evt.target.value,
+    }))
+  
+}
+
+const handleDescriptionAmazon = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      descriptionAmazon: evt.target.value,
+  }));
+}
+
+const handleBullet1 = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      bullet1: evt.target.value,
+  }));
+}
+const handleBullet2 = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      bullet2: evt.target.value,
+  }))
+  
+}
+const handleBullet3 = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      bullet3: evt.target.value,
+  }))
+}
+const handleBullet4 = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      bullet4: evt.target.value,
+  }))
+}
+const handleBullet5 = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      bullet5: evt.target.value,
+  }))
+}
+const handleBullet6 = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      bullet6: evt.target.value,
+  }))
+}
+const handleBullet7 = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      bullet7: evt.target.value,
+  }))
+}
+
+const handleHeight = (evt) => {
+  evt.persist()
+  let dimCalc = Math.ceil((evt.target.value * productForm.length * productForm.width) / 139)
+  setProductForm((values) => ({
+      ...values,
+      height: evt.target.value,
+      dimensionalWeight: dimCalc,
+      appliedWeight: dimCalc > productForm.weight ? dimCalc : productForm.weight, 
+  }))
+ 
+}
+const handleLength = (evt) => {
+  evt.persist()
+  let dimCalc = Math.ceil((evt.target.value * productForm.height * productForm.width) / 139)
+  setProductForm((values) => ({
+      ...values,
+      length: evt.target.value,
+      dimensionalWeight: dimCalc,
+      appliedWeight: dimCalc > productForm.length ? dimCalc : productForm.length, 
+  }))
+}
+const handleWidth = (evt) => {
+  evt.persist()
+  let dimCalc = Math.ceil((evt.target.value * productForm.length * productForm.height) / 139)
+  setProductForm((values) => ({
+      ...values,
+      width: evt.target.value,
+      dimensionalWeight: dimCalc,
+      appliedWeight: dimCalc > productForm.width ? dimCalc : productForm.width,
+  }))
+}
+
+const handleWeight = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      weight: evt.target.value,
+      appliedWeight: productForm.dimensionalWeight > evt.target.value ? productForm.dimensionalWeight : evt.target.value,      
+  }))
+}
+
+const handleDimensionalWeight = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      dimensionalWeight: evt.target.value,
+  }))
+}
+
+const handleAppliedWeight = (evt) => {
+  evt.persist();
+  setProductForm((values) => ({
+      ...values,
+      appliedWeight: evt.target.value,
+  }))
+}
               
 
     const handleEditSKU = (evt) => {
@@ -600,16 +837,34 @@ const fetchProducts = async () => {
                       legacyId = {productForm.legacyId} handleLegacyId = {(e) => handleMPN(e)}
                       parentSKU = {productForm.parentSKU} handleParentSKU = {(e) => handleMPN(e)}
                       binLocation = {productForm.binLocation} handleBinLocation = {(e) => handleMPN(e)}
-                      handle = {productForm.handle} handleHandle = {(e) => handleMPN(e)}
-                      shopifyFitmentTags = {productForm.shopifyFitmentTags} handleShopifyFitmentTags = {(e) => handleMPN(e)}
-                      shopifyOnlyTags = {productForm.shopifyOnlyTags} handleShopifyOnlyTags = {(e) => handleMPN(e)}
-                      brands = {brands} valueBrand = {brand} handleBrand = {(e, { value }) => handleBrand(value)}
-                      manufacturers = {manufacturers} valueManufacturer = {manufacturer} handleManufacturer = {(e, { value }) => handleManufacturer(value)}
-                      categories = {categories} valueCategory = {category} handleCategory = {(e, { value }) => handleCategory(value)}
-                      subCategories = {subCategories} valueSubCategory = {subCategory} handleSubCategory = {(e, { value }) => handleSubCategory(value)}
-                      subCategories2 = {subCategories2} valueSubCategory2 = {subCategory2} handleSubCategory2 = {(e, { value }) => handleSubCategory2(value)}
-                      ebayStoreCategorys = {ebayStoreCategorys} valueEbayStoreCategory = {ebayStoreCategory} handleEbayStoreCategory = {(e, { value }) => handleEbayStoreCategory(value)}
-                 
+                      handle = {productForm.handle} handleHandle = {(e) => handleHandle(e)}
+                      shopifyFitmentTags = {productForm.shopifyFitmentTags} handleShopifyFitmentTags = {(e) => handleShopifyFitmentTags(e)}
+                      shopifyOnlyTags = {productForm.shopifyOnlyTags} handleShopifyOnlyTags = {(e) => handleShopifyOnlyTags(e)}
+                      brands = {brands} valueBrand = {productForm.brandID} handleBrand = {(e, { value }) => handleBrand(value)}
+                      manufacturers = {manufacturers} valueManufacturer = {productForm.manufacturerID} handleManufacturer = {(e, { value }) => handleManufacturer(value)}
+                      categories = {categories} valueCategory = {productForm.categoryID} handleCategory = {(e, { value }) => handleCategory(value)}
+                      subCategories = {subCategories} valueSubCategory = {productForm.subcategoryID} handleSubCategory = {(e, { value }) => handleSubCategory(value)}
+                      subCategories2 = {subCategories2} valueSubCategory2 = {productForm.subcategory2ID} handleSubCategory2 = {(e, { value }) => handleSubCategory2(value)}
+                      ebayStoreCategorys = {ebayStoreCategorys} valueEbayStoreCategory = {productForm.ebaystorecategoryID} handleEbayStoreCategory = {(e, { value }) => handleEbayStoreCategory(value)}
+                      titleStore = {productForm.titleStore} handleTitleStore = {(e) => handleTitleStore(e)}
+                      titleEbay = {productForm.titleEbay} handleTitleEbay = {(e) => handleTitleEbay(e)} ebayChars = {ebayTitleChars}
+                      titleAmazon = {productForm.titleAmazon} handleTitleAmazon = {(e) => handleTitleAmazon(e)}
+                      descriptionStore = {productForm.descriptionStore} handleDescriptionStore = {(e) => handleDescriptionStore(e)}
+                      descriptionEbay = {productForm.descriptionEbay} handleDescriptionEbay = {(e) => handleDescriptionEbay(e)} 
+                      descriptionAmazon = {productForm.descriptionAmazon} handleDescriptionAmazon = {(e) => handleDescriptionAmazon(e)}
+                      bullet1 = {productForm.bullet1} handleBullet1 = {(e) => handleBullet1(e)}
+                      bullet2 = {productForm.bullet2} handleBullet2 = {(e) => handleBullet2(e)}
+                      bullet3 = {productForm.bullet3} handleBullet3 = {(e) => handleBullet3(e)}
+                      bullet4 = {productForm.bullet4} handleBullet4 = {(e) => handleBullet4(e)}
+                      bullet5 = {productForm.bullet5} handleBullet5 = {(e) => handleBullet5(e)}
+                      bullet6 = {productForm.bullet6} handleBullet6 = {(e) => handleBullet6(e)}
+                      bullet7 = {productForm.bullet7} handleBullet7 = {(e) => handleBullet7(e)}
+                      height = {productForm.height} handleHeight = {(e) => handleHeight(e)}
+                      length = {productForm.length} handleLength = {(e) => handleLength(e)}
+                      width = {productForm.width} handleWidth = {(e) => handleWidth(e)}
+                      weight = {productForm.weight} handleWeight = {(e) => handleWeight(e)}
+                      dimensionalWeight = {productForm.dimensionalWeight} //handleDimensionalWeight = {(e) => handleDimensionalWeight(e)}
+                      appliedWeight = {productForm.appliedWeight} //handleAppliedWeight = {(e) => handleAppliedWeight(e)}
 
                       
                   />
