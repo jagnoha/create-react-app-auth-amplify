@@ -3,7 +3,7 @@ import { API, graphqlOperation } from 'aws-amplify'
 import { Pagination, Input, Button, Icon, Grid, Modal, Form} from 'semantic-ui-react'
 import { SemanticToastContainer, toast } from 'react-semantic-toasts'
 import 'react-semantic-toasts/styles/react-semantic-alert.css'
-import { listProducts, listBrands, listManufacturers, listCategorys, listSubCategorys, listSubCategory2s, listEbayStoreCategorys } from '../../graphql/queries'
+import { listProducts, listBrands, listManufacturers, listCategorys, listSubCategorys, listSubCategory2s, listEbayStoreCategorys, listAttributes } from '../../graphql/queries'
 import { createProduct, updateProduct } from '../../graphql/mutations'
 import * as subscriptions from '../../graphql/subscriptions'
 import { v4 as uuidv4 } from 'uuid'
@@ -24,6 +24,11 @@ export default function Products() {
 
   const [categories, setCategories] = useState([])
   const [category, setCategory] = useState(null)
+
+  const [attributes, setAttributes] = useState([])
+  const [attributesSelected, setAttributesSelected] = useState([])
+  const [attributeSelected, setAttributeSelected] = useState({})
+
 
   const [subCategories, setSubCategories] = useState([])
   const [subCategory, setSubCategory] = useState(null)
@@ -283,6 +288,8 @@ const onPageRendered = async () => {
   fetchSubCategories()
   fetchSubCategories2()
   fetchEbayStoreCategorys()
+  fetchAttributes()
+  
   subscriptionCreate()
   subscriptionUpdate()
   
@@ -351,6 +358,22 @@ const fetchManufacturers = async () => {
     
     const manufacturers = await manufacturersData.data.listManufacturers.items.filter(item => !item._deleted)      
     setManufacturers(manufacturers)   
+    
+
+} catch (err) { console.log(err) }
+}
+
+const fetchAttributes = async () => {
+  try {
+    const attributesData = await API.graphql({
+      query: listAttributes,
+    
+    })      
+
+    //console.log(manufacturersData)
+    
+    const attributes = await attributesData.data.listAttributes.items.filter(item => !item._deleted)      
+    setAttributes(attributes)   
     
 
 } catch (err) { console.log(err) }
@@ -532,6 +555,70 @@ const fetchProducts = async () => {
             mpn: evt.target.value,
         }));
     }
+    const handleAttributes = (value) => {
+      //evt.persist();
+      
+      let temp = value.map(item => {
+        
+        let attr = attributesSelected.find(itemAtrr => itemAtrr.id === item)
+        
+        if (attr){
+        return (
+          {id: attr.id, value: attr.value, option: attr.option}
+        )}
+        return (
+          {
+            id: item,
+            value: "",
+            option: false,
+          }
+        )
+      })      
+      
+      setAttributesSelected(temp)
+  }
+
+  const handleAttributesSelectedValue = (evt) => {
+    console.log(evt.target.value)
+    console.log(evt.target.id)
+    let id = evt.target.id
+    let value = evt.target.value
+    let tempAttributesSelected = attributesSelected.map(item => {
+      if (item.id === id){
+        return (
+          {id: id, value: value, option: item.option }
+        )
+      }      
+      return (
+        item
+      )
+    })
+
+    setAttributesSelected(tempAttributesSelected)
+
+    
+}
+
+const handleAttributesSelectedCheckbox = (data) => {
+  //evt.persist()
+  let id = data.id.split('.')[0]
+  //console.log("OOOOOOOOOOOOOOTRA:", id)
+  //console.log("Otra mierda", id)
+  console.log("COOOOOOOOOOOOOOOONO: ", data.id.split('.')[0])
+
+  let tempAttributesSelected = attributesSelected.map(item => {
+    if (item.id === id){
+      return (
+        {...item, option: !item.option }
+      )
+    }      
+    return (
+      item
+    )
+  })
+  setAttributesSelected(tempAttributesSelected)
+  
+}
 
     const handleBrand = (value) => {
       //evt.persist();
@@ -891,7 +978,8 @@ const handleSourceDropship = (evt) => {
 
     //console.log("************************** ",ProductForm)
     //console.log(ProductEdit.id)
-    
+    //console.log(attributesSelected)
+    console.log("Los atributos ************** ", attributesSelected)
 
     return (
       
@@ -980,6 +1068,11 @@ const handleSourceDropship = (evt) => {
                       cost = {productForm.cost} handleCost = {(e) => handleCost(e)}                      
                       SourceWarehouse = {productForm.SourceWarehouse} handleSourceWarehouse = {(e) => handleSourceWarehouse(e)}
                       SourceDropship = {productForm.SourceDropship} handleSourceDropship = {(e) => handleSourceDropship(e)}
+                      attributes = {attributes} handleAttributes = {(e, { value }) => handleAttributes(value)}
+                      attributesSelected = {attributesSelected}
+                      handleAttributesSelectedValue = {(e) => handleAttributesSelectedValue(e)}
+                      handleAttributesSelectedCheckbox = {(e, data) => handleAttributesSelectedCheckbox(data)} 
+                      
                   />
 
                 </Modal.Description>
@@ -988,7 +1081,7 @@ const handleSourceDropship = (evt) => {
               <Button negative onClick={handleClose}>
                 Cancel
               </Button>
-              <Button positive onClick={handleSubmit}>
+              <Button positive disabled = { !(productForm.sku && (productForm.sourceWarehouse || productForm.sourceDropship))  ? true : false} onClick={handleSubmit}>
                 Add Product
               </Button>
  

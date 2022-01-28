@@ -2,6 +2,8 @@ import React, {useState} from 'react'
 import { Form, Checkbox, GridRow } from 'semantic-ui-react'
 import { Dropdown, Segment, Header, Icon, Divider, Grid, Accordion } from 'semantic-ui-react'
 
+
+
 export default function CreateProductForm(props) {
   let brands = props.brands.map(item => { return {key: item.id, text: item.name, value: item.id } } )
   let manufacturers = props.manufacturers.map(item => { return {key: item.id, text: item.name, value: item.id } } )
@@ -9,8 +11,10 @@ export default function CreateProductForm(props) {
   let subCategories = props.subCategories.map(item => { return {key: item.id, text: item.name, value: item.id } } )
   let subCategories2 = props.subCategories2.map(item => { return {key: item.id, text: item.name, value: item.id } } )
   let ebayStoreCategorys = props.ebayStoreCategorys.map(item => { return {key: item.id, text: item.name, value: item.id } } )
+  let attributes = props.attributes.map(item => { return {key: item.id, text: item.name, value: item.id } } )
+  //const [attributeList, setAttributeList] = useState([])
   
-
+  
   
   
   return (
@@ -49,8 +53,8 @@ export default function CreateProductForm(props) {
                       <Grid.Row>
                         <Grid.Column width={12}>
                     <Segment raised >
-                        <Header>Source</Header>
-                    <Form.Group >
+                        <Header>Source <span style={{"font-size":"0.8em","color":"red"}}>*</span></Header>
+                    <Form.Group>
                       <Form.Field control={Checkbox} toggle label='Warehouse' onChange={props.handleSourceWarehouse} checked={props.sourceWarehouse} />
                       <Form.Field control={Checkbox} toggle label='Dropship' onChange={props.handleSourceDropship} checked={props.sourceDropship} />
                     </Form.Group>
@@ -472,7 +476,56 @@ export default function CreateProductForm(props) {
                     
                     </Segment>
 
+                    <Segment>
 
+                    <Form.Field>
+                    <label>Attributes</label>
+                      <Dropdown upward placeholder='Attributes' fluid multiple selection placeholder='Select Attributes'                           
+                         search searchInput={{ type: 'text' }}
+                         options={attributes}
+                         onChange={props.handleAttributes} 
+                         //onChange={props.handleAttributes}
+                         //value = {props.valueAttributes}
+                         //loading
+                        />                       
+                    </Form.Field>
+                    {props.attributesSelected.map(itemAttr => 
+                          
+                          <div key={itemAttr.id}>
+                            {console.log("Mierda ", itemAttr)}
+                          <Grid>
+                            <Grid.Row>
+                              <Grid.Column width={10}>
+                          <Form.Field>
+                            <label>{attributes.find(item => item.key === itemAttr.id).text}</label>
+                            <input id = {itemAttr.id} placeholder={attributes.find(item => item.key === itemAttr.id).text + ' Value'}
+                              //value = {props.priceScratchHigh} 
+                              onChange={props.handleAttributesSelectedValue}
+                              />
+                          </Form.Field>
+                          </Grid.Column>
+                          <Grid.Column width={6}>
+                            {console.log("Naguevona: ", itemAttr.option)}
+                          
+
+                                <Checkbox
+                                  id={itemAttr.id+'.toggle'}
+                                  toggle
+                                  label='Use as Option'
+                                  //onChange={(e, data) => setChecked(data.checked)}
+                                  onChange = {props.handleAttributesSelectedCheckbox}
+                                  checked={itemAttr.option}
+                                />
+
+
+                          
+                          </Grid.Column>
+                          </Grid.Row>
+                          </Grid>
+                          </div>                                        
+                    )}
+
+                    </Segment>
 
                     
 
