@@ -1,0 +1,12 @@
+{
+  "resourceName": "s3storagedemons",
+  "bucketName": "storagedemons",
+  "policyUUID": "e31987f0",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ",
+    "DELETE"
+  ]
+}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect }from 'react'
-import { API, graphqlOperation } from 'aws-amplify'
+import Amplify, { API, graphqlOperation, Storage } from 'aws-amplify'
 import { Pagination, Input, Button, Icon, Grid, Modal, Form} from 'semantic-ui-react'
 import { SemanticToastContainer, toast } from 'react-semantic-toasts'
 import 'react-semantic-toasts/styles/react-semantic-alert.css'
@@ -10,6 +10,8 @@ import { v4 as uuidv4 } from 'uuid'
 import ProductTable from '../ProductTable/ProductTable'
 import CreateProductForm from '../Forms/CreateProductForm'
 import urlSlug from 'url-slug'
+import aws_exports from '../../aws-exports'
+Amplify.configure(aws_exports)
 
 
 
@@ -164,6 +166,24 @@ export default function Products() {
     }
   }
 
+  /*const saveImages = async () => {
+    let image = images[0]
+    await Storage.put(image.file.name, image.data_url)
+    console.log('************************** successfully saved file... ******************')
+  }*/
+
+  const saveImages = async () => {
+    try {
+      //let image = images[0]
+      //await Storage.put(image.file.name, image.data_url)
+
+      const result = await Storage.put("test.txt", "Hello")
+
+      console.log('************************** successfully saved file... ******************: ', result)        
+  
+    } catch (err) { console.log(err) }}
+
+
   const modifyProduct = async () => {
     try {
         
@@ -175,7 +195,9 @@ export default function Products() {
         let index = tempProducts.findIndex(item => item.id === id)
         tempProducts[index].sku = sku
         setProducts(tempProducts)        
-        const version = tempProducts[index]._version        
+        const version = tempProducts[index]._version     
+        
+        saveImages()
         
         /*const productDetails = {
           id: id,
@@ -1143,7 +1165,7 @@ const handleSourceDropship = (evt) => {
 }
 
 const handleImages = (imageList, addUpdateIndex) => {
-    console.log(imageList, addUpdateIndex)
+    console.log("IMAGE LIST >>>>>>>>>>>>>", imageList, addUpdateIndex)
     setImages(imageList)
 
 }
