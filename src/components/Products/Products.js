@@ -174,10 +174,10 @@ export default function Products() {
 
   const saveImages = async () => {
     try {
-      //let image = images[0]
-      //await Storage.put(image.file.name, image.data_url)
+      let image = images[0]
+      const result = await Storage.put(image.file.name, image.data_url)
 
-      const result = await Storage.put("test.txt", "Hello")
+      //const result = await Storage.put("test.txt", "Hello")
 
       console.log('************************** successfully saved file... ******************: ', result)        
   
