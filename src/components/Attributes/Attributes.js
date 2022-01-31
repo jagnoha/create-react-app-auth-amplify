@@ -316,12 +316,13 @@ const fetchAttributes = async () => {
     }
     console.log(attributeEdit.name)
     console.log(attributeEdit.id)
+    console.log("Este es el attribute:",attributeEdit)
 
     return (
       
         <div style={divStyle}>
           <SemanticToastContainer position="top-center" />
-        <h1>attributes</h1>
+        <h1>Attributes</h1>
 
         <Grid>
           <Grid.Column width={12}>

@@ -126,8 +126,8 @@ export default function Products() {
           source: {
             warehouse: productForm.sourceWarehouse,
             dropship: productForm.sourceDropship,
-          }
-          
+          },
+          Attributes: productForm.Attributes,          
         }
         setProducts([...products, productInput])        
         await API.graphql(graphqlOperation(createProduct, { input: productInput }))
@@ -164,8 +164,8 @@ export default function Products() {
   const modifyProduct = async () => {
     try {
         
-        const sku = productEdit.sku
-        const id = productEdit.id
+        const sku = productForm.sku
+        const id = productForm.id
         console.log("AQUI VA ProductS ********")
         console.log(products)
         let tempProducts = [...products]
@@ -174,16 +174,79 @@ export default function Products() {
         setProducts(tempProducts)        
         const version = tempProducts[index]._version        
         
-        const productDetails = {
+        /*const productDetails = {
           id: id,
           SKU: productEdit.sku,
           mpn: productEdit.mpn,
           _version: version
-        };
+        };*/
+
+        let productDetails = {
+          id,
+          SKU: productForm.sku, 
+          mpn: productForm.mpn,
+          legacyId: productForm.legacyId,
+          parentSKU: productForm.parentSKU,
+          binLocation: productForm.binLocation,
+          handle: productForm.handle,
+          shopifyFitmentTags: productForm.shopifyFitmentTags,
+          shopifyOnlyTags: productForm.shopifyOnlyTags,
+          brandID: productForm.brandID,
+          manufacturerID: productForm.manufacturerID,
+          categoryID: productForm.categoryID,
+          subcategoryID: productForm.subcategoryID,
+          subcategory2ID: productForm.subcategory2ID,
+          ebaystorecategoryID: productForm.ebaystorecategoryID,
+          title: {
+            store: productForm.titleStore,
+            ebay: productForm.titleEbay,
+            amazon: productForm.titleAmazon,
+          },
+          description: {
+            store: productForm.descriptionStore,
+            ebay: productForm.descriptionEbay,
+            amazon: productForm.descriptionAmazon,
+          },
+          bulletPoints: {
+            bullet1: productForm.bullet1,  
+            bullet2: productForm.bullet1,
+            bullet3: productForm.bullet1,
+            bullet4: productForm.bullet1,
+            bullet5: productForm.bullet1,
+            bullet6: productForm.bullet1,
+            bullet7: productForm.bullet1,            
+          },
+          dimensions: {
+            height: productForm.height,
+            length: productForm.length,
+            width: productForm.width,
+          },
+          weight: productForm.weight,
+          dimensionalWeight: productForm.dimensionalWeight,
+          appliedWeight: productForm.appliedWeight,
+          price: {
+            MSRP: productForm.priceMSRP,
+            MAP: productForm.priceMAP,
+            store: productForm.priceStore,
+            ebay: productForm.priceEbay,
+            amazon: productForm.priceAmazon,
+            wholesaleLow: productForm.priceWholesaleLow,
+            wholesaleHigh: productForm.priceWholesaleHigh,
+            scratchLow: productForm.priceScratchLow,
+            scratchHigh: productForm.priceScratchHigh,
+          },
+          cost: productForm.cost,
+          source: {
+            warehouse: productForm.sourceWarehouse,
+            dropship: productForm.sourceDropship,
+          },
+          Attributes: productForm.Attributes,
+          _version: version,          
+        }
         await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
         fetchProducts()
 
-        setProductEdit({})
+        setProductForm({})
         setTimeout(() => {
           toast({
               type: 'success',
@@ -198,13 +261,13 @@ export default function Products() {
            
     } catch (err) {
         console.log('error updating Product:', err)
-        setProductEdit({})
+        setProductForm({})
         setTimeout(() => {
           toast({
               type: 'error',
               icon: 'times',
               size: 'tiny',              
-              title: 'Error creating Ebay Store Category',
+              title: 'Error creating Product',
               description: err,              
               time: 2000,              
           });
@@ -254,6 +317,8 @@ const subscriptionUpdate = async () => await API.graphql(
 
 
 
+
+
     
 
   const handleSubmit = (evt) => {
@@ -270,15 +335,30 @@ const subscriptionUpdate = async () => await API.graphql(
     /*setBrand(null)
     setManufacturer(null)*/
     setOpen(false)
-    setProductForm({})  
+    setProductForm({})
+    setAttributesSelected([])  
     //setManufacturer(null)
     
+}
+
+const handleCloseUpdate = (evt) => {
+  evt.preventDefault()
+  
+  //console.log(productForm)
+  /*setBrand(null)
+  setManufacturer(null)*/
+  setOpenEdit(false)
+  setProductForm({})
+  setAttributesSelected([])  
+  //setManufacturer(null)
+  
 }
 
   const handleUpdate = (evt) => {
     evt.preventDefault()
     modifyProduct()
   }
+
 
 const onPageRendered = async () => {
   fetchProducts()
@@ -292,6 +372,12 @@ const onPageRendered = async () => {
   
   subscriptionCreate()
   subscriptionUpdate()
+
+
+
+  
+
+  
   
 }
 
@@ -520,8 +606,89 @@ const fetchProducts = async () => {
 
     const handleOpenEditForm = (item) => {
       setOpenEdit(!openEdit) 
-      setProductEdit({id: item.id, sku: item.SKU, mpn: item.mpn})
-           
+      //setProductEdit({id: item.id, sku: item.SKU, mpn: item.mpn})
+      console.log("ESTE ES EL IIIIIIIIIIIIIITEM", item);
+      console.log("ESTE ES EL ATTRIBUTE: " ,item.Attributes)
+      console.log("ESTE ES EL OBJETO: ", JSON.parse(item.Attributes))
+      let attributesObject = JSON.parse(item.Attributes)
+      setAttributesSelected(attributesObject ? attributesObject : [] )
+      console.log(attributesObject)
+
+      //console.log("OTRA MAAAAAAAAAAAAAAAAAAAARCA ********************")
+      //console.log(attributesObject.map(item => item.id))
+      /*setAttributes(attributesObject.map(item => { 
+        return (
+          {
+            key: item.id, name: item.value, value: item.id
+          }
+        )
+      }))*/
+
+
+
+      //key: item.id, text: item.name, value: item.id
+
+      setProductForm({
+        id: item.id, 
+        sku: item.SKU ? item.SKU : "",
+        legacyID: item.legacyID ? item.legacyID : "",
+        mpn: item.mpn ? item.mpn : "",
+        parentSKU: item.parentSKU ? item.parentSKU : "",
+        brandID: item.brandID,
+        manufacturerID: item.manufacturerID,
+        categoryID: item.categoryID,
+        subcategoryID: item.subcategoryID,
+        subcategory2ID: item.subcategory2ID,
+        ebaystorecategoryID: item.ebaystorecategoryID,
+        binLocation: item.binLocation ? item.binLocation : "",
+        //title: item.title,
+        sourceDropship: item.source ? item.source.dropship : false,
+        sourceWarehouse: item.source ? item.source.warehouse : false,
+        titleStore: item.title ? item.titleStore : "",
+        titleEbay: item.title ? item.titleEbay : "",
+        titleAmazon: item.title ? item.titleAmazon : "", 
+        descriptionStore: item.description ? item.description.store : "",
+        descriptionEbay: item.description ? item.description.ebay : "",
+        descriptionAmazon: item.description ? item.description.amazon : "",
+        bullet1: item.bulletPoints ? item.bulletPoints.bullet1 : "",
+        bullet2: item.bulletPoints ? item.bulletPoints.bullet2 : "",
+        bullet3: item.bulletPoints ? item.bulletPoints.bullet3 : "",
+        bullet4: item.bulletPoints ? item.bulletPoints.bullet4 : "",
+        bullet5: item.bulletPoints ? item.bulletPoints.bullet5 : "",
+        bullet6: item.bulletPoints ? item.bulletPoints.bullet6 : "",
+        bullet7: item.bulletPoints ? item.bulletPoints.bullet7 : "",
+        handle: item.handle ? item.handle : "",
+        weight: item.weight ? item.weight : 0,
+        dimensionalWeight: item.dimensionalWeight ? item.dimensionalWeight : 0,
+        appliedWeight: item.appliedWeight ? item.appliedWeight : 0,
+        height: item.dimensions ? item.dimensions.height : 0,
+        length: item.dimensions ? item.dimensions.length : 0,
+        width: item.dimensions ? item.dimensions.width : 0,
+        shopifyFitmentTags: item.shopifyFitmentTags ? item.shopifyFitmentTags : "",
+        shopifyOnlyTags: item.shopifyOnlyTags ? item.shopifyOnlyTags : "",
+        priceMSRP: item.price ? item.price.MSRP : 0,
+        priceMAP: item.price ? item.price.MAP : 0,
+        priceStore: item.price ? item.price.store : 0,
+        priceEbay: item.price ? item.price.ebay : 0,
+        priceAmazon: item.price ? item.price.amazon : 0,
+        priceWholesaleLow: item.price ? item.price.wholesaleLow : 0,
+        priceWholesaleHigh: item.price ? item.price.wholesaleHigh : 0,
+        priceScratchLow: item.price ? item.price.scratchLow : 0,
+        priceScratchHigh: item.price ? item.price.scratchHigh : 0,
+        cost: item.cost ? item.cost : 0,
+
+
+
+
+        
+        
+        
+
+        //sourceWarehouse: item.source.warehouse,
+        //sourceDropship: item.source.dropship,       
+      })
+      //setProductForm(item)
+         
     }
 
     const handleKeyDown = (event) => {
@@ -561,7 +728,7 @@ const fetchProducts = async () => {
       let temp = value.map(item => {
         
         let attr = attributesSelected.find(itemAtrr => itemAtrr.id === item)
-        
+        console.log("************ attribute: ",item)
         if (attr){
         return (
           {id: attr.id, value: attr.value, option: attr.option}
@@ -571,6 +738,7 @@ const fetchProducts = async () => {
             id: item,
             value: "",
             option: false,
+            //text: "",
           }
         )
       })      
@@ -595,6 +763,10 @@ const fetchProducts = async () => {
     })
 
     setAttributesSelected(tempAttributesSelected)
+    setProductForm((values) => ({
+      ...values,
+      Attributes: JSON.stringify(tempAttributesSelected),
+    }))
 
     
 }
@@ -617,6 +789,13 @@ const handleAttributesSelectedCheckbox = (data) => {
     )
   })
   setAttributesSelected(tempAttributesSelected)
+  
+  setProductForm((values) => ({
+    ...values,
+    Attributes: JSON.stringify(tempAttributesSelected),
+  }))
+
+  //console.log("<<<<<<<<<<<<<<<<<", JSON.stringify(tempAttributesSelected))
   
 }
 
@@ -979,8 +1158,9 @@ const handleSourceDropship = (evt) => {
     //console.log("************************** ",ProductForm)
     //console.log(ProductEdit.id)
     //console.log(attributesSelected)
-    console.log("Los atributos ************** ", attributesSelected)
-
+    //console.log("Los atributos ************** ", attributesSelected)
+    //console.log("^^^^^^^^^^^^^^^^^^^", productForm)
+    //console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", attributes)
     return (
       
         <div style={divStyle}>
@@ -1066,14 +1246,15 @@ const handleSourceDropship = (evt) => {
                       priceScratchLow = {productForm.pricePriceScratchLow} handlePriceScratchLow = {(e) => handlePriceScratchLow(e)}
                       priceScratchHigh = {productForm.pricePriceScratchHigh} handlePriceScratchHigh = {(e) => handlePriceScratchHigh(e)}
                       cost = {productForm.cost} handleCost = {(e) => handleCost(e)}                      
-                      SourceWarehouse = {productForm.SourceWarehouse} handleSourceWarehouse = {(e) => handleSourceWarehouse(e)}
-                      SourceDropship = {productForm.SourceDropship} handleSourceDropship = {(e) => handleSourceDropship(e)}
+                      sourceWarehouse = {productForm.sourceWarehouse} handleSourceWarehouse = {(e) => handleSourceWarehouse(e)}
+                      sourceDropship = {productForm.sourceDropship} handleSourceDropship = {(e) => handleSourceDropship(e)}
                       attributes = {attributes} handleAttributes = {(e, { value }) => handleAttributes(value)}
                       attributesSelected = {attributesSelected}
                       handleAttributesSelectedValue = {(e) => handleAttributesSelectedValue(e)}
                       handleAttributesSelectedCheckbox = {(e, data) => handleAttributesSelectedCheckbox(data)} 
                       
                   />
+                  
 
                 </Modal.Description>
               </Modal.Content>
@@ -1090,32 +1271,80 @@ const handleSourceDropship = (evt) => {
 
 
             <Modal
+            closeOnEscape={true}
+            closeOnDimmerClick={false} 
               onClose={() => setOpenEdit(false)}
               onOpen={() => setOpenEdit(true)}
               open={openEdit}
               
             >
               <Modal.Header>Edit Product</Modal.Header>
-              <Modal.Content>
+              <Modal.Content scrolling>
                 <Modal.Description>
                   
-                  <Form>
-                    <Form.Field>
-                      <label>SKU</label>
-                      <input placeholder='Product SKU' 
-                      value = {productEdit.sku} 
-                      onChange={ (e) => handleEditSKU(e) }/>
-                    </Form.Field>
-                    <Form.Field>
-                      <label>Manufacturer Part Number</label>
-                      <input placeholder='Manufacturer Part Number' 
-                      value = {productEdit.mpn} 
-                      onChange={ (e) => handleEditMPN(e) }/>
-                    </Form.Field>                        
-                  </Form>
+                <CreateProductForm 
+                      sku = {productForm.sku} handleSKU = {(e) => handleSKU(e)}
+                      mpn = {productForm.mpn} handleMPN = {(e) => handleMPN(e)}
+                      legacyId = {productForm.legacyId} handleLegacyId = {(e) => handleMPN(e)}
+                      parentSKU = {productForm.parentSKU} handleParentSKU = {(e) => handleMPN(e)}
+                      binLocation = {productForm.binLocation} handleBinLocation = {(e) => handleMPN(e)}
+                      handle = {productForm.handle} handleHandle = {(e) => handleHandle(e)}
+                      shopifyFitmentTags = {productForm.shopifyFitmentTags} handleShopifyFitmentTags = {(e) => handleShopifyFitmentTags(e)}
+                      shopifyOnlyTags = {productForm.shopifyOnlyTags} handleShopifyOnlyTags = {(e) => handleShopifyOnlyTags(e)}
+                      brands = {brands} valueBrand = {productForm.brandID} handleBrand = {(e, { value }) => handleBrand(value)}
+                      manufacturers = {manufacturers} valueManufacturer = {productForm.manufacturerID} handleManufacturer = {(e, { value }) => handleManufacturer(value)}
+                      categories = {categories} valueCategory = {productForm.categoryID} handleCategory = {(e, { value }) => handleCategory(value)}
+                      subCategories = {subCategories} valueSubCategory = {productForm.subcategoryID} handleSubCategory = {(e, { value }) => handleSubCategory(value)}
+                      subCategories2 = {subCategories2} valueSubCategory2 = {productForm.subcategory2ID} handleSubCategory2 = {(e, { value }) => handleSubCategory2(value)}
+                      ebayStoreCategorys = {ebayStoreCategorys} valueEbayStoreCategory = {productForm.ebaystorecategoryID} handleEbayStoreCategory = {(e, { value }) => handleEbayStoreCategory(value)}
+                      titleStore = {productForm.titleStore} handleTitleStore = {(e) => handleTitleStore(e)}
+                      titleEbay = {productForm.titleEbay} handleTitleEbay = {(e) => handleTitleEbay(e)} ebayChars = {ebayTitleChars}
+                      titleAmazon = {productForm.titleAmazon} handleTitleAmazon = {(e) => handleTitleAmazon(e)}
+                      descriptionStore = {productForm.descriptionStore} handleDescriptionStore = {(e) => handleDescriptionStore(e)}
+                      descriptionEbay = {productForm.descriptionEbay} handleDescriptionEbay = {(e) => handleDescriptionEbay(e)} 
+                      descriptionAmazon = {productForm.descriptionAmazon} handleDescriptionAmazon = {(e) => handleDescriptionAmazon(e)}
+                      bullet1 = {productForm.bullet1} handleBullet1 = {(e) => handleBullet1(e)}
+                      bullet2 = {productForm.bullet2} handleBullet2 = {(e) => handleBullet2(e)}
+                      bullet3 = {productForm.bullet3} handleBullet3 = {(e) => handleBullet3(e)}
+                      bullet4 = {productForm.bullet4} handleBullet4 = {(e) => handleBullet4(e)}
+                      bullet5 = {productForm.bullet5} handleBullet5 = {(e) => handleBullet5(e)}
+                      bullet6 = {productForm.bullet6} handleBullet6 = {(e) => handleBullet6(e)}
+                      bullet7 = {productForm.bullet7} handleBullet7 = {(e) => handleBullet7(e)}
+                      height = {productForm.height} handleHeight = {(e) => handleHeight(e)}
+                      length = {productForm.length} handleLength = {(e) => handleLength(e)}
+                      width = {productForm.width} handleWidth = {(e) => handleWidth(e)}
+                      weight = {productForm.weight} handleWeight = {(e) => handleWeight(e)}
+                      dimensionalWeight = {productForm.dimensionalWeight} //handleDimensionalWeight = {(e) => handleDimensionalWeight(e)}
+                      appliedWeight = {productForm.appliedWeight} //handleAppliedWeight = {(e) => handleAppliedWeight(e)}
+                      priceMSRP = {productForm.priceMSRP} handlePriceMSRP = {(e) => handlePriceMSRP(e)}
+                      priceMAP = {productForm.priceMAP} handlePriceMAP = {(e) => handlePriceMAP(e)}
+                      priceStore = {productForm.priceStore} handlePriceStore = {(e) => handlePriceStore(e)}
+                      priceEbay = {productForm.priceEbay} handlePriceEbay = {(e) => handlePriceEbay(e)}
+                      priceAmazon = {productForm.priceAmazon} handlePriceAmazon = {(e) => handlePriceAmazon(e)}
+                      priceWholesaleLow = {productForm.priceWholesaleLow} handlePriceWholesaleLow = {(e) => handlePriceWholesaleLow(e)}
+                      priceWholesaleHigh = {productForm.priceWholesaleHigh} handlePriceWholesaleHigh = {(e) => handlePriceWholesaleHigh(e)}
+                      priceScratchLow = {productForm.pricePriceScratchLow} handlePriceScratchLow = {(e) => handlePriceScratchLow(e)}
+                      priceScratchHigh = {productForm.pricePriceScratchHigh} handlePriceScratchHigh = {(e) => handlePriceScratchHigh(e)}
+                      cost = {productForm.cost} handleCost = {(e) => handleCost(e)}                      
+                      sourceWarehouse = {productForm.sourceWarehouse} handleSourceWarehouse = {(e) => handleSourceWarehouse(e)}
+                      sourceDropship = {productForm.sourceDropship} handleSourceDropship = {(e) => handleSourceDropship(e)}
+                      attributes = {attributes} handleAttributes = {(e, { value }) => handleAttributes(value)}
+                      attributesSelected = {attributesSelected}
+                      handleAttributesSelectedValue = {(e) => handleAttributesSelectedValue(e)}
+                      handleAttributesSelectedCheckbox = {(e, data) => handleAttributesSelectedCheckbox(data)} 
+                      
+                  />
+
+
+
+
+
                 </Modal.Description>
               </Modal.Content>
               <Modal.Actions>
+              <Button negative onClick={handleCloseUpdate}>
+                Cancel
+              </Button>
               <Button positive onClick={handleUpdate}>
                 Save Product
               </Button>

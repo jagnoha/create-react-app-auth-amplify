@@ -12,7 +12,7 @@ export default function CreateProductForm(props) {
   let subCategories2 = props.subCategories2.map(item => { return {key: item.id, text: item.name, value: item.id } } )
   let ebayStoreCategorys = props.ebayStoreCategorys.map(item => { return {key: item.id, text: item.name, value: item.id } } )
   let attributes = props.attributes.map(item => { return {key: item.id, text: item.name, value: item.id } } )
-  //const [attributeList, setAttributeList] = useState([])
+  //const [valuesSelected, setValuesSelected] = useState([])
   
   
   
@@ -53,7 +53,7 @@ export default function CreateProductForm(props) {
                       <Grid.Row>
                         <Grid.Column width={12}>
                     <Segment raised >
-                        <Header>Source <span style={{"font-size":"0.8em","color":"red"}}>*</span></Header>
+                        <Header>Source <span style={{fontSize:0.8,"color":"red"}}>*</span></Header>
                     <Form.Group>
                       <Form.Field control={Checkbox} toggle label='Warehouse' onChange={props.handleSourceWarehouse} checked={props.sourceWarehouse} />
                       <Form.Field control={Checkbox} toggle label='Dropship' onChange={props.handleSourceDropship} checked={props.sourceDropship} />
@@ -485,10 +485,15 @@ export default function CreateProductForm(props) {
                          options={attributes}
                          onChange={props.handleAttributes} 
                          //onChange={props.handleAttributes}
-                         //value = {props.valueAttributes}
+                         value = {props.attributesSelected.map(item => item.id)}
+                         /*value = {props.attributesSelected.map( itemAttr => {
+                           let value = attributes.find(item => item.key === itemAttr.id) ? attributes.find(item => item.key === itemAttr.id).text : ""
+                          return [value]
+                         })}*/
                          //loading
                         />                       
                     </Form.Field>
+                    {console.log("MARCANDO ************** -", props.attributesSelected)}
                     {props.attributesSelected.map(itemAttr => 
                           
                           <div key={itemAttr.id}>
@@ -499,7 +504,7 @@ export default function CreateProductForm(props) {
                           <Form.Field>
                             <label>{attributes.find(item => item.key === itemAttr.id).text}</label>
                             <input id = {itemAttr.id} placeholder={attributes.find(item => item.key === itemAttr.id).text + ' Value'}
-                              //value = {props.priceScratchHigh} 
+                              value = {itemAttr.value} 
                               onChange={props.handleAttributesSelectedValue}
                               />
                           </Form.Field>
