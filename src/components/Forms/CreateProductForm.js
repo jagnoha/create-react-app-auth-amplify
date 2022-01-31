@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
-import { Form, Checkbox, GridRow } from 'semantic-ui-react'
-import { Dropdown, Segment, Header, Icon, Divider, Grid, Accordion } from 'semantic-ui-react'
+import { Form, Checkbox, GridRow, CardContent } from 'semantic-ui-react'
+import { Dropdown, Segment, Header, Icon, Divider, Grid, Accordion, Transition, Button, Card } from 'semantic-ui-react'
+import ImageUploading from 'react-images-uploading'
 
 
 
@@ -12,7 +13,7 @@ export default function CreateProductForm(props) {
   let subCategories2 = props.subCategories2.map(item => { return {key: item.id, text: item.name, value: item.id } } )
   let ebayStoreCategorys = props.ebayStoreCategorys.map(item => { return {key: item.id, text: item.name, value: item.id } } )
   let attributes = props.attributes.map(item => { return {key: item.id, text: item.name, value: item.id } } )
-  //const [valuesSelected, setValuesSelected] = useState([])
+  const [addImageVisible, setAddImageVisible] = useState(false)
   
   
   
@@ -109,6 +110,109 @@ export default function CreateProductForm(props) {
                             </Grid.Column>
                       </Grid.Row>
                     </Grid>
+
+                    <Segment raised >
+                    <Header>Images</Header>
+                    <ImageUploading
+                        multiple
+                        value={props.images}
+                        onChange={props.handleImages}
+                        maxNumber={12}
+                        dataURLKey="data_url"
+                      >
+                        {({
+                          imageList,
+                          onImageUpload,
+                          onImageRemoveAll,
+                          onImageUpdate,
+                          onImageRemove,
+                          isDragging,
+                          dragProps
+                        }) => (
+                          // write your building UI
+                          
+                          
+                          
+                          <div>
+                             <Card.Group itemsPerRow={6}>
+                            {imageList.map((image, index) => (
+                              
+                              <Card key={index}>
+                              <Card.Content>
+                              
+                              <div key={index} className="image-item">
+                                <img src={image.data_url} alt="" width="100" />
+                                
+                                
+                              </div>
+                              </Card.Content>
+                              <Card.Content extra>
+                              <div className='ui two buttons'>
+                              <Button color='blue' title='Update this Image' icon size={'small'} onClick={() => onImageUpdate(index)}>
+                                      <Icon name='edit' />
+                                  </Button>
+                                  <Button negative title='Remove this Image' icon size={'small'} onClick={() => onImageRemove(index)}>
+                                      <Icon name='trash' />
+                                  </Button>
+                              </div>
+                              </Card.Content>
+
+                                  </Card>
+
+                              
+                                  
+                                  
+                                  
+                                  
+                                  
+             
+                                
+                                
+                                
+                            
+                            
+                            
+                            ))}
+                            </Card.Group>
+                            <Divider />
+                            <Button
+                                content={addImageVisible ? 'Cancel' : 'Add Images'}
+                              onClick={() => setAddImageVisible(!addImageVisible)}
+                              icon= {addImageVisible ? "cancel" : "add"}
+                              primary = {!addImageVisible}
+                              negative = {addImageVisible}
+                              //icon = {"add"}
+                            />
+                             <Button basic color='red' icon = {"trash"} onClick={onImageRemoveAll} content={"Remove all images"} />
+                           
+                            
+                            <Transition visible={addImageVisible} animation='scale' duration={500}>
+                              
+                            <div style={{marginTop:15}}>
+                            <Button size={'massive'} onClick={onImageUpload} style={isDragging ? { color: "red" } : null}
+                              {...dragProps} fluid>
+                                <Icon name='upload'></Icon>
+                                Drop files here or click to upload
+                               </Button>
+                            </div>  
+                            </Transition>
+
+                            
+                            &nbsp;
+                           
+
+
+                          </div>
+
+
+
+                        )}
+                    </ImageUploading>
+
+
+                    </Segment>
+
+
                    
                     <Segment raised >
                         <Header>Title</Header>
@@ -308,7 +412,7 @@ export default function CreateProductForm(props) {
                           <Grid.Column>
                           <Form.Field>
                           <label>Height</label>
-                          <input type='number' min="0" placeholder='Height in inches' 
+                          <input type='number' min="0" step="any" placeholder='Height in inches' 
                             value = {props.height} 
                             onChange={props.handleHeight }/>
                         </Form.Field>
@@ -316,7 +420,7 @@ export default function CreateProductForm(props) {
                         <Grid.Column>
                           <Form.Field>
                           <label>Length</label>
-                          <input type='number' min="0" placeholder='Length in inches' 
+                          <input type='number' min="0" step="any" placeholder='Length in inches' 
                             value = {props.length} 
                             onChange={props.handleLength }/>
                         </Form.Field>
@@ -324,7 +428,7 @@ export default function CreateProductForm(props) {
                         <Grid.Column>
                         <Form.Field>
                           <label>Width</label>
-                          <input type='number' min="0" placeholder='Width in inches' 
+                          <input type='number' min="0" step="any" placeholder='Width in inches' 
                             value = {props.width} 
                             onChange={props.handleWidth }/>
                         </Form.Field>
@@ -343,7 +447,7 @@ export default function CreateProductForm(props) {
                           <Grid.Column>
                           <Form.Field>
                           <label>Weight</label>
-                          <input type='number' min="0" placeholder='Weight in pounds' 
+                          <input type='number' min="0" step="any" placeholder='Weight in pounds' 
                             value = {props.weight} 
                             onChange={props.handleWeight }/>
                         </Form.Field>
@@ -351,7 +455,7 @@ export default function CreateProductForm(props) {
                         <Grid.Column>
                           <Form.Field>
                           <label>Dimensional Weight</label>
-                          <input type='number' min="0" placeholder='Dimensional Weight' 
+                          <input type='number' min="0" step="any" placeholder='Dimensional Weight' 
                             value = {props.dimensionalWeight} 
                             onChange={props.handleDimensionalWeight }/>
                         </Form.Field>
@@ -359,7 +463,7 @@ export default function CreateProductForm(props) {
                         <Grid.Column>
                         <Form.Field>
                           <label>Applied Weight</label>
-                          <input type='number' min="0" placeholder='Applied Weight' 
+                          <input type='number' min="0" step="any" placeholder='Applied Weight' 
                             value = {props.appliedWeight} 
                             onChange={props.handleAppliedWeight }/>
                         </Form.Field>
@@ -372,7 +476,7 @@ export default function CreateProductForm(props) {
                     <Segment raised >
                     <Form.Field>
                           <label>Cost</label>
-                          <input type='number' min="0" placeholder='Cost' 
+                          <input type='number' min="0" step="any" placeholder='Cost' 
                             value = {props.cost} 
                             onChange={props.handleCost }/>
                         </Form.Field>
@@ -386,7 +490,7 @@ export default function CreateProductForm(props) {
                           <Grid.Column>
                           <Form.Field>
                           <label>MSRP</label>
-                          <input type='number' min="0" placeholder='MSRP' 
+                          <input type='number' min="0" step="any" placeholder='MSRP' 
                             value = {props.priceMSRP} 
                             onChange={props.handlePriceMSRP }/>
                         </Form.Field>
@@ -394,7 +498,7 @@ export default function CreateProductForm(props) {
                         <Grid.Column>
                           <Form.Field>
                           <label>MAP</label>
-                          <input type='number' min="0" placeholder='MAP' 
+                          <input type='number' min="0" step="any" placeholder='MAP' 
                             value = {props.priceMAP} 
                             onChange={props.handlePriceMAP }/>
                         </Form.Field>
@@ -406,7 +510,7 @@ export default function CreateProductForm(props) {
                           <Grid.Column>
                           <Form.Field>
                           <label>Store</label>
-                          <input type='number' min="0" placeholder='Store price' 
+                          <input type='number' min="0" step="any" placeholder='Store price' 
                             value = {props.priceStore} 
                             onChange={props.handlePriceStore }/>
                         </Form.Field>
@@ -414,7 +518,7 @@ export default function CreateProductForm(props) {
                         <Grid.Column>
                           <Form.Field>
                           <label>eBay</label>
-                          <input type='number' min="0" placeholder='eBay Price' 
+                          <input type='number' min="0" step="any" placeholder='eBay Price' 
                             value = {props.priceEbay} 
                             onChange={props.handlePriceEbay }/>
                         </Form.Field>
@@ -422,7 +526,7 @@ export default function CreateProductForm(props) {
                         <Grid.Column>
                         <Form.Field>
                           <label>Amazon</label>
-                          <input type='number' min="0" placeholder='Amazon price' 
+                          <input type='number' min="0" step="any" placeholder='Amazon price' 
                             value = {props.priceAmazon} 
                             onChange={props.handlePriceAmazon }/>
                         </Form.Field>
@@ -434,7 +538,7 @@ export default function CreateProductForm(props) {
                           <Grid.Column>
                           <Form.Field>
                           <label>Wholesale Low</label>
-                          <input type='number' min="0" placeholder='Wholesale Low Price' 
+                          <input type='number' min="0" step="any" placeholder='Wholesale Low Price' 
                             value = {props.priceWholesaleLow} 
                             onChange={props.handlePriceWholesaleLow }/>
                         </Form.Field>
@@ -442,7 +546,7 @@ export default function CreateProductForm(props) {
                         <Grid.Column>
                           <Form.Field>
                           <label>wholesale High</label>
-                          <input type='number' min="0" placeholder='wholesale High Price' 
+                          <input type='number' min="0" step="any" placeholder='wholesale High Price' 
                             value = {props.priceWholesaleHigh} 
                             onChange={props.handlePriceWholesaleHigh }/>
                         </Form.Field>
@@ -454,7 +558,7 @@ export default function CreateProductForm(props) {
                           <Grid.Column>
                           <Form.Field>
                           <label>Scratch Low</label>
-                          <input type='number' min="0" placeholder='Scratch Low Price' 
+                          <input type='number' min="0" step="any" placeholder='Scratch Low Price' 
                             value = {props.priceScratchLow} 
                             onChange={props.handlePriceScratchLow }/>
                         </Form.Field>
@@ -462,7 +566,7 @@ export default function CreateProductForm(props) {
                         <Grid.Column>
                           <Form.Field>
                           <label>Scratch High</label>
-                          <input type='number' min="0" placeholder='Scratch High Price' 
+                          <input type='number' min="0" step="any" placeholder='Scratch High Price' 
                             value = {props.priceScratchHigh} 
                             onChange={props.handlePriceScratchHigh }/>
                         </Form.Field>

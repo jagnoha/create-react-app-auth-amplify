@@ -15,6 +15,8 @@ import CreateProductForm from '../Forms/CreateProductForm'
 export default function Products() {
   const [chunckProducts, setChunkProducts] = useState(null)
   const [products, setProducts] = useState([])
+
+  const [images, setImages] = React.useState([]);
   
   const [brands, setBrands] = useState([])
   const [brand, setBrand] = useState(null)
@@ -1134,6 +1136,12 @@ const handleSourceDropship = (evt) => {
   }))
 }
 
+const handleImages = (imageList, addUpdateIndex) => {
+    console.log(imageList, addUpdateIndex)
+    setImages(imageList)
+
+}
+
 
 
               
@@ -1251,7 +1259,9 @@ const handleSourceDropship = (evt) => {
                       attributes = {attributes} handleAttributes = {(e, { value }) => handleAttributes(value)}
                       attributesSelected = {attributesSelected}
                       handleAttributesSelectedValue = {(e) => handleAttributesSelectedValue(e)}
-                      handleAttributesSelectedCheckbox = {(e, data) => handleAttributesSelectedCheckbox(data)} 
+                      handleAttributesSelectedCheckbox = {(e, data) => handleAttributesSelectedCheckbox(data)}
+                      handleImages = {(imageList, addUpdateIndex) => handleImages(imageList, addUpdateIndex)} 
+                      images = {images}
                       
                   />
                   
@@ -1331,7 +1341,9 @@ const handleSourceDropship = (evt) => {
                       attributes = {attributes} handleAttributes = {(e, { value }) => handleAttributes(value)}
                       attributesSelected = {attributesSelected}
                       handleAttributesSelectedValue = {(e) => handleAttributesSelectedValue(e)}
-                      handleAttributesSelectedCheckbox = {(e, data) => handleAttributesSelectedCheckbox(data)} 
+                      handleAttributesSelectedCheckbox = {(e, data) => handleAttributesSelectedCheckbox(data)}
+                      handleImages = {(imageList, addUpdateIndex) => handleImages(imageList, addUpdateIndex)}
+                      images = {images} 
                       
                   />
 
