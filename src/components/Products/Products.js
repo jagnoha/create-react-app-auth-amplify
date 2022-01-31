@@ -9,6 +9,7 @@ import * as subscriptions from '../../graphql/subscriptions'
 import { v4 as uuidv4 } from 'uuid'
 import ProductTable from '../ProductTable/ProductTable'
 import CreateProductForm from '../Forms/CreateProductForm'
+import urlSlug from 'url-slug'
 
 
 
@@ -98,12 +99,12 @@ export default function Products() {
           },
           bulletPoints: {
             bullet1: productForm.bullet1,  
-            bullet2: productForm.bullet1,
-            bullet3: productForm.bullet1,
-            bullet4: productForm.bullet1,
-            bullet5: productForm.bullet1,
-            bullet6: productForm.bullet1,
-            bullet7: productForm.bullet1,            
+            bullet2: productForm.bullet2,
+            bullet3: productForm.bullet3,
+            bullet4: productForm.bullet4,
+            bullet5: productForm.bullet5,
+            bullet6: productForm.bullet6,
+            bullet7: productForm.bullet7,            
           },
           dimensions: {
             height: productForm.height,
@@ -211,12 +212,12 @@ export default function Products() {
           },
           bulletPoints: {
             bullet1: productForm.bullet1,  
-            bullet2: productForm.bullet1,
-            bullet3: productForm.bullet1,
-            bullet4: productForm.bullet1,
-            bullet5: productForm.bullet1,
-            bullet6: productForm.bullet1,
-            bullet7: productForm.bullet1,            
+            bullet2: productForm.bullet2,
+            bullet3: productForm.bullet3,
+            bullet4: productForm.bullet4,
+            bullet5: productForm.bullet5,
+            bullet6: productForm.bullet6,
+            bullet7: productForm.bullet7,            
           },
           dimensions: {
             height: productForm.height,
@@ -646,9 +647,9 @@ const fetchProducts = async () => {
         //title: item.title,
         sourceDropship: item.source ? item.source.dropship : false,
         sourceWarehouse: item.source ? item.source.warehouse : false,
-        titleStore: item.title ? item.titleStore : "",
-        titleEbay: item.title ? item.titleEbay : "",
-        titleAmazon: item.title ? item.titleAmazon : "", 
+        titleStore: item.title ? item.title.store : "",
+        titleEbay: item.title ? item.title.ebay : "",
+        titleAmazon: item.title ? item.title.amazon : "", 
         descriptionStore: item.description ? item.description.store : "",
         descriptionEbay: item.description ? item.description.ebay : "",
         descriptionAmazon: item.description ? item.description.amazon : "",
@@ -893,6 +894,11 @@ const handleAttributesSelectedCheckbox = (data) => {
             setProductForm((values) => ({
                 ...values,
                 titleStore: evt.target.value,
+                /*title: {
+                  store: evt.target.value,
+                  ebay: productForm.title ? productForm.title.ebay : "",
+                  amazon: productForm.title ? productForm.title.amazon : "",
+                }*/
             }));
         }
 
@@ -1142,6 +1148,30 @@ const handleImages = (imageList, addUpdateIndex) => {
 
 }
 
+const handleGenerateHandle = () => {
+  
+  let newHandle = productForm.titleStore
+  let brandFind = brands.find(item => item.id === productForm.brandID)
+  let brand = brandFind ? brandFind.name : ""
+  let mpn = productForm.mpn
+
+  console.log("ESTA ES LA MARCA!: ", brand)
+
+  if (brand === "Ultima" || brand === "Demon's Cycle"){
+    setProductForm((values) => ({
+      ...values,
+      handle: urlSlug(newHandle),
+  }))
+  } else {
+    setProductForm((values) => ({
+      ...values,
+      handle: urlSlug(`${brand} ${mpn} ${newHandle}`),
+  }))
+  }
+
+ 
+}
+
 
 
               
@@ -1225,7 +1255,7 @@ const handleImages = (imageList, addUpdateIndex) => {
                       subCategories = {subCategories} valueSubCategory = {productForm.subcategoryID} handleSubCategory = {(e, { value }) => handleSubCategory(value)}
                       subCategories2 = {subCategories2} valueSubCategory2 = {productForm.subcategory2ID} handleSubCategory2 = {(e, { value }) => handleSubCategory2(value)}
                       ebayStoreCategorys = {ebayStoreCategorys} valueEbayStoreCategory = {productForm.ebaystorecategoryID} handleEbayStoreCategory = {(e, { value }) => handleEbayStoreCategory(value)}
-                      titleStore = {productForm.titleStore} handleTitleStore = {(e) => handleTitleStore(e)}
+                      titleStore = { productForm.titleStore } handleTitleStore = {(e) => handleTitleStore(e)}
                       titleEbay = {productForm.titleEbay} handleTitleEbay = {(e) => handleTitleEbay(e)} ebayChars = {ebayTitleChars}
                       titleAmazon = {productForm.titleAmazon} handleTitleAmazon = {(e) => handleTitleAmazon(e)}
                       descriptionStore = {productForm.descriptionStore} handleDescriptionStore = {(e) => handleDescriptionStore(e)}
@@ -1262,6 +1292,7 @@ const handleImages = (imageList, addUpdateIndex) => {
                       handleAttributesSelectedCheckbox = {(e, data) => handleAttributesSelectedCheckbox(data)}
                       handleImages = {(imageList, addUpdateIndex) => handleImages(imageList, addUpdateIndex)} 
                       images = {images}
+                      generateHandle = {() => handleGenerateHandle()}
                       
                   />
                   
@@ -1288,7 +1319,10 @@ const handleImages = (imageList, addUpdateIndex) => {
               open={openEdit}
               
             >
-              <Modal.Header>Edit Product</Modal.Header>
+              <Modal.Header>
+                <p>Edit Product</p> 
+                <p>{productForm.sku} - {productForm.titleStore}</p>
+              </Modal.Header>
               <Modal.Content scrolling>
                 <Modal.Description>
                   
@@ -1307,7 +1341,7 @@ const handleImages = (imageList, addUpdateIndex) => {
                       subCategories = {subCategories} valueSubCategory = {productForm.subcategoryID} handleSubCategory = {(e, { value }) => handleSubCategory(value)}
                       subCategories2 = {subCategories2} valueSubCategory2 = {productForm.subcategory2ID} handleSubCategory2 = {(e, { value }) => handleSubCategory2(value)}
                       ebayStoreCategorys = {ebayStoreCategorys} valueEbayStoreCategory = {productForm.ebaystorecategoryID} handleEbayStoreCategory = {(e, { value }) => handleEbayStoreCategory(value)}
-                      titleStore = {productForm.titleStore} handleTitleStore = {(e) => handleTitleStore(e)}
+                      titleStore = { productForm.titleStore } handleTitleStore = {(e) => handleTitleStore(e)}
                       titleEbay = {productForm.titleEbay} handleTitleEbay = {(e) => handleTitleEbay(e)} ebayChars = {ebayTitleChars}
                       titleAmazon = {productForm.titleAmazon} handleTitleAmazon = {(e) => handleTitleAmazon(e)}
                       descriptionStore = {productForm.descriptionStore} handleDescriptionStore = {(e) => handleDescriptionStore(e)}
@@ -1344,6 +1378,7 @@ const handleImages = (imageList, addUpdateIndex) => {
                       handleAttributesSelectedCheckbox = {(e, data) => handleAttributesSelectedCheckbox(data)}
                       handleImages = {(imageList, addUpdateIndex) => handleImages(imageList, addUpdateIndex)}
                       images = {images} 
+                      generateHandle = {() => handleGenerateHandle()}
                       
                   />
 

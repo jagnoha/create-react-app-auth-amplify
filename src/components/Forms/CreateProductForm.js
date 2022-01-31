@@ -637,14 +637,22 @@ export default function CreateProductForm(props) {
                     </Segment>
 
                     
-
+                      <Grid>
+                        <Grid.Row>
+                    <Grid.Column width={12}>
                     <Form.Field>
                       <label>Handle</label>
                       <input placeholder='Handle' 
                         value = {props.handle} 
                         onChange={props.handleHandle }/>
                     </Form.Field>
-                    
+                    </Grid.Column>
+                    <Grid.Column style={{marginTop:25}} width={4}>
+                        <Button basic size="mini"  color='blue' icon = {"sync"} onClick={props.generateHandle} content={"Generate"} />                           
+                    </Grid.Column>
+                    </Grid.Row>
+                    </Grid>
+
                     <Grid>
                       <Grid.Row>
                         <Grid.Column width={8}>
