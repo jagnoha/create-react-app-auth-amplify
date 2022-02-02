@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 import { Form, Checkbox, GridRow, CardContent } from 'semantic-ui-react'
-import { Dropdown, Segment, Header, Icon, Divider, Grid, Accordion, Transition, Button, Card } from 'semantic-ui-react'
+import { Dropdown, Segment, Header, Icon, Divider, Grid, Accordion, Transition, Button, Card, Image } from 'semantic-ui-react'
 import ImageUploading from 'react-images-uploading'
 
 
@@ -117,7 +117,7 @@ export default function CreateProductForm(props) {
                         multiple
                         value={props.images}
                         onChange={props.handleImages}
-                        maxNumber={12}
+                        maxNumber={10}
                         dataURLKey="data_url"
                       >
                         {({
@@ -134,6 +134,7 @@ export default function CreateProductForm(props) {
                           
                           
                           <div>
+                            
                              <Card.Group itemsPerRow={6}>
                             {imageList.map((image, index) => (
                               
@@ -597,11 +598,9 @@ export default function CreateProductForm(props) {
                          //loading
                         />                       
                     </Form.Field>
-                    {console.log("MARCANDO ************** -", props.attributesSelected)}
                     {props.attributesSelected.map(itemAttr => 
                           
                           <div key={itemAttr.id}>
-                            {console.log("Mierda ", itemAttr)}
                           <Grid>
                             <Grid.Row>
                               <Grid.Column width={10}>
@@ -614,8 +613,7 @@ export default function CreateProductForm(props) {
                           </Form.Field>
                           </Grid.Column>
                           <Grid.Column width={6}>
-                            {console.log("Naguevona: ", itemAttr.option)}
-                          
+                            
 
                                 <Checkbox
                                   id={itemAttr.id+'.toggle'}

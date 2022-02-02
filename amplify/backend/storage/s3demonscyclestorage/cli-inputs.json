@@ -1,7 +1,7 @@
 {
-  "resourceName": "s3storagedemons",
-  "bucketName": "storagedemons",
-  "policyUUID": "e31987f0",
+  "resourceName": "s3demonscyclestorage",
+  "bucketName": "demons-cycle-storage",
+  "policyUUID": "67895d54",
   "storageAccess": "auth",
   "guestAccess": [],
   "authAccess": [

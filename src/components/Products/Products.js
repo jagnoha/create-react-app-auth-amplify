@@ -11,6 +11,7 @@ import ProductTable from '../ProductTable/ProductTable'
 import CreateProductForm from '../Forms/CreateProductForm'
 import urlSlug from 'url-slug'
 import aws_exports from '../../aws-exports'
+import { parse } from 'uuid'
 Amplify.configure(aws_exports)
 
 
@@ -19,6 +20,7 @@ export default function Products() {
   const [chunckProducts, setChunkProducts] = useState(null)
   const [products, setProducts] = useState([])
 
+  //const [images, setImages] = React.useState([{"data_url":"https://cdn.shopify.com/s/files/1/0338/9682/4876/products/28890339_600x.jpg?v=1627667600"}]);
   const [images, setImages] = React.useState([]);
   
   const [brands, setBrands] = useState([])
@@ -53,13 +55,13 @@ export default function Products() {
   const [productEdit, setProductEdit] = useState({})
   const [ebayTitleChars, setEbayTitleChars] = useState(0)
   
-   
+  const urlBase = 'https://demons-cycle-storage202642-devt.s3.amazonaws.com/public/'
   
-  const addProduct = async () => {
+  const addProduct = async (imageList) => {
     try {
         
         const product = productForm
-        console.log(productForm);
+        //console.log(productForm);
         if (products.find(item => item.SKU.toUpperCase() === product.sku.toUpperCase() ))  {
           setTimeout(() => {
             toast({
@@ -98,6 +100,18 @@ export default function Products() {
             store: productForm.descriptionStore,
             ebay: productForm.descriptionEbay,
             amazon: productForm.descriptionAmazon,
+          },
+          images: {
+            image1: JSON.stringify(imageList[0]),
+            image2: JSON.stringify(imageList[1]),
+            image3: JSON.stringify(imageList[2]),
+            image4: JSON.stringify(imageList[3]),
+            image5: JSON.stringify(imageList[4]),
+            image6: JSON.stringify(imageList[5]),
+            image7: JSON.stringify(imageList[6]),
+            image8: JSON.stringify(imageList[7]),
+            image9: JSON.stringify(imageList[8]),
+            image10: JSON.stringify(imageList[9]),
           },
           bulletPoints: {
             bullet1: productForm.bullet1,  
@@ -174,30 +188,86 @@ export default function Products() {
 
   const saveImages = async () => {
     try {
-      let image = images[0]
-      const result = await Storage.put(image.file.name, image.data_url)
+      //let image = images[0]
+      //const result = await Storage.put(image.file.name, image.data_url)
+      //let imageList = images.map(item => item)
+      
+      /*console.log("&&&&&&& &&&&&&& &&&&&& &&&&", images)
+      setProductForm((values) => ({
+        ...values,
+        images: [],
+      }))*/
+      let tempList = []
+      console.log("**************************",images)
+      for (const item of images) {
+        let name = uuidv4()
+        
+        console.log("ESTE ES EL TIPO:", item)
+        const result = await Storage.put(item.file ? item.file.name : name, item.file, {
+          //level: "public",
+          contentType: item.file.type,
+        })
+        //const result = await Storage.put(name, item.data_url)
+        
+        //console.log(result.key)
+        
+        tempList.push({data_url: urlBase + item.file.name, file: {type: item.file.type, name: item.file.name}})
+        //console.log("$$$$$$$$$$$$$$$$$$$$$$$ ", result)
+        
+        /*if (productForm.images) {
 
+            setProductForm((values) => ({
+              ...values,
+              images: [ ...productForm.images, urlBase + result.key],
+            }))     
+        } else {
+          setProductForm((values) => ({
+            ...values,
+            images: [urlBase + result.key],
+          }))   
+        }*/
+      
+      }
+
+      /*console.log(tempList)
+    
+      setProductForm((values) => ({
+        ...values,
+        images: tempList,
+      })) */
+
+        /*const file = await Storage.get(
+          'demonhorns_480x.png', {
+            level: 'public'
+          }
+        )*/
+      
+      
       //const result = await Storage.put("test.txt", "Hello")
 
-      console.log('************************** successfully saved file... ******************: ', result)        
-  
+      //console.log('************************** successfully saved file... ******************: ', result)      
+      return tempList
+
+
     } catch (err) { console.log(err) }}
 
 
-  const modifyProduct = async () => {
+  const modifyProduct = async (imageList) => {
     try {
-        
+      //let imageList = result.then(value =>console.log(value))
+      //console.log("IMAGES: ", images)  
+      //console.log("IMAGE LIST: ", imageList)
         const sku = productForm.sku
         const id = productForm.id
-        console.log("AQUI VA ProductS ********")
-        console.log(products)
+        //console.log("AQUI VA ProductS ********")
+        //console.log(products)
         let tempProducts = [...products]
         let index = tempProducts.findIndex(item => item.id === id)
         tempProducts[index].sku = sku
         setProducts(tempProducts)        
         const version = tempProducts[index]._version     
         
-        saveImages()
+        //saveImages()
         
         /*const productDetails = {
           id: id,
@@ -205,6 +275,7 @@ export default function Products() {
           mpn: productEdit.mpn,
           _version: version
         };*/
+        //console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM  ", productForm)
 
         let productDetails = {
           id,
@@ -231,6 +302,18 @@ export default function Products() {
             store: productForm.descriptionStore,
             ebay: productForm.descriptionEbay,
             amazon: productForm.descriptionAmazon,
+          },
+          images: {
+            image1: JSON.stringify(imageList[0]),
+            image2: JSON.stringify(imageList[1]),
+            image3: JSON.stringify(imageList[2]),
+            image4: JSON.stringify(imageList[3]),
+            image5: JSON.stringify(imageList[4]),
+            image6: JSON.stringify(imageList[5]),
+            image7: JSON.stringify(imageList[6]),
+            image8: JSON.stringify(imageList[7]),
+            image9: JSON.stringify(imageList[8]),
+            image10: JSON.stringify(imageList[9]),
           },
           bulletPoints: {
             bullet1: productForm.bullet1,  
@@ -283,9 +366,10 @@ export default function Products() {
           setOpenEdit(false)
       
       }, 200)
+
            
     } catch (err) {
-        console.log('error updating Product:', err)
+        //console.log('error updating Product:', err)
         setProductForm({})
         setTimeout(() => {
           toast({
@@ -306,7 +390,7 @@ export default function Products() {
     next: (item) => { 
       fetchProducts()
       let product = item.value.data.onCreateProduct;
-      console.log(product)
+      //console.log(product)
        
       //console.log("QUE HAY AHORA", products)
       
@@ -325,7 +409,7 @@ const subscriptionUpdate = async () => await API.graphql(
     fetchProducts()
     //console.log(item)
     let productTemp = item.value.data.onUpdateProduct;
-    console.log(productTemp)
+    //console.log(productTemp)
     
     let tempProducts = [...products]
     let index = tempProducts.findIndex(item => item.id === productTemp.id)
@@ -349,8 +433,13 @@ const subscriptionUpdate = async () => await API.graphql(
   const handleSubmit = (evt) => {
       evt.preventDefault()
       
-      console.log(productForm)
-      addProduct()
+      
+      
+      let imageList = serialFlow().then(value => { 
+        
+        addProduct(value)
+      })
+
   }
 
   const handleClose = (evt) => {
@@ -379,9 +468,27 @@ const handleCloseUpdate = (evt) => {
   
 }
 
-  const handleUpdate = (evt) => {
+async function serialFlow(){
+ 
+  let result = await saveImages()
+  /*setProductForm((values) => ({
+    ...values,
+    images: "",
+  }))*/
+  
+  return result
+  
+  }
+
+  //const handleUpdate = (evt) => {
+    async function handleUpdate(evt){
     evt.preventDefault()
-    modifyProduct()
+
+    let imageList = serialFlow().then(value => { 
+      
+      modifyProduct(value)
+    })
+    
   }
 
 
@@ -397,6 +504,9 @@ const onPageRendered = async () => {
   
   subscriptionCreate()
   subscriptionUpdate()
+
+  //subscriptions.onCreateProduct.unsubscribe()
+  //subscriptions.onUpdateProduct.unsubscribe()
 
 
 
@@ -446,7 +556,7 @@ const fetchBrands = async () => {
     
     })      
 
-    console.log(brandsData)
+    //console.log(brandsData)
     
     const brands = await brandsData.data.listBrands.items.filter(item => !item._deleted)   
     //console.log("QUE TENEMOS AQUI:", Products)  
@@ -465,7 +575,7 @@ const fetchManufacturers = async () => {
     
     })      
 
-    console.log(manufacturersData)
+    //console.log(manufacturersData)
     
     const manufacturers = await manufacturersData.data.listManufacturers.items.filter(item => !item._deleted)      
     setManufacturers(manufacturers)   
@@ -545,7 +655,7 @@ const fetchEbayStoreCategorys = async () => {
     
     })      
 
-    console.log("ebay store: ",ebayStoreCategorysData)
+    //console.log("ebay store: ",ebayStoreCategorysData)
     
     const ebayStoreCategorys = await ebayStoreCategorysData.data.listEbayStoreCategorys.items.filter(item => !item._deleted)      
     setEbayStoreCategorys(ebayStoreCategorys)   
@@ -563,14 +673,14 @@ const fetchProducts = async () => {
       
       })      
 
-      console.log(productData)
+      //console.log(productData)
       
       const products = await productData.data.listProducts.items.filter(item => !item._deleted)   
       //console.log("QUE TENEMOS AQUI:", Products)  
       //sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
       setChunkProducts( sliceIntoChunks(products, 10 ))
       setProducts(products)
-      console.log("esta es una prueba *****", products)
+      //console.log("esta es una prueba *****", products)
       
 
   } catch (err) { console.log(err) }}
@@ -619,10 +729,10 @@ const fetchProducts = async () => {
     }
     
     const handleOrderColumn = (column) => {
-      console.log(column);
+      //console.log(column);
       setOrderColumn({column: column, direction: orderColumn.direction === 'descending' ? 'ascending' : 'descending' })
-      console.log(products)
-      console.log(orderColumn.direction)
+      //console.log(products)
+      //console.log(orderColumn.direction)
       sortItems(products, orderColumn.direction);
       setChunkProducts( sliceIntoChunks(products, 10 ))
       setProducts(products)
@@ -632,12 +742,12 @@ const fetchProducts = async () => {
     const handleOpenEditForm = (item) => {
       setOpenEdit(!openEdit) 
       //setProductEdit({id: item.id, sku: item.SKU, mpn: item.mpn})
-      console.log("ESTE ES EL IIIIIIIIIIIIIITEM", item);
-      console.log("ESTE ES EL ATTRIBUTE: " ,item.Attributes)
-      console.log("ESTE ES EL OBJETO: ", JSON.parse(item.Attributes))
+      //console.log("ESTE ES EL IIIIIIIIIIIIIITEM", item);
+      //console.log("ESTE ES EL ATTRIBUTE: " ,item.Attributes)
+      //console.log("ESTE ES EL OBJETO: ", JSON.parse(item.Attributes))
       let attributesObject = JSON.parse(item.Attributes)
       setAttributesSelected(attributesObject ? attributesObject : [] )
-      console.log(attributesObject)
+      //console.log(attributesObject)
 
       //console.log("OTRA MAAAAAAAAAAAAAAAAAAAARCA ********************")
       //console.log(attributesObject.map(item => item.id))
@@ -648,9 +758,29 @@ const fetchProducts = async () => {
           }
         )
       }))*/
-
-
-
+      let tempImages = []
+    
+      if (item.images){
+        for (const property in item.images){
+          console.log("IMAGES PROPERTY: ",item.images[property])
+          if (item.images[property]) {
+            //tempImages.push({data_url:urlBase+item.images[property]})
+            tempImages.push(JSON.parse(item.images[property]))   
+          
+          }
+          
+        }
+        /*let images = item.images
+      
+              for (item of images){
+                if (item){
+                  tempImages.push({"data_url":item})
+                }
+              }*/
+      }
+      console.log("mamamamamamama:  ",tempImages)
+      
+      setImages(tempImages)
       //key: item.id, text: item.name, value: item.id
 
       setProductForm({
@@ -684,6 +814,7 @@ const fetchProducts = async () => {
         bullet7: item.bulletPoints ? item.bulletPoints.bullet7 : "",
         handle: item.handle ? item.handle : "",
         weight: item.weight ? item.weight : 0,
+        images: tempImages, 
         dimensionalWeight: item.dimensionalWeight ? item.dimensionalWeight : 0,
         appliedWeight: item.appliedWeight ? item.appliedWeight : 0,
         height: item.dimensions ? item.dimensions.height : 0,
@@ -713,12 +844,13 @@ const fetchProducts = async () => {
         //sourceDropship: item.source.dropship,       
       })
       //setProductForm(item)
+      
          
     }
 
     const handleKeyDown = (event) => {
       if (event.key === 'Enter') {
-        console.log(search);
+        //console.log(search);
         
 
         setActivePage(1); 
@@ -753,7 +885,7 @@ const fetchProducts = async () => {
       let temp = value.map(item => {
         
         let attr = attributesSelected.find(itemAtrr => itemAtrr.id === item)
-        console.log("************ attribute: ",item)
+        //console.log("************ attribute: ",item)
         if (attr){
         return (
           {id: attr.id, value: attr.value, option: attr.option}
@@ -772,8 +904,8 @@ const fetchProducts = async () => {
   }
 
   const handleAttributesSelectedValue = (evt) => {
-    console.log(evt.target.value)
-    console.log(evt.target.id)
+    //console.log(evt.target.value)
+    //console.log(evt.target.id)
     let id = evt.target.id
     let value = evt.target.value
     let tempAttributesSelected = attributesSelected.map(item => {
@@ -801,7 +933,7 @@ const handleAttributesSelectedCheckbox = (data) => {
   let id = data.id.split('.')[0]
   //console.log("OOOOOOOOOOOOOOTRA:", id)
   //console.log("Otra mierda", id)
-  console.log("COOOOOOOOOOOOOOOONO: ", data.id.split('.')[0])
+  //console.log("COOOOOOOOOOOOOOOONO: ", data.id.split('.')[0])
 
   let tempAttributesSelected = attributesSelected.map(item => {
     if (item.id === id){
@@ -832,7 +964,7 @@ const handleAttributesSelectedCheckbox = (data) => {
     }))
       
       //setBrand(value)
-      console.log(value)
+      //console.log(value)
       }
 
       const handleManufacturer = (value) => {
@@ -844,7 +976,7 @@ const handleAttributesSelectedCheckbox = (data) => {
       }))
 
         //setManufacturer(value)
-        console.log(value)
+        //console.log(value)
         }
 
         const handleCategory = (value) => {
@@ -854,7 +986,7 @@ const handleAttributesSelectedCheckbox = (data) => {
             categoryID: value,
         }))
           //setCategory(value)
-          console.log(value)
+          //console.log(value)
           }
 
           const handleSubCategory = (value) => {
@@ -864,7 +996,7 @@ const handleAttributesSelectedCheckbox = (data) => {
               subcategoryID: value,
           }))
             //setSubCategory(value)
-            console.log(value)
+            //console.log(value)
             }
 
             const handleSubCategory2 = (value) => {
@@ -874,7 +1006,7 @@ const handleAttributesSelectedCheckbox = (data) => {
                 subcategory2ID: value,
             }))
               //setSubCategory2(value)
-              console.log(value)
+              //console.log(value)
               }
 
               const handleEbayStoreCategory = (value) => {
@@ -884,7 +1016,7 @@ const handleAttributesSelectedCheckbox = (data) => {
                   ebaystorecategoryID: value,
               }))
                 //setEbayStoreCategory(value)
-                console.log(value)
+                //console.log(value)
                 }
 
                 const handleHandle = (evt) => {
@@ -1147,7 +1279,7 @@ const handleCost = (evt) => {
 const handleSourceWarehouse = (evt) => {
   evt.persist();
 
-  console.log(!productForm.sourceWarehouse)
+  //console.log(!productForm.sourceWarehouse)
   
   setProductForm((values) => ({
       ...values,
@@ -1157,7 +1289,7 @@ const handleSourceWarehouse = (evt) => {
 
 const handleSourceDropship = (evt) => {
   evt.persist()
-  console.log(!productForm.sourceDropship)
+  //console.log(!productForm.sourceDropship)
   setProductForm((values) => ({
       ...values,
       sourceDropship: !productForm.sourceDropship,
@@ -1165,7 +1297,9 @@ const handleSourceDropship = (evt) => {
 }
 
 const handleImages = (imageList, addUpdateIndex) => {
-    console.log("IMAGE LIST >>>>>>>>>>>>>", imageList, addUpdateIndex)
+    //console.log("IMAGE LIST >>>>>>>>>>>>>", imageList, addUpdateIndex)
+    console.log("IMAGE LIST >>>",imageList)
+    //console.log(addUpdateIndex)
     setImages(imageList)
 
 }
@@ -1177,7 +1311,7 @@ const handleGenerateHandle = () => {
   let brand = brandFind ? brandFind.name : ""
   let mpn = productForm.mpn
 
-  console.log("ESTA ES LA MARCA!: ", brand)
+  //console.log("ESTA ES LA MARCA!: ", brand)
 
   if (brand === "Ultima" || brand === "Demon's Cycle"){
     setProductForm((values) => ({
@@ -1215,11 +1349,11 @@ const handleGenerateHandle = () => {
         }));
     }
 
-    //console.log("************************** ",ProductForm)
+    //console.log("************************** ",productForm)
     //console.log(ProductEdit.id)
     //console.log(attributesSelected)
     //console.log("Los atributos ************** ", attributesSelected)
-    //console.log("^^^^^^^^^^^^^^^^^^^", productForm)
+    console.log("^^^^^^^^^^^^^^^^^^^", productForm)
     //console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", attributes)
     return (
       
@@ -1312,8 +1446,8 @@ const handleGenerateHandle = () => {
                       attributesSelected = {attributesSelected}
                       handleAttributesSelectedValue = {(e) => handleAttributesSelectedValue(e)}
                       handleAttributesSelectedCheckbox = {(e, data) => handleAttributesSelectedCheckbox(data)}
-                      handleImages = {(imageList, addUpdateIndex) => handleImages(imageList, addUpdateIndex)} 
-                      images = {images}
+                      handleImages = {(imageList, addUpdateIndex) => handleImages(imageList, addUpdateIndex)}
+                      images = {images} 
                       generateHandle = {() => handleGenerateHandle()}
                       
                   />

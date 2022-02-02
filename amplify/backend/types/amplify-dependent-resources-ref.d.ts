@@ -17,7 +17,7 @@ export type AmplifyDependentResourcesAttributes = {
         }
     },
     "storage": {
-        "s3storagedemons": {
+        "s3demonscyclestorage": {
             "BucketName": "string",
             "Region": "string"
         }

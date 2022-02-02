@@ -34,7 +34,7 @@
     }
   },
   "storage": {
-    "s3storagedemons": {
+    "s3demonscyclestorage": {
       "service": "S3",
       "providerPlugin": "awscloudformation",
       "dependsOn": []
