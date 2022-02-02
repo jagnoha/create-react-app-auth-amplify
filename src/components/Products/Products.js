@@ -26,6 +26,8 @@ export default function Products() {
   const [brands, setBrands] = useState([])
   const [brand, setBrand] = useState(null)
 
+  const [statusType, setStatusType] = useState([{key: 1, text: "Active", value: '1'},{key: 0, text: "Draft", value: '0'}])
+
   const [manufacturers, setManufacturers] = useState([])
   const [manufacturer, setManufacturer] = useState(null)
 
@@ -146,7 +148,8 @@ export default function Products() {
             warehouse: productForm.sourceWarehouse,
             dropship: productForm.sourceDropship,
           },
-          Attributes: productForm.Attributes,          
+          Attributes: productForm.Attributes,
+          status: productForm.status,          
         }
         setProducts([...products, productInput])        
         await API.graphql(graphqlOperation(createProduct, { input: productInput }))
@@ -349,6 +352,7 @@ export default function Products() {
             dropship: productForm.sourceDropship,
           },
           Attributes: productForm.Attributes,
+          status: productForm.status,
           _version: version,          
         }
         await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
@@ -832,6 +836,8 @@ const fetchProducts = async () => {
         priceScratchLow: item.price ? item.price.scratchLow : 0,
         priceScratchHigh: item.price ? item.price.scratchHigh : 0,
         cost: item.cost ? item.cost : 0,
+        status: item.status ? item.status : "Draft",
+        
 
 
 
@@ -966,6 +972,8 @@ const handleAttributesSelectedCheckbox = (data) => {
       //setBrand(value)
       //console.log(value)
       }
+
+      
 
       const handleManufacturer = (value) => {
         //evt.persist();
@@ -1287,6 +1295,17 @@ const handleSourceWarehouse = (evt) => {
   }))
 }
 
+const handleStatus = (evt) => {
+  evt.persist();
+
+  //console.log(!productForm.sourceWarehouse)
+  console.log(evt)
+  setProductForm((values) => ({
+      ...values,
+      status: productForm.status === "Active" ? "Draft" : "Active",
+  }))
+}
+
 const handleSourceDropship = (evt) => {
   evt.persist()
   //console.log(!productForm.sourceDropship)
@@ -1449,6 +1468,7 @@ const handleGenerateHandle = () => {
                       handleImages = {(imageList, addUpdateIndex) => handleImages(imageList, addUpdateIndex)}
                       images = {images} 
                       generateHandle = {() => handleGenerateHandle()}
+                      status = {productForm.status === 'Active' ? true : false} handleStatus = {(e) => handleStatus(e)}
                       
                   />
                   
@@ -1535,6 +1555,7 @@ const handleGenerateHandle = () => {
                       handleImages = {(imageList, addUpdateIndex) => handleImages(imageList, addUpdateIndex)}
                       images = {images} 
                       generateHandle = {() => handleGenerateHandle()}
+                      status = {productForm.status === 'Active' ? true : false} handleStatus = {(e) => handleStatus(e)}
                       
                   />
 
@@ -1559,7 +1580,15 @@ const handleGenerateHandle = () => {
         </Grid>
 
         
-        <ProductTable data = {dataChunks[activePage - 1]} handleOrder = {handleOrderColumn} orderColumn = {orderColumn} openForm = {handleOpenEditForm} />
+        <ProductTable 
+              data = {dataChunks[activePage - 1]} 
+              categories = {categories}
+              subCategories = {subCategories}
+              subCategories2 = {subCategories2}
+              attributes = {attributes}
+              handleOrder = {handleOrderColumn} 
+              orderColumn = {orderColumn} 
+              openForm = {handleOpenEditForm} />
          <div style = {paginationStyle}>
           <Pagination
               activePage={activePage}

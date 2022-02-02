@@ -13,6 +13,7 @@ export default function CreateProductForm(props) {
   let subCategories2 = props.subCategories2.map(item => { return {key: item.id, text: item.name, value: item.id } } )
   let ebayStoreCategorys = props.ebayStoreCategorys.map(item => { return {key: item.id, text: item.name, value: item.id } } )
   let attributes = props.attributes.map(item => { return {key: item.id, text: item.name, value: item.id } } )
+  //let statusList = [{key: 1, text: "Active", value: '1'},{key: 0, text: "Draft", value: '0'}]
   const [addImageVisible, setAddImageVisible] = useState(false)
   
   
@@ -20,6 +21,10 @@ export default function CreateProductForm(props) {
   
   return (
     <Form>
+                    
+                    <Grid>
+                      <Grid.Row>
+                        <Grid.Column width={12}>
                     <Form.Field required>
                       <label>SKU</label>
                       <input placeholder='Product SKU' 
@@ -27,7 +32,12 @@ export default function CreateProductForm(props) {
                         onChange = {props.handleSKU}
                       />
                     </Form.Field>
-                    
+                    </Grid.Column>
+                    <Grid.Column width={4}>
+                    <Form.Field style={{marginTop:30}} control={Checkbox} toggle label='Active' onChange={props.handleStatus} checked={props.status} />
+                    </Grid.Column>
+                    </Grid.Row>
+                    </Grid>
                     <Grid>
                       <Grid.Row>
                         <Grid.Column width={10}>
@@ -546,8 +556,8 @@ export default function CreateProductForm(props) {
                         </Grid.Column>
                         <Grid.Column>
                           <Form.Field>
-                          <label>wholesale High</label>
-                          <input type='number' min="0" step="any" placeholder='wholesale High Price' 
+                          <label>Wholesale High</label>
+                          <input type='number' min="0" step="any" placeholder='Wholesale High Price' 
                             value = {props.priceWholesaleHigh} 
                             onChange={props.handlePriceWholesaleHigh }/>
                         </Form.Field>
@@ -616,6 +626,7 @@ export default function CreateProductForm(props) {
                             
 
                                 <Checkbox
+                                style={{marginTop:30}}
                                   id={itemAttr.id+'.toggle'}
                                   toggle
                                   label='Use as Option'
