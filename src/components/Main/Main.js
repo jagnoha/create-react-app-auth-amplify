@@ -13,6 +13,7 @@ import SubCategories from '../SubCategories/SubCategories'
 import SubCategories2 from '../SubCategories2/SubCategories2'
 import EbayStoreCategories from '../EbayStoreCategories/EbayStoreCategories'
 import Attributes from '../Attributes/Attributes'
+import ExportFile from '../ExportFile/ExportFile'
 
 //const Home = () => <h1>Home</h1>;
 //const Products = () => <h1>Products</h1>;
@@ -67,6 +68,10 @@ export default function Main(props) {
         {
           path: "/attributes",
           main: () => <Attributes />,          
+        },
+        {
+          path: "/exportfile",
+          main: () => <ExportFile />,          
         }                   
       ];
 
@@ -113,7 +118,10 @@ export default function Main(props) {
           return 'Settings'
         } else if (menuItem === 'attributes'){
           return 'Product Attributes'
-        }
+        } else if (menuItem === 'exportfile'){
+          return 'Export Files'
+        } 
+        
         return newTitle;
       }
 
@@ -189,6 +197,14 @@ export default function Main(props) {
       </Menu>
 
       <Menu icon vertical pointing borderless={true} fixed={'bottom'} >
+      <Menu.Item
+          name='exportfile'
+          active={activeItem === 'exportfile'}
+          onClick={()=>handleItemClick('exportfile')}
+        >
+         <Popup content='Export Files' position='right center' style={style} offset={[0, 15]} inverted trigger={<Icon size='large' name='download' />} />
+          
+        </Menu.Item>
       <Menu.Item
           name='reports'
           active={activeItem === 'reports'}

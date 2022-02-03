@@ -1,6 +1,6 @@
 import React, { useState, useEffect }from 'react'
 import Amplify, { API, graphqlOperation, Storage } from 'aws-amplify'
-import { Pagination, Input, Button, Icon, Grid, Modal, Dropdown, Form} from 'semantic-ui-react'
+import { Pagination, Input, Button, Icon, Grid, Modal, Dropdown, Form, Popup} from 'semantic-ui-react'
 import { SemanticToastContainer, toast } from 'react-semantic-toasts'
 import 'react-semantic-toasts/styles/react-semantic-alert.css'
 import { listProducts, listBrands, listManufacturers, listCategorys, listSubCategorys, listSubCategory2s, listEbayStoreCategorys, listAttributes } from '../../graphql/queries'
@@ -14,6 +14,8 @@ import aws_exports from '../../aws-exports'
 //import _, { groupBy, map, first } from 'underscore';
 
 import { parse } from 'uuid'
+import EditCategoriesForm from '../Forms/EditCategoriesForm'
+import SubCategories from '../SubCategories/SubCategories'
 Amplify.configure(aws_exports)
 
 
@@ -27,7 +29,7 @@ export default function Products() {
   //const [images, setImages] = React.useState([{"data_url":"https://cdn.shopify.com/s/files/1/0338/9682/4876/products/28890339_600x.jpg?v=1627667600"}]);
   const [images, setImages] = React.useState([]);
   
-  const [productsByPage, setProductsByPage] = useState(7)
+  const [productsByPage, setProductsByPage] = useState(15)
   
   const [brands, setBrands] = useState([])
   const [brand, setBrand] = useState(null)
@@ -65,6 +67,22 @@ export default function Products() {
   const [productForm, setProductForm] = useState({})
   const [productEdit, setProductEdit] = useState({})
   const [ebayTitleChars, setEbayTitleChars] = useState(0)
+
+  const [editCategoriesModal, setEditCategoriesModal] = useState(false)
+  const [editAttributesModal, setEditAttributesModal] = useState(false)
+  const [editPricesModal, setEditPricesModal] = useState(false)
+  const [editStatusModal, setEditStatusModal] = useState(false)
+
+  const [editCategoriesSelected, setEditCategoriesSelected] = 
+        useState({
+          category: {id:"", checked: false},
+          subCategory: {id: "", checked: false},
+          subCategory2: {id: "", checked: false},
+          ebayStoreCategory: {id:"", checked: false}
+        })
+  
+  
+  
 
   const optionsActions = [
     { key: 'categories', icon: 'sitemap', text: 'Edit Categories', value: 'categories' },
@@ -169,7 +187,7 @@ export default function Products() {
         }
         setProducts([...products, productInput])        
         await API.graphql(graphqlOperation(createProduct, { input: productInput }))
-        fetchProducts()
+        //fetchProducts()
         setProductForm({})
         setTimeout(() => {
           toast({
@@ -377,7 +395,7 @@ export default function Products() {
           _version: version,          
         }
         await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
-        fetchProducts()
+        //fetchProducts()
 
         setProductForm({})
         setTimeout(() => {
@@ -720,7 +738,7 @@ const fetchProducts = async () => {
 
     let dataChunks = ((chunckProducts === null ? [] : chunckProducts ))
     
-    const handlePaginationChange = (e, { activePage }) => { setActivePage(activePage); setProductsSelected([]); setProductsSelectedAll(false);fetchProducts() };
+    const handlePaginationChange = (e, { activePage }) => { console.log("ORDER COLUMN:", orderColumn);setActivePage(activePage); setProductsSelected([]); setProductsSelectedAll(false); };
     
     
     const sortItems = (list, direction, column) => {
@@ -761,15 +779,17 @@ const fetchProducts = async () => {
     
     const handleOrderColumn = (column) => {
       //console.log(column);
-      setOrderColumn({column: column, direction: orderColumn.direction === 'descending' ? 'ascending' : 'descending' })
-      setProductsSelected([]) 
-      setProductsSelectedAll(false)
+      
       
       //console.log(products)
       //console.log(orderColumn.direction)
       sortItems(products, orderColumn.direction, column);
       setChunkProducts( sliceIntoChunks(products, productsByPage ))
       setProducts(products)
+
+      setOrderColumn({column: column, direction: orderColumn.direction === 'descending' ? 'ascending' : 'descending' })
+      setProductsSelected([]) 
+      setProductsSelectedAll(false)
       
     }
 
@@ -1093,6 +1113,104 @@ const handleAttributesSelectedCheckbox = (data) => {
           //setCategory(value)
           //console.log(value)
           }
+
+          const handleCategorySelectedBulk = ({value}) => {
+            //evt.persist();
+            console.log(value)
+            setEditCategoriesSelected((values) => ({
+              ...values,
+              category: {id: value, checked: editCategoriesSelected.category.checked},
+          }))
+          console.log(editCategoriesSelected)
+            //setCategory(value)
+            //console.log(value)
+          }
+
+          const handleCategorySelectedBulkChecked = (e, data) => {
+            //evt.persist();
+            console.log(data.checked)
+            let value = data.checked
+            setEditCategoriesSelected((values) => ({
+              ...values,
+              category: {id: editCategoriesSelected.category.id, checked: value},
+          }))
+          console.log(editCategoriesSelected)
+          }
+
+          const handleSubCategorySelectedBulkChecked = (e, data) => {
+            //evt.persist();
+            console.log(data.checked)
+            let value = data.checked
+            setEditCategoriesSelected((values) => ({
+              ...values,
+              subCategory: {id: editCategoriesSelected.subCategory.id, checked: value},
+          }))
+          console.log(editCategoriesSelected)
+          }
+
+          const handleSubCategorySelectedBulk = ({value}) => {
+            //evt.persist();
+            console.log(value)
+            setEditCategoriesSelected((values) => ({
+              ...values,
+              subCategory: {id: value, checked: editCategoriesSelected.subCategory.checked},
+          }))
+          console.log(editCategoriesSelected)
+            //setCategory(value)
+            //console.log(value)
+          }
+
+          const handleSubCategory2SelectedBulkChecked = (e, data) => {
+            //evt.persist();
+            console.log(data.checked)
+            let value = data.checked
+            setEditCategoriesSelected((values) => ({
+              ...values,
+              subCategory2: {id: editCategoriesSelected.subCategory2.id, checked: value},
+          }))
+          console.log(editCategoriesSelected)
+          }
+
+          const handleSubCategory2SelectedBulk = ({value}) => {
+            //evt.persist();
+            console.log(value)
+            setEditCategoriesSelected((values) => ({
+              ...values,
+              subCategory2: {id: value, checked: editCategoriesSelected.subCategory2.checked},
+          }))
+          console.log(editCategoriesSelected)
+            //setCategory(value)
+            //console.log(value)
+          }
+
+          const handleEbayStoreCategorySelectedBulkChecked = (e, data) => {
+            //evt.persist();
+            console.log(data.checked)
+            let value = data.checked
+            setEditCategoriesSelected((values) => ({
+              ...values,
+              ebayStoreCategory: {id: editCategoriesSelected.ebayStoreCategory.id, checked: value},
+          }))
+          console.log(editCategoriesSelected)
+          }
+
+          const handleEbayStoreCategorySelectedBulk = ({value}) => {
+            //evt.persist();
+            console.log(value)
+            setEditCategoriesSelected((values) => ({
+              ...values,
+              ebayStoreCategory: {id: value, checked: editCategoriesSelected.ebayStoreCategory.checked},
+          }))
+          console.log(editCategoriesSelected)
+            //setCategory(value)
+            //console.log(value)
+          }
+
+          
+
+
+
+
 
           const handleSubCategory = (value) => {
             //evt.persist();
@@ -1420,6 +1538,66 @@ const handleImages = (imageList, addUpdateIndex) => {
 
 }
 
+const updateCategories = async (id) => {
+  try {
+    let product = products.find(item => item.id === id)
+    let version = product._version
+    let categoryOld = product.categoryID
+    let subCategoryOld = product.subcategoryID
+    let subCategoryOld2 = product.subcategory2ID
+    let ebayStoreCategoryOld = product.ebaystorecategoryID
+    
+    let productDetails = {
+      id,
+      categoryID: editCategoriesSelected.category.checked ? editCategoriesSelected.category.id : categoryOld, 
+      subcategoryID: editCategoriesSelected.subCategory.checked ? editCategoriesSelected.subCategory.id : subCategoryOld,
+      subcategory2ID: editCategoriesSelected.subCategory2.checked ? editCategoriesSelected.subCategory2.id : subCategoryOld2,
+      ebaystorecategoryID: editCategoriesSelected.ebayStoreCategory.checked ? editCategoriesSelected.ebayStoreCategory.id : ebayStoreCategoryOld,
+      _version: version,          
+    }
+    await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+
+    
+
+  } catch (err) {
+    //console.log('error creating Product:', err)
+    setTimeout(() => {
+      toast({
+          type: 'error',
+          icon: 'times',
+          size: 'tiny',              
+          title: 'Error updating Categories',
+          description: err,              
+          time: 2000,              
+      });
+    }, 200);
+  }
+}
+
+const handleApplyCategoriesChanges = () => {
+  setEditCategoriesModal(false)
+  try {
+  for (let item of productsSelected){
+    console.log(item)
+    updateCategories(item)
+  }
+  setTimeout(() => {
+    toast({
+        type: 'success',
+        icon: 'check circle outline',
+        size: 'tiny',              
+        description: productsSelected.length + ' Products successfully updated',
+        time: 2000,              
+    })
+  }, 200
+  )
+  setProductsSelected([])
+  setProductsSelectedAll(false)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 const handleGenerateHandle = () => {
   
   let newHandle = productForm.titleStore
@@ -1470,6 +1648,7 @@ const handleGenerateHandle = () => {
     //console.log(attributesSelected)
     //console.log("Los atributos ************** ", attributesSelected)
     console.log("^^^^^^^^^^^^^^^^^^^", productForm)
+    console.log(editCategoriesSelected)
     //console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", attributes)
     return (
       
@@ -1491,22 +1670,131 @@ const handleGenerateHandle = () => {
               />
           </Grid.Column>
           <Grid.Column width={4}>
-              
+          
+          <Modal
+              closeOnEscape={true}
+              closeOnDimmerClick={false}            
+              onClose={() => setEditCategoriesModal(false)}              
+              open={editCategoriesModal}              
+            >
+              <Modal.Header>Edit Categories <span style={{fontSize: 14}}>({productsSelected.length} Products Selected)</span></Modal.Header>
+              <Modal.Content >
+                <Modal.Description>
+                  <EditCategoriesForm 
+                        categories = {categories} 
+                        subCategories = {subCategories} 
+                        subCategories2 = {subCategories2} 
+                        ebayStoreCategorys = {ebayStoreCategorys}
+                        handleCategorySelectedBulk = {(e,{value}) => handleCategorySelectedBulk({value})} 
+                        handleCategorySelectedBulkChecked = {(e,data) => handleCategorySelectedBulkChecked(e,data)}
+                        handleSubCategorySelectedBulk = {(e,{value}) => handleSubCategorySelectedBulk({value})} 
+                        handleSubCategorySelectedBulkChecked = {(e,data) => handleSubCategorySelectedBulkChecked(e,data)}
+                        handleSubCategory2SelectedBulk = {(e,{value}) => handleSubCategory2SelectedBulk({value})} 
+                        handleSubCategory2SelectedBulkChecked = {(e,data) => handleSubCategory2SelectedBulkChecked(e,data)}
+                        handleEbayStoreCategorySelectedBulk = {(e,{value}) => handleEbayStoreCategorySelectedBulk({value})} 
+                        handleEbayStoreCategorySelectedBulkChecked = {(e,data) => handleEbayStoreCategorySelectedBulkChecked(e,data)}
+
+                        
+                        
+                        />
+                  </Modal.Description>
+              </Modal.Content>
+              <Modal.Actions>
+              <Button negative onClick={() => setEditCategoriesModal(false)}>
+                Cancel
+              </Button>
+              <Button positive disabled = {!Object.keys(editCategoriesSelected).some( (k) => { return editCategoriesSelected[k].checked === true })} onClick={() => handleApplyCategoriesChanges()}>
+                Apply changes
+              </Button>
+ 
+              </Modal.Actions>
+          </Modal>
+
+          <Modal
+              closeOnEscape={true}
+              closeOnDimmerClick={false}            
+              onClose={() => setEditAttributesModal(false)}              
+              open={editAttributesModal}              
+            >
+              <Modal.Header>Edit Attributes <span style={{fontSize: 14}}>({productsSelected.length} Products Selected)</span></Modal.Header>
+              <Modal.Content scrolling>
+                <Modal.Description>
+                  </Modal.Description>
+              </Modal.Content>
+              <Modal.Actions>
+              <Button negative onClick={() => setEditAttributesModal(false)}>
+                Cancel
+              </Button>
+              <Button positive onClick={() => console.log("caramba")}>
+                Apply changes
+              </Button>
+ 
+              </Modal.Actions>
+          </Modal>
+
+          <Modal
+              closeOnEscape={true}
+              closeOnDimmerClick={false}            
+              onClose={() => setEditPricesModal(false)}              
+              open={editPricesModal}              
+            >
+              <Modal.Header>Edit Prices <span style={{fontSize: 14}}>({productsSelected.length} Products Selected)</span></Modal.Header>
+              <Modal.Content scrolling>
+                <Modal.Description>
+                  </Modal.Description>
+              </Modal.Content>
+              <Modal.Actions>
+              <Button negative onClick={() => setEditPricesModal(false)}>
+                Cancel
+              </Button>
+              <Button positive onClick={() => console.log("caramba")}>
+                Apply changes
+              </Button>
+ 
+              </Modal.Actions>
+          </Modal>
+
+          <Modal
+              closeOnEscape={true}
+              closeOnDimmerClick={false}            
+              onClose={() => setEditStatusModal(false)}              
+              open={editStatusModal}              
+            >
+              <Modal.Header>Edit Status <span style={{fontSize: 14}}>({productsSelected.length} Products Selected)</span></Modal.Header>
+              <Modal.Content scrolling>
+                <Modal.Description>
+                  </Modal.Description>
+              </Modal.Content>
+              <Modal.Actions>
+              <Button negative onClick={() => setEditStatusModal(false)}>
+                Cancel
+              </Button>
+              <Button positive onClick={() => console.log("caramba")}>
+                Apply changes
+              </Button>
+ 
+              </Modal.Actions>
+          </Modal>
          
 
 
               <Button.Group>
-                  <Button name="Edit Categories" icon>
-                    <Icon name='sitemap' />
+                  <Button onClick = {() => setEditCategoriesModal(true) } disabled = {productsSelected.length > 0 ? false : true} name="Edit Categories" icon>
+                    <Popup content='Edit Categories' position='top center' offset={[0, 15]} inverted trigger={<Icon name='sitemap' />} />
+
                   </Button>
-                  <Button icon>
-                    <Icon name='sliders horizontal' />
+                  <Button onClick = {() => setEditAttributesModal(true)} disabled = {productsSelected.length > 0 ? false : true} icon>
+                  <Popup content='Edit Attributes' position='top center' offset={[0, 15]} inverted trigger={<Icon name='sliders horizontal' />} />
+                    
                   </Button>
-                  <Button icon>
-                    <Icon name='money bill alternate' />
+                  <Button onClick = {() => setEditPricesModal(true)} disabled = {productsSelected.length > 0 ? false : true} icon>
+                  <Popup content='Edit Prices' position='top center' offset={[0, 15]} inverted trigger={<Icon name='money bill alternate' />} />
                   </Button>
-                  <Button icon>
-                    <Icon name='delete' />
+                  <Button onClick = {() => setEditStatusModal(true)} disabled = {productsSelected.length > 0 ? false : true} icon>
+                  <Popup content='Change Status' position='top center' offset={[0, 15]} inverted trigger={<Icon name='checkmark' />} />
+                  </Button>
+                  <Button disabled = {productsSelected.length > 0 ? false : true} icon>
+                  <Popup content='Remove Products' position='top center' offset={[0, 15]} inverted trigger={<Icon name='delete' />} />
                   </Button>
                 </Button.Group>
 

@@ -156,7 +156,7 @@ export default function ProductTable(props) {
 
                 }</Table.Cell>
                 <Table.Cell onClick = {()=>props.openForm(item)}>{ 
-                    subCategory2 ? subCategory2.name : ""
+                    subCategory2 ? (subCategory2.id === '3dc30aff-66a5-49fa-9f20-49c76031a994' ? "" : subCategory2.name) : ""
 
                 }</Table.Cell>
                 <Table.Cell onClick = {()=>props.openForm(item)} >{new Date(item.createdAt).toString().split(' GMT')[0]}</Table.Cell>
