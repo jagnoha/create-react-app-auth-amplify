@@ -16,6 +16,7 @@ import aws_exports from '../../aws-exports'
 import { parse } from 'uuid'
 import EditCategoriesForm from '../Forms/EditCategoriesForm'
 import SubCategories from '../SubCategories/SubCategories'
+import EditAttributesForm from '../Forms/EditAttributesForm'
 Amplify.configure(aws_exports)
 
 
@@ -44,7 +45,7 @@ export default function Products() {
 
   const [attributes, setAttributes] = useState([])
   const [attributesSelected, setAttributesSelected] = useState([])
-  const [attributeSelected, setAttributeSelected] = useState({})
+  //const [attributeSelected, setAttributeSelected] = useState({})
 
   const [productsSelected, setProductsSelected] = useState([])
   const [productsSelectedAll, setProductsSelectedAll] = useState(false)
@@ -911,10 +912,24 @@ const fetchProducts = async () => {
 
         //lista.filter(item => item.a.includes('1') || item.b.includes('ch'))
         //console.log(search.toLowerCase())
-        let tempProducts = products.filter(  
-          item => item.mpn.toLowerCase().includes(search.toLowerCase())
-        )
         
+        let tempProducts1 = products.filter(itemFilter => itemFilter.SKU ? itemFilter.SKU.toLowerCase().includes(search.toLowerCase()) : "" )
+
+        let tempProducts2 = products.filter(itemFilter => itemFilter.mpn ? itemFilter.mpn.toLowerCase().includes(search.toLowerCase()) : "" )
+        
+        let tempProducts3 = products.filter(itemFilter => itemFilter.title && itemFilter.title.store ? itemFilter.title.store.toLowerCase().includes(search.toLowerCase()) : "" )
+        
+        const mergeProducts = [...tempProducts1, ...tempProducts2, ...tempProducts3 ]
+    
+        let set = new Set();
+        let tempProducts = mergeProducts.filter(item => {
+          if (!set.has(item.id)) {
+            set.add(item.id);
+            return true;
+          }
+          return false;
+        }, set);
+
         /*let tempProductsSKU = products.filter(  
           item => item.SKU.toLowerCase().includes(search.toLowerCase())
         )*/
@@ -1538,6 +1553,52 @@ const handleImages = (imageList, addUpdateIndex) => {
 
 }
 
+const updateAttributes = async (id) => {
+  try {
+    let product = products.find(item => item.id === id)
+    let productAttributesOld = product.Attributes ? JSON.parse(product.Attributes) : []
+    let productAttributes = attributesSelected
+    
+    const mergeNewProductAttributes = [...productAttributes, ...productAttributesOld ]
+    
+    let set = new Set();
+    let newProductAttributes = mergeNewProductAttributes.filter(item => {
+      if (!set.has(item.id)) {
+        set.add(item.id);
+        return true;
+      }
+      return false;
+    }, set);
+    
+
+    console.log("NEW PRODUCT ATTRIBUTES",newProductAttributes)
+    let attributes = JSON.stringify(newProductAttributes) 
+    let version = product._version
+    
+    let productDetails = {
+      id,
+      Attributes: attributes, 
+      _version: version,          
+    }
+    await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+
+    
+
+  } catch (err) {
+    setTimeout(() => {
+      toast({
+          type: 'error',
+          icon: 'times',
+          size: 'tiny',              
+          title: 'Error updating Attributes',
+          description: err,              
+          time: 2000,              
+      });
+    }, 200);
+  }
+}
+
+
 const updateCategories = async (id) => {
   try {
     let product = products.find(item => item.id === id)
@@ -1598,6 +1659,31 @@ const handleApplyCategoriesChanges = () => {
   }
 }
 
+const handleApplyAttributesChanges = () => {
+  setEditAttributesModal(false)
+  try {
+  for (let item of productsSelected){
+    console.log(item)
+    updateAttributes(item)
+  }
+  setTimeout(() => {
+    toast({
+        type: 'success',
+        icon: 'check circle outline',
+        size: 'tiny',              
+        description: productsSelected.length + ' Products successfully updated',
+        time: 2000,              
+    })
+  }, 200
+  )
+  setProductsSelected([])
+  setAttributesSelected([])
+  setProductsSelectedAll(false)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 const handleGenerateHandle = () => {
   
   let newHandle = productForm.titleStore
@@ -1647,8 +1733,8 @@ const handleGenerateHandle = () => {
     //console.log(ProductEdit.id)
     //console.log(attributesSelected)
     //console.log("Los atributos ************** ", attributesSelected)
-    console.log("^^^^^^^^^^^^^^^^^^^", productForm)
-    console.log(editCategoriesSelected)
+    //console.log("^^^^^^^^^^^^^^^^^^^", productForm)
+    console.log(attributesSelected)
     //console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", attributes)
     return (
       
@@ -1703,7 +1789,8 @@ const handleGenerateHandle = () => {
               <Button negative onClick={() => setEditCategoriesModal(false)}>
                 Cancel
               </Button>
-              <Button positive disabled = {!Object.keys(editCategoriesSelected).some( (k) => { return editCategoriesSelected[k].checked === true })} onClick={() => handleApplyCategoriesChanges()}>
+              <Button positive disabled = {!Object.keys(editCategoriesSelected).some( (k) => { return editCategoriesSelected[k].checked === true })} 
+              onClick={() => handleApplyCategoriesChanges()}>
                 Apply changes
               </Button>
  
@@ -1717,15 +1804,24 @@ const handleGenerateHandle = () => {
               open={editAttributesModal}              
             >
               <Modal.Header>Edit Attributes <span style={{fontSize: 14}}>({productsSelected.length} Products Selected)</span></Modal.Header>
-              <Modal.Content scrolling>
+              <Modal.Content >
                 <Modal.Description>
+                  <EditAttributesForm 
+                  attributes = {attributes} 
+                  attributesSelected = {attributesSelected}
+                  handleAttributesSelectedValue = {(e) => handleAttributesSelectedValue(e)}
+                  handleAttributesSelectedCheckbox = {(e, data) => handleAttributesSelectedCheckbox(data)}
+                  handleAttributes = {(e, { value }) => handleAttributes(value)}
+                  attributesSelected = {attributesSelected}
+                  />
                   </Modal.Description>
               </Modal.Content>
               <Modal.Actions>
               <Button negative onClick={() => setEditAttributesModal(false)}>
                 Cancel
               </Button>
-              <Button positive onClick={() => console.log("caramba")}>
+              <Button positive disabled = {attributesSelected && attributesSelected.length > 0 && attributesSelected[0].value.length > 0 ? false : true} 
+              onClick={() => handleApplyAttributesChanges()}>
                 Apply changes
               </Button>
  
@@ -1780,13 +1876,13 @@ const handleGenerateHandle = () => {
 
               <Button.Group>
                   <Button onClick = {() => setEditCategoriesModal(true) } disabled = {productsSelected.length > 0 ? false : true} name="Edit Categories" icon>
-                    <Popup content='Edit Categories' position='top center' offset={[0, 15]} inverted trigger={<Icon name='sitemap' />} />
+                    <Popup content='Edit Product categories in bulk' position='top center' offset={[0, 15]} inverted trigger={<Icon name='sitemap' />} />
 
                   </Button>
                   <Button onClick = {() => setEditAttributesModal(true)} disabled = {productsSelected.length > 0 ? false : true} icon>
-                  <Popup content='Edit Attributes' position='top center' offset={[0, 15]} inverted trigger={<Icon name='sliders horizontal' />} />
-                    
+                  <Popup content='Edit Product Attributes in bulk' position='top center' offset={[0, 15]} inverted trigger={<Icon name='sliders horizontal' />} />
                   </Button>
+                  {/*
                   <Button onClick = {() => setEditPricesModal(true)} disabled = {productsSelected.length > 0 ? false : true} icon>
                   <Popup content='Edit Prices' position='top center' offset={[0, 15]} inverted trigger={<Icon name='money bill alternate' />} />
                   </Button>
@@ -1796,6 +1892,7 @@ const handleGenerateHandle = () => {
                   <Button disabled = {productsSelected.length > 0 ? false : true} icon>
                   <Popup content='Remove Products' position='top center' offset={[0, 15]} inverted trigger={<Icon name='delete' />} />
                   </Button>
+                  */}
                 </Button.Group>
 
 
@@ -1984,12 +2081,13 @@ const handleGenerateHandle = () => {
            
         </Grid>
 
-        
+        {console.log(brands)}
         <ProductTable 
               data = {dataChunks[activePage - 1]} 
               categories = {categories}
               subCategories = {subCategories}
               subCategories2 = {subCategories2}
+              brands = {brands}
               attributes = {attributes}
               handleOrder = {handleOrderColumn} 
               orderColumn = {orderColumn}

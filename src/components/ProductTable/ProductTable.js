@@ -96,6 +96,10 @@ export default function ProductTable(props) {
                 sorted={props.orderColumn.column === 'mpn' ? props.orderColumn.direction : null}
                 onClick={() => props.handleOrder('mpn')}>MPN
             </Table.HeaderCell>
+            <Table.HeaderCell width={1}
+                sorted={props.orderColumn.column === 'brandID' ? props.orderColumn.direction : null}
+                onClick={() => props.handleOrder('brandID')}>Brand
+            </Table.HeaderCell>
             <Table.HeaderCell width={2}>Attributes</Table.HeaderCell>
             <Table.HeaderCell width={2} sorted={props.orderColumn.column === 'categoryID' ? props.orderColumn.direction : null}
                 onClick={() => props.handleOrder('categoryID')}     
@@ -118,6 +122,8 @@ export default function ProductTable(props) {
                 let category = props.categories.find(itemCat => itemCat.id === item.categoryID )
                 let subCategory = props.subCategories.find(itemCat => itemCat.id === item.subcategoryID )
                 let subCategory2 = props.subCategories2.find(itemCat => itemCat.id === item.subcategory2ID )
+                let brand = props.brands.find(itemBrand => itemBrand.id === item.brandID )
+                //console.log(brand)
                 //let attributesSelected = item.Attributes ? JSON.parse(item.Attributes) : ""
                 //console.log("Atributes Selected: ", attributesSelected)
                 
@@ -146,6 +152,7 @@ export default function ProductTable(props) {
             </Table.Cell>
             <Table.Cell onClick = {()=>props.openForm(item)}>{item.title.store}</Table.Cell>
             <Table.Cell onClick = {()=>props.openForm(item)}>{item.mpn}</Table.Cell>
+            <Table.Cell onClick = {()=>props.openForm(item)}>{brand ? brand.name : ""}</Table.Cell>
             <Table.Cell onClick = {()=>props.openForm(item)}><AttributeList attributesSelected = {item.Attributes} attributes = {props.attributes} /></Table.Cell>
             <Table.Cell onClick = {()=>props.openForm(item)}>{ 
                     category ? category.name : ""
