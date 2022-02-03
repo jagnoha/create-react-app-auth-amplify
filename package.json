@@ -15,6 +15,7 @@
     "react-semantic-toasts": "^0.6.5",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^2.0.4",
+    "underscore": "^1.13.2",
     "url-slug": "^3.0.3",
     "uuid": "^8.3.2"
   },

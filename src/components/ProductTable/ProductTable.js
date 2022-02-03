@@ -1,5 +1,5 @@
 import React from 'react'
-import { Table, Loader, Container, Image, Label, Icon } from 'semantic-ui-react'
+import { Table, Loader, Container, Image, Label, Icon, Checkbox } from 'semantic-ui-react'
 
 function AttributeList(props){
     let attributeParse = props.attributesSelected ? JSON.parse( props.attributesSelected) : [] 
@@ -60,7 +60,7 @@ export default function ProductTable(props) {
 
     } 
 
-    console.log(props.data)
+    console.log("ESTA ES LA DATA: ",props.data)
 
 
     return (
@@ -71,11 +71,12 @@ export default function ProductTable(props) {
 
             
           <Table.Row >
+          <Table.HeaderCell > <Checkbox toggle /></Table.HeaderCell>
             <Table.HeaderCell >Status</Table.HeaderCell>
             <Table.HeaderCell width={1}>Images</Table.HeaderCell>
             <Table.HeaderCell 
-                sorted={props.orderColumn.column === 'sku' ? props.orderColumn.direction : null}
-                onClick={() => props.handleOrder('sku')}
+                sorted={props.orderColumn.column === 'SKU' ? props.orderColumn.direction : null}
+                onClick={() => props.handleOrder('SKU')}
             >SKU</Table.HeaderCell>
             <Table.HeaderCell width={2}>Source</Table.HeaderCell>
             
@@ -89,9 +90,13 @@ export default function ProductTable(props) {
                 onClick={() => props.handleOrder('mpn')}>MPN
             </Table.HeaderCell>
             <Table.HeaderCell width={2}>Attributes</Table.HeaderCell>
-            <Table.HeaderCell width={2}>Category</Table.HeaderCell>
-            <Table.HeaderCell width={2}>SubCategory</Table.HeaderCell>
-            <Table.HeaderCell width={1}>SubCategory 2</Table.HeaderCell>
+            <Table.HeaderCell width={2} sorted={props.orderColumn.column === 'categoryID' ? props.orderColumn.direction : null}
+                onClick={() => props.handleOrder('categoryID')}     
+                 >Category</Table.HeaderCell>
+            <Table.HeaderCell width={2} sorted={props.orderColumn.column === 'subcategoryID' ? props.orderColumn.direction : null}
+                onClick={() => props.handleOrder('subcategoryID')} >SubCategory</Table.HeaderCell>
+            <Table.HeaderCell width={1} sorted={props.orderColumn.column === 'subcategory2ID' ? props.orderColumn.direction : null}
+                onClick={() => props.handleOrder('subcategory2ID')} >SubCategory 2</Table.HeaderCell>
             <Table.HeaderCell width={1} sorted={props.orderColumn.column === 'createdAt' ? props.orderColumn.direction : null}
                 onClick={() => props.handleOrder('createdAt')}>Created</Table.HeaderCell>
             <Table.HeaderCell width={1} sorted={props.orderColumn.column === 'updatedAt' ? props.orderColumn.direction : null}
@@ -111,37 +116,40 @@ export default function ProductTable(props) {
                 
                 
                 return (
-            <Table.Row key={item.id} onClick = {()=>props.openForm(item)}>
-            <Table.Cell>{item.status === 'Active' ? <Icon color="green" name = "circle" /> : <Icon name = "circle" /> }
+            <Table.Row key={item.id} >
+            <Table.Cell >
+                 <Checkbox toggle />
+            </Table.Cell>
+            <Table.Cell onClick = {()=>props.openForm(item)}>{item.status === 'Active' ? <Icon color="green" name = "circle" /> : <Icon name = "circle" /> }
                 
             </Table.Cell>
-            <Table.Cell>
+            <Table.Cell onClick = {()=>props.openForm(item)}>
                 
                 <Image src={item.images.image1 ? JSON.parse(item.images.image1).data_url : ""} size='mini' />
             
             </Table.Cell>
-            <Table.Cell>{item.SKU}</Table.Cell>
-            <Table.Cell>
+            <Table.Cell onClick = {()=>props.openForm(item)}>{item.SKU}</Table.Cell>
+            <Table.Cell onClick = {()=>props.openForm(item)}>
                 {item.source.warehouse ? <Label color='blue' size={"mini"}>Warehouse</Label> : ''}  
                 {item.source.dropship ? <Label color='orange' size={"mini"}>Dropship</Label> : ''}          
             </Table.Cell>
-            <Table.Cell>{item.title.store}</Table.Cell>
-            <Table.Cell>{item.mpn}</Table.Cell>
-            <Table.Cell><AttributeList attributesSelected = {item.Attributes} attributes = {props.attributes} /></Table.Cell>
-            <Table.Cell>{ 
+            <Table.Cell onClick = {()=>props.openForm(item)}>{item.title.store}</Table.Cell>
+            <Table.Cell onClick = {()=>props.openForm(item)}>{item.mpn}</Table.Cell>
+            <Table.Cell onClick = {()=>props.openForm(item)}><AttributeList attributesSelected = {item.Attributes} attributes = {props.attributes} /></Table.Cell>
+            <Table.Cell onClick = {()=>props.openForm(item)}>{ 
                     category ? category.name : ""
 
                 }</Table.Cell>
-                <Table.Cell>{ 
+                <Table.Cell onClick = {()=>props.openForm(item)}>{ 
                     subCategory ? subCategory.name : ""
 
                 }</Table.Cell>
-                <Table.Cell>{ 
+                <Table.Cell onClick = {()=>props.openForm(item)}>{ 
                     subCategory2 ? subCategory2.name : ""
 
                 }</Table.Cell>
-                <Table.Cell >{new Date(item.createdAt).toString().split(' GMT')[0]}</Table.Cell>
-                <Table.Cell >{new Date(item.updatedAt).toString().split(' GMT')[0]}</Table.Cell>
+                <Table.Cell onClick = {()=>props.openForm(item)} >{new Date(item.createdAt).toString().split(' GMT')[0]}</Table.Cell>
+                <Table.Cell onClick = {()=>props.openForm(item)} >{new Date(item.updatedAt).toString().split(' GMT')[0]}</Table.Cell>
 
 
           </Table.Row>

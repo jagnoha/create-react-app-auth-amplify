@@ -1,6 +1,6 @@
 import React, { useState, useEffect }from 'react'
 import Amplify, { API, graphqlOperation, Storage } from 'aws-amplify'
-import { Pagination, Input, Button, Icon, Grid, Modal, Form} from 'semantic-ui-react'
+import { Pagination, Input, Button, Icon, Grid, Modal, Dropdown, Form} from 'semantic-ui-react'
 import { SemanticToastContainer, toast } from 'react-semantic-toasts'
 import 'react-semantic-toasts/styles/react-semantic-alert.css'
 import { listProducts, listBrands, listManufacturers, listCategorys, listSubCategorys, listSubCategory2s, listEbayStoreCategorys, listAttributes } from '../../graphql/queries'
@@ -11,6 +11,8 @@ import ProductTable from '../ProductTable/ProductTable'
 import CreateProductForm from '../Forms/CreateProductForm'
 import urlSlug from 'url-slug'
 import aws_exports from '../../aws-exports'
+//import _, { groupBy, map, first } from 'underscore';
+
 import { parse } from 'uuid'
 Amplify.configure(aws_exports)
 
@@ -38,6 +40,8 @@ export default function Products() {
   const [attributesSelected, setAttributesSelected] = useState([])
   const [attributeSelected, setAttributeSelected] = useState({})
 
+  const [productsSelected, setProductsSelected] = useState([])
+
 
   const [subCategories, setSubCategories] = useState([])
   const [subCategory, setSubCategory] = useState(null)
@@ -56,6 +60,11 @@ export default function Products() {
   const [productForm, setProductForm] = useState({})
   const [productEdit, setProductEdit] = useState({})
   const [ebayTitleChars, setEbayTitleChars] = useState(0)
+
+  const optionsActions = [
+    { key: 'edit', icon: 'edit', text: 'Edit Product', value: 'edit' },
+    { key: 'delete', icon: 'delete', text: 'Remove Product', value: 'delete' },    
+  ]
   
   const urlBase = 'https://demons-cycle-storage202642-devt.s3.amazonaws.com/public/'
   
@@ -696,11 +705,11 @@ const fetchProducts = async () => {
     const handlePaginationChange = (e, { activePage }) => { setActivePage(activePage); fetchProducts() };
     
     
-    const sortItems = (list, direction) => {
+    const sortItems = (list, direction, column) => {
       if (direction === 'descending'){
         list.sort(function(a, b) {
-          let nameA = a.SKU.toUpperCase(); // ignore upper and lowercase
-          let nameB = b.SKU.toUpperCase(); // ignore upper and lowercase
+          let nameA = column !== 'title' ? ( a[column] ? a[column].toUpperCase() : "" ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
+          let nameB = column !== 'title' ? ( b[column] ? b[column].toUpperCase() : "" ) : ( b.title.store ? b.title.store.toUpperCase() : "")  // ignore upper and lowercase
           if (nameA < nameB) {
             return -1;
           }
@@ -713,8 +722,8 @@ const fetchProducts = async () => {
         });
       } else {
         list.sort(function(a, b) {
-          let nameA = a.SKU.toUpperCase(); // ignore upper and lowercase
-          let nameB = b.SKU.toUpperCase(); // ignore upper and lowercase
+          let nameA = column !== 'title' ? ( a[column] ? a[column].toUpperCase() : "" ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
+          let nameB = column !== 'title' ? ( b[column] ? b[column].toUpperCase() : "" ) : ( b.title.store ? b.title.store.toUpperCase() : "")  // ignore upper and lowercase
           if (nameB < nameA) {
             return -1;
           }
@@ -737,7 +746,7 @@ const fetchProducts = async () => {
       setOrderColumn({column: column, direction: orderColumn.direction === 'descending' ? 'ascending' : 'descending' })
       //console.log(products)
       //console.log(orderColumn.direction)
-      sortItems(products, orderColumn.direction);
+      sortItems(products, orderColumn.direction, column);
       setChunkProducts( sliceIntoChunks(products, 10 ))
       setProducts(products)
       
@@ -861,10 +870,43 @@ const fetchProducts = async () => {
 
         setActivePage(1); 
       
-        let tempProducts = products.filter(item => item.SKU.toLowerCase().includes(search.toLowerCase()) )
-        tempProducts = tempProducts.length > 0 ? tempProducts : products
-         
+        /*let tempProducts = products.filter(  
+          item => item.SKU.toLowerCase().includes(search.toLowerCase()) 
+        )*/
+        console.log(products)
+
+        //lista.filter(item => item.a.includes('1') || item.b.includes('ch'))
+        //console.log(search.toLowerCase())
+        let tempProducts = products.filter(  
+          item => item.mpn.toLowerCase().includes(search.toLowerCase())
+        )
         
+        /*let tempProductsSKU = products.filter(  
+          item => item.SKU.toLowerCase().includes(search.toLowerCase())
+        )*/
+
+        
+
+       // const comparation = (item) => item.mpn.to
+       //let map = new Map()
+       
+       
+       //let tempProductsJoin = tempProductsMPN.concat(tempProductsSKU)
+       //let tempProducts = [...new Set(tempProductsJoin.map(item => item.id))]
+       
+       
+       
+       /*tempProducts.forEach(item => {
+        if(!map.has(item.id)){
+          map.set(item.id, item);
+        }
+      })*/
+      //Array.from(map.values())
+
+        tempProducts = tempProducts.length > 0 ? tempProducts : products
+        
+
+
         setChunkProducts( sliceIntoChunks(tempProducts, 10 ))
       }
     }
@@ -1394,7 +1436,21 @@ const handleGenerateHandle = () => {
               />
           </Grid.Column>
           <Grid.Column width={4}>
-          
+              <Button.Group 
+                            style = {{paddingLeft: 15}}
+                            floated='right'
+                            //icon
+                            labelPosition='left'
+                            primary                            
+                            size='small'>
+              <Button>Actions</Button>
+              <Dropdown
+                className='button icon'
+                //floating
+                options={optionsActions}
+                trigger={<></>}
+              />
+              </Button.Group>  
             <Modal
               closeOnEscape={true}
               closeOnDimmerClick={false}            
@@ -1575,8 +1631,9 @@ const handleGenerateHandle = () => {
  
               </Modal.Actions>
             </Modal>
-
-          </Grid.Column>          
+            
+          </Grid.Column> 
+           
         </Grid>
 
         
