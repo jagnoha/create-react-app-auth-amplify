@@ -71,7 +71,14 @@ export default function ProductTable(props) {
 
             
           <Table.Row >
-          <Table.HeaderCell > <Checkbox toggle /></Table.HeaderCell>
+          <Table.HeaderCell > 
+              <Checkbox 
+                    toggle 
+                    onChange= {(e, data) => props.handleSelectAllProductsInPage(e, data.checked) } //{(e, data) => setChecked(data.checked)}
+                    //checked={props.productsSelected.find(itemSelected => itemSelected === item.id ) ? true : false}
+                    checked = {props.productsSelectedAll}
+                />
+            </Table.HeaderCell>
             <Table.HeaderCell >Status</Table.HeaderCell>
             <Table.HeaderCell width={1}>Images</Table.HeaderCell>
             <Table.HeaderCell 
@@ -118,7 +125,11 @@ export default function ProductTable(props) {
                 return (
             <Table.Row key={item.id} >
             <Table.Cell >
-                 <Checkbox toggle />
+                 <Checkbox 
+                    onChange= {(e, data,id) => props.handleProductSelected(e, data.checked, item.id) } //{(e, data) => setChecked(data.checked)}
+                    checked={props.productsSelected.find(itemSelected => itemSelected === item.id ) ? true : false}
+                    toggle
+                  />
             </Table.Cell>
             <Table.Cell onClick = {()=>props.openForm(item)}>{item.status === 'Active' ? <Icon color="green" name = "circle" /> : <Icon name = "circle" /> }
                 

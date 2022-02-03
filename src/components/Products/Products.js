@@ -22,8 +22,12 @@ export default function Products() {
   const [chunckProducts, setChunkProducts] = useState(null)
   const [products, setProducts] = useState([])
 
+
+
   //const [images, setImages] = React.useState([{"data_url":"https://cdn.shopify.com/s/files/1/0338/9682/4876/products/28890339_600x.jpg?v=1627667600"}]);
   const [images, setImages] = React.useState([]);
+  
+  const [productsByPage, setProductsByPage] = useState(7)
   
   const [brands, setBrands] = useState([])
   const [brand, setBrand] = useState(null)
@@ -41,6 +45,7 @@ export default function Products() {
   const [attributeSelected, setAttributeSelected] = useState({})
 
   const [productsSelected, setProductsSelected] = useState([])
+  const [productsSelectedAll, setProductsSelectedAll] = useState(false)
 
 
   const [subCategories, setSubCategories] = useState([])
@@ -62,7 +67,9 @@ export default function Products() {
   const [ebayTitleChars, setEbayTitleChars] = useState(0)
 
   const optionsActions = [
-    { key: 'edit', icon: 'edit', text: 'Edit Product', value: 'edit' },
+    { key: 'categories', icon: 'sitemap', text: 'Edit Categories', value: 'categories' },
+    { key: 'attribute', icon: 'sliders horizontal', text: 'Edit Attributes', value: 'attributes' },
+    { key: 'price', icon: 'money bill alternate', text: 'Edit Price', value: 'price' },    
     { key: 'delete', icon: 'delete', text: 'Remove Product', value: 'delete' },    
   ]
   
@@ -209,16 +216,21 @@ export default function Products() {
         ...values,
         images: [],
       }))*/
+      console.log("AQUI VAN UNAS IMAGENES!!!!!!!!!!!!!")
       let tempList = []
       console.log("**************************",images)
       for (const item of images) {
+        
         let name = uuidv4()
         
         console.log("ESTE ES EL TIPO:", item)
+        
+        if (!item.old){
         const result = await Storage.put(item.file ? item.file.name : name, item.file, {
-          //level: "public",
+          level: "public",
           contentType: item.file.type,
         })
+      }
         //const result = await Storage.put(name, item.data_url)
         
         //console.log(result.key)
@@ -241,8 +253,8 @@ export default function Products() {
       
       }
 
-      /*console.log(tempList)
-    
+      console.log("LISTA TEMPORAL: ", tempList)
+    /*
       setProductForm((values) => ({
         ...values,
         images: tempList,
@@ -463,7 +475,10 @@ const subscriptionUpdate = async () => await API.graphql(
     setManufacturer(null)*/
     setOpen(false)
     setProductForm({})
-    setAttributesSelected([])  
+    setAttributesSelected([])
+    setProductsSelected([]) 
+    setProductsSelectedAll(false)
+        
     //setManufacturer(null)
     
 }
@@ -476,7 +491,10 @@ const handleCloseUpdate = (evt) => {
   setManufacturer(null)*/
   setOpenEdit(false)
   setProductForm({})
-  setAttributesSelected([])  
+  setAttributesSelected([])
+  setProductsSelected([]) 
+  setProductsSelectedAll(false)
+       
   //setManufacturer(null)
   
 }
@@ -691,7 +709,7 @@ const fetchProducts = async () => {
       const products = await productData.data.listProducts.items.filter(item => !item._deleted)   
       //console.log("QUE TENEMOS AQUI:", Products)  
       //sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
-      setChunkProducts( sliceIntoChunks(products, 10 ))
+      setChunkProducts( sliceIntoChunks(products, productsByPage ))
       setProducts(products)
       //console.log("esta es una prueba *****", products)
       
@@ -702,7 +720,7 @@ const fetchProducts = async () => {
 
     let dataChunks = ((chunckProducts === null ? [] : chunckProducts ))
     
-    const handlePaginationChange = (e, { activePage }) => { setActivePage(activePage); fetchProducts() };
+    const handlePaginationChange = (e, { activePage }) => { setActivePage(activePage); setProductsSelected([]); setProductsSelectedAll(false);fetchProducts() };
     
     
     const sortItems = (list, direction, column) => {
@@ -744,10 +762,13 @@ const fetchProducts = async () => {
     const handleOrderColumn = (column) => {
       //console.log(column);
       setOrderColumn({column: column, direction: orderColumn.direction === 'descending' ? 'ascending' : 'descending' })
+      setProductsSelected([]) 
+      setProductsSelectedAll(false)
+      
       //console.log(products)
       //console.log(orderColumn.direction)
       sortItems(products, orderColumn.direction, column);
-      setChunkProducts( sliceIntoChunks(products, 10 ))
+      setChunkProducts( sliceIntoChunks(products, productsByPage ))
       setProducts(products)
       
     }
@@ -778,20 +799,13 @@ const fetchProducts = async () => {
           console.log("IMAGES PROPERTY: ",item.images[property])
           if (item.images[property]) {
             //tempImages.push({data_url:urlBase+item.images[property]})
-            tempImages.push(JSON.parse(item.images[property]))   
+            tempImages.push({...JSON.parse(item.images[property]),old: true})   
           
           }
           
         }
-        /*let images = item.images
-      
-              for (item of images){
-                if (item){
-                  tempImages.push({"data_url":item})
-                }
-              }*/
       }
-      console.log("mamamamamamama:  ",tempImages)
+      console.log("IMAGENES TEMPORALES ***********:  ",tempImages)
       
       setImages(tempImages)
       //key: item.id, text: item.name, value: item.id
@@ -907,8 +921,49 @@ const fetchProducts = async () => {
         
 
 
-        setChunkProducts( sliceIntoChunks(tempProducts, 10 ))
+        setChunkProducts( sliceIntoChunks(tempProducts, productsByPage ))
       }
+    }
+
+    const handleSelectAllProductsInPage = (e, value) => {
+      
+      /*console.log(value, ' ', id)
+      console.log(productsSelected)
+      let result = productsSelected.find(item => item === id)
+      if (result) {
+        setProductsSelected(productsSelected.filter(item => item !== id))
+      } else {
+        setProductsSelected(...productsSelected, id)
+      }*/
+      setProductsSelectedAll(value)
+
+      if (value) {
+        setProductsSelected(chunckProducts[activePage - 1].map(item => item.id))
+      } else {
+        setProductsSelected([])
+      }
+      
+    }
+
+    const handleProductSelected = (e, value, id) => {
+      
+      /*console.log(value, ' ', id)
+      console.log(productsSelected)
+      let result = productsSelected.find(item => item === id)
+      if (result) {
+        setProductsSelected(productsSelected.filter(item => item !== id))
+      } else {
+        setProductsSelected(...productsSelected, id)
+      }*/
+      if (value){
+        setProductsSelected([...productsSelected,id])
+      } else {
+        setProductsSelected(productsSelected.filter(item => item !== id))
+      }
+
+      console.log("**************************** ",productsSelected)
+      console.log("PRODUCTS IN PAGE", chunckProducts[activePage - 1])
+      
     }
 
     const handleSKU = (evt) => {
@@ -1436,21 +1491,26 @@ const handleGenerateHandle = () => {
               />
           </Grid.Column>
           <Grid.Column width={4}>
-              <Button.Group 
-                            style = {{paddingLeft: 15}}
-                            floated='right'
-                            //icon
-                            labelPosition='left'
-                            primary                            
-                            size='small'>
-              <Button>Actions</Button>
-              <Dropdown
-                className='button icon'
-                //floating
-                options={optionsActions}
-                trigger={<></>}
-              />
-              </Button.Group>  
+              
+         
+
+
+              <Button.Group>
+                  <Button name="Edit Categories" icon>
+                    <Icon name='sitemap' />
+                  </Button>
+                  <Button icon>
+                    <Icon name='sliders horizontal' />
+                  </Button>
+                  <Button icon>
+                    <Icon name='money bill alternate' />
+                  </Button>
+                  <Button icon>
+                    <Icon name='delete' />
+                  </Button>
+                </Button.Group>
+
+
             <Modal
               closeOnEscape={true}
               closeOnDimmerClick={false}            
@@ -1644,7 +1704,11 @@ const handleGenerateHandle = () => {
               subCategories2 = {subCategories2}
               attributes = {attributes}
               handleOrder = {handleOrderColumn} 
-              orderColumn = {orderColumn} 
+              orderColumn = {orderColumn}
+              productsSelected = {productsSelected} 
+              handleProductSelected = {(e, data, id) => handleProductSelected (e, data, id)}
+              handleSelectAllProductsInPage = {(e, data) => handleSelectAllProductsInPage (e, data)}
+              productsSelectedAll = {productsSelectedAll}
               openForm = {handleOpenEditForm} />
          <div style = {paginationStyle}>
           <Pagination
