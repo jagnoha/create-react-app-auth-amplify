@@ -1,6 +1,6 @@
-import React, { useState, useEffect }from 'react'
+import React, { useState, useEffect } from 'react'
 import Amplify, { API, graphqlOperation, Storage } from 'aws-amplify'
-import { Pagination, Input, Button, Icon, Grid, Modal, Dropdown, Form, Popup} from 'semantic-ui-react'
+import { Pagination, Input, Button, Icon, Grid, Modal, Dropdown, Form, Popup, Label} from 'semantic-ui-react'
 import { SemanticToastContainer, toast } from 'react-semantic-toasts'
 import 'react-semantic-toasts/styles/react-semantic-alert.css'
 import { listProducts, listBrands, listManufacturers, listCategorys, listSubCategorys, listSubCategory2s, listEbayStoreCategorys, listAttributes } from '../../graphql/queries'
@@ -73,6 +73,8 @@ export default function Products() {
   const [editAttributesModal, setEditAttributesModal] = useState(false)
   const [editPricesModal, setEditPricesModal] = useState(false)
   const [editStatusModal, setEditStatusModal] = useState(false)
+
+  const [productQty, setProductQty] = useState(0)
 
   const [editCategoriesSelected, setEditCategoriesSelected] = 
         useState({
@@ -391,7 +393,7 @@ export default function Products() {
             warehouse: productForm.sourceWarehouse,
             dropship: productForm.sourceDropship,
           },
-          Attributes: productForm.Attributes,
+          Attributes: attributesSelected ? JSON.stringify(attributesSelected) : "",//productForm.Attributes,
           status: productForm.status,
           _version: version,          
         }
@@ -399,6 +401,7 @@ export default function Products() {
         //fetchProducts()
 
         setProductForm({})
+        setAttributesSelected([])
         setTimeout(() => {
           toast({
               type: 'success',
@@ -729,7 +732,10 @@ const fetchProducts = async () => {
       //console.log("QUE TENEMOS AQUI:", Products)  
       //sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
       setChunkProducts( sliceIntoChunks(products, productsByPage ))
+      setProductQty(products.length)
+
       setProducts(products)
+      
       //console.log("esta es una prueba *****", products)
       
 
@@ -919,8 +925,30 @@ const fetchProducts = async () => {
         
         let tempProducts3 = products.filter(itemFilter => itemFilter.title && itemFilter.title.store ? itemFilter.title.store.toLowerCase().includes(search.toLowerCase()) : "" )
         
-        const mergeProducts = [...tempProducts1, ...tempProducts2, ...tempProducts3 ]
-    
+        let tempProducts4 = products.filter(itemFilter => { 
+            let brand = brands.find(item => item.id === itemFilter.brandID)
+            let brandName = brand ? brand.name : ''
+            return brandName ? brandName.toLowerCase().includes(search.toLowerCase()) : "" 
+        
+          }  )
+
+          let tempProducts5 = products.filter(itemFilter => { 
+            let sourceWarehouse = itemFilter.source && itemFilter.source.warehouse ? 'Warehouse' : ''  
+            return sourceWarehouse ? sourceWarehouse.toLowerCase().includes(search.toLowerCase()) : "" 
+        
+          }  )
+
+          let tempProducts6 = products.filter(itemFilter => { 
+            let sourceDropship = itemFilter.source && itemFilter.source.dropship ? 'Dropship' : ''  
+            return sourceDropship ? sourceDropship.toLowerCase().includes(search.toLowerCase()) : "" 
+        
+          }  )
+
+          
+        
+
+        const mergeProducts = [...tempProducts1, ...tempProducts2, ...tempProducts3, ...tempProducts4, ...tempProducts5, ...tempProducts6 ]
+        
         let set = new Set();
         let tempProducts = mergeProducts.filter(item => {
           if (!set.has(item.id)) {
@@ -929,6 +957,8 @@ const fetchProducts = async () => {
           }
           return false;
         }, set);
+
+        setProductQty(tempProducts.length)
 
         /*let tempProductsSKU = products.filter(  
           item => item.SKU.toLowerCase().includes(search.toLowerCase())
@@ -1743,7 +1773,7 @@ const handleGenerateHandle = () => {
         <h1>Products</h1>
 
         <Grid>
-          <Grid.Column width={12}>
+          <Grid.Column width={10}>
           <Input
                 icon='search'
                 iconPosition='left'
@@ -1754,6 +1784,14 @@ const handleGenerateHandle = () => {
                 value={search}             
                 //floated='left'
               />
+          </Grid.Column>
+          <Grid.Column width={2}>
+             
+            <Label>
+            Products
+            <Label.Detail>{productQty}</Label.Detail>
+          </Label>
+
           </Grid.Column>
           <Grid.Column width={4}>
           

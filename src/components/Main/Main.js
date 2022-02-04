@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, { useState, useEffect } from 'react'
 import { Route, Routes, Link, useLocation, useNavigate  } from "react-router-dom"
 import Home from "../Home/Home"
 import Products from "../Products/Products"
@@ -14,6 +14,9 @@ import SubCategories2 from '../SubCategories2/SubCategories2'
 import EbayStoreCategories from '../EbayStoreCategories/EbayStoreCategories'
 import Attributes from '../Attributes/Attributes'
 import ExportFile from '../ExportFile/ExportFile'
+import Amplify, { API, graphqlOperation, Storage } from 'aws-amplify'
+import { listAttributes } from '../../graphql/queries'
+import aws_exports from '../../aws-exports'
 
 //const Home = () => <h1>Home</h1>;
 //const Products = () => <h1>Products</h1>;
@@ -23,6 +26,8 @@ const style = {
 }
 
 export default function Main(props) {
+
+  const [attributes, setAttributes] = useState([])
 
     const routes = [
         {
@@ -71,7 +76,7 @@ export default function Main(props) {
         },
         {
           path: "/exportfile",
-          main: () => <ExportFile />,          
+          main: () => <ExportFile attributes = {attributes}/>,          
         }                   
       ];
 
@@ -127,7 +132,22 @@ export default function Main(props) {
 
       let newTitle = getTitle();
 
+      const fetchAttributes = async () => {
+        try {
+          const attributesData = await API.graphql({
+            query: listAttributes,          
+          })
+          const attributesTemp = await attributesData.data.listAttributes.items.filter(item => !item._deleted)      
+          setAttributes(attributesTemp)
+          //console.log("OTROS ATTRIBUTES:", attributes)   
+          
       
+        } catch (err) { console.log(err) }
+    }
+      
+    useEffect(() => {
+        fetchAttributes()
+    }, [])
 
   return (
     <div>
