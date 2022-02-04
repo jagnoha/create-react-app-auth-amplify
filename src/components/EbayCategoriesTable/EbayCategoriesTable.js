@@ -25,7 +25,6 @@ export default function EbayCategoriesTable(props) {
 
             
           <Table.Row >
-            <Table.HeaderCell width={4}>Id</Table.HeaderCell>
             <Table.HeaderCell 
                 sorted={props.orderColumn.column === 'name' ? props.orderColumn.direction : null}
                 onClick={() => props.handleOrder('name')}
@@ -39,9 +38,6 @@ export default function EbayCategoriesTable(props) {
             {props.data.map((item) => 
             
             <Table.Row key={item.id} onClick = {()=>props.openForm(item)}>
-            <Table.Cell>
-               {item.id}  
-            </Table.Cell>
             <Table.Cell>{item.name}</Table.Cell>
             <Table.Cell>{item.code}</Table.Cell>
           </Table.Row>

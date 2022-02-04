@@ -18,14 +18,14 @@ export default function SimpleTable(props) {
     } 
 
     return (
-        
+        <div style={{marginTop: 15}}>
             <Table sortable celled selectable>
         <Table.Header>
 
 
             
           <Table.Row >
-            <Table.HeaderCell width={4}>Id</Table.HeaderCell>
+            
             <Table.HeaderCell 
                 sorted={props.orderColumn.column === 'name' ? props.orderColumn.direction : null}
                 onClick={() => props.handleOrder('name')}
@@ -38,9 +38,7 @@ export default function SimpleTable(props) {
             {props.data.map((item) => 
             
             <Table.Row key={item.id} onClick = {()=>props.openForm(item)}>
-            <Table.Cell>
-               {item.id}  
-            </Table.Cell>
+            
             <Table.Cell>{item.name}</Table.Cell>
           </Table.Row>
             
@@ -48,7 +46,7 @@ export default function SimpleTable(props) {
 
           </Table.Body>
           </Table>
-        
+     </div>   
     )
     
     

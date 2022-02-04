@@ -216,7 +216,7 @@ export default function ExportFile(props) {
                 }*/
 
                 let product = { 
-                    SKU: item.SKU, MPN: item.mpn, BinLocation: item.binLocation,
+                    SKU: item.SKU, MPN: item.mpn, BinLocation: item.parentSKU,
                     Brand: brandName, PartsSKU: '', TuckerSKU: '', WPSSKU: '', ItemName: title,
                     BodyDescription: description, Handle: item.handle, Category: categoryName, SubCategory: subCategoryName,
                     SubCategory2: subCategory2Name, Weight: item.appliedWeight, Height: height, Length: length, Width: width,

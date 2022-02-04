@@ -30,7 +30,7 @@ export default function Products() {
   //const [images, setImages] = React.useState([{"data_url":"https://cdn.shopify.com/s/files/1/0338/9682/4876/products/28890339_600x.jpg?v=1627667600"}]);
   const [images, setImages] = React.useState([]);
   
-  const [productsByPage, setProductsByPage] = useState(15)
+  const [productsByPage, setProductsByPage] = useState(25)
   
   const [brands, setBrands] = useState([])
   const [brand, setBrand] = useState(null)
@@ -73,6 +73,8 @@ export default function Products() {
   const [editAttributesModal, setEditAttributesModal] = useState(false)
   const [editPricesModal, setEditPricesModal] = useState(false)
   const [editStatusModal, setEditStatusModal] = useState(false)
+
+  const [statusProduct, setStatusProduct] = useState('ALL')
 
   const [productQty, setProductQty] = useState(0)
 
@@ -192,6 +194,7 @@ export default function Products() {
         await API.graphql(graphqlOperation(createProduct, { input: productInput }))
         //fetchProducts()
         setProductForm({})
+        setStatusProduct('ALL')
         setTimeout(() => {
           toast({
               type: 'success',
@@ -207,6 +210,7 @@ export default function Products() {
     } catch (err) {
         //console.log('error creating Product:', err)
         setProductForm({})
+        setStatusProduct('ALL')
         setTimeout(() => {
           toast({
               type: 'error',
@@ -402,6 +406,8 @@ export default function Products() {
 
         setProductForm({})
         setAttributesSelected([])
+        setStatusProduct('ALL')
+        
         setTimeout(() => {
           toast({
               type: 'success',
@@ -418,6 +424,7 @@ export default function Products() {
     } catch (err) {
         //console.log('error updating Product:', err)
         setProductForm({})
+        setStatusProduct('ALL')
         setTimeout(() => {
           toast({
               type: 'error',
@@ -497,6 +504,7 @@ const subscriptionUpdate = async () => await API.graphql(
     setManufacturer(null)*/
     setOpen(false)
     setProductForm({})
+    setImages([])
     setAttributesSelected([])
     setProductsSelected([]) 
     setProductsSelectedAll(false)
@@ -516,6 +524,7 @@ const handleCloseUpdate = (evt) => {
   setAttributesSelected([])
   setProductsSelected([]) 
   setProductsSelectedAll(false)
+  setImages([])
        
   //setManufacturer(null)
   
@@ -583,6 +592,7 @@ const sliceIntoChunks = (arr, chunkSize) => {
       const chunk = arr.slice(i, i + chunkSize);
       res.push(chunk);
   }
+  setProductQty(arr.length)
   return res;
 }
 
@@ -727,8 +737,10 @@ const fetchProducts = async () => {
       })      
 
       //console.log(productData)
+      const products = await productData.data.listProducts.items.filter(item => !item._deleted)  
       
-      const products = await productData.data.listProducts.items.filter(item => !item._deleted)   
+      
+      
       //console.log("QUE TENEMOS AQUI:", Products)  
       //sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
       setChunkProducts( sliceIntoChunks(products, productsByPage ))
@@ -1689,6 +1701,50 @@ const handleApplyCategoriesChanges = () => {
   }
 }
 
+const handleStatusProduct = (value) => {
+  console.log(value)
+  console.log(products)
+  let productList = []
+  
+  if (value === 'ACTIVE'){
+    console.log('Active')
+    productList = sliceIntoChunks(products.filter(item => item.status === 'Active'), productsByPage )
+    setChunkProducts( productList )
+  }
+
+  if (value === 'DRAFT'){
+    console.log('Draft')
+    productList = sliceIntoChunks(products.filter(item => item.status === 'Draft'), productsByPage )
+    setChunkProducts( productList )
+  }
+
+  if (value === 'ALL'){
+    console.log('All')
+    productList = sliceIntoChunks(products.filter(item => item.status === 'Draft' || item.status === 'Active'), productsByPage )
+    setChunkProducts( productList )
+  }
+
+  setStatusProduct(value)
+
+  //setProductQty(productList.length)
+
+  /*setStatusProduct(value)
+    
+  if (value === 'ACTIVE'){
+    setProducts(products.filter(item => item.status === 'Active'))  
+  }
+
+  if (value === 'DRAFT'){
+    setProducts(products.filter(item => item.status === 'Draft'))  
+  }
+  
+  if (value === 'ALL'){
+    setProducts(products.filter(item => item.status))
+  }*/
+
+  
+  }
+
 const handleApplyAttributesChanges = () => {
   setEditAttributesModal(false)
   try {
@@ -1773,7 +1829,7 @@ const handleGenerateHandle = () => {
         <h1>Products</h1>
 
         <Grid>
-          <Grid.Column width={10}>
+          <Grid.Column width={8}>
           <Input
                 icon='search'
                 iconPosition='left'
@@ -1785,14 +1841,37 @@ const handleGenerateHandle = () => {
                 //floated='left'
               />
           </Grid.Column>
-          <Grid.Column width={2}>
+          <Grid.Column width={4}>
              
-            <Label>
-            Products
+            <Label style={{marginTop:6}}>
+            Products:
             <Label.Detail>{productQty}</Label.Detail>
           </Label>
+          <span style={{marginLeft: 15}}>
+           Filter by Status: 
+          <Dropdown
+          style={{paddingLeft: 10}}
+            onChange={(e,{value}) => handleStatusProduct(value)}
+            value={statusProduct}
+            //onChange={(e,{value}) => console.log(value)}
+            
+            inline
+            
+            defaultValue={'ALL'}
+            options={[
+              { key: 1, text: 'All', value: 'ALL' },
+              { key: 2, text: 'Active', value: 'ACTIVE' },
+              { key: 3, text: 'Draft', value: 'DRAFT' },
+            ]}
+            //placeholder='Choose an option'
+            //selection
+            //value={value}
+          />
+          </span>
 
           </Grid.Column>
+          
+          
           <Grid.Column width={4}>
           
           <Modal
@@ -2146,7 +2225,9 @@ const handleGenerateHandle = () => {
               onPageChange={handlePaginationChange}              
             />
             
+            
             </div>
+            
 
       </div>  
     );
