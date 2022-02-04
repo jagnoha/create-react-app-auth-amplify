@@ -15,7 +15,7 @@ import EbayStoreCategories from '../EbayStoreCategories/EbayStoreCategories'
 import Attributes from '../Attributes/Attributes'
 import ExportFile from '../ExportFile/ExportFile'
 import Amplify, { API, graphqlOperation, Storage } from 'aws-amplify'
-import { listAttributes } from '../../graphql/queries'
+import { listAttributes, listBrands, listCategorys, listSubCategorys, listSubCategory2s } from '../../graphql/queries'
 import aws_exports from '../../aws-exports'
 
 //const Home = () => <h1>Home</h1>;
@@ -28,6 +28,11 @@ const style = {
 export default function Main(props) {
 
   const [attributes, setAttributes] = useState([])
+  const [brands, setBrands] = useState([])
+  const [categories, setCategories] = useState([])
+  const [subCategories, setSubCategories] = useState([])
+  const [subCategories2, setSubCategories2] = useState([]) 
+    
 
     const routes = [
         {
@@ -76,7 +81,12 @@ export default function Main(props) {
         },
         {
           path: "/exportfile",
-          main: () => <ExportFile attributes = {attributes}/>,          
+          main: () => <ExportFile attributes = {attributes} 
+                                  brands = {brands} 
+                                  categories = {categories}
+                                  subCategories = {subCategories}
+                                  subCategories2 = {subCategories2}
+                                  />,          
         }                   
       ];
 
@@ -144,9 +154,62 @@ export default function Main(props) {
       
         } catch (err) { console.log(err) }
     }
+
+    const fetchBrands = async () => {
+      try {
+        const brandsData = await API.graphql({
+          query: listBrands,
+        })      
+        const brands = await brandsData.data.listBrands.items.filter(item => !item._deleted)   
+        setBrands(brands)
+
+      } catch (err) { console.log(err) }
+  }
+
+  const fetchCategories = async () => {
+    try {
+      const categoriesData = await API.graphql({
+        query: listCategorys,
+      
+      })      
+      const categories = await categoriesData.data.listCategorys.items.filter(item => !item._deleted)      
+      setCategories(categories)   
+      
+  
+    } catch (err) { console.log(err) }
+  }
+
+  const fetchSubCategories = async () => {
+    try {
+      const subCategoriesData = await API.graphql({
+        query: listSubCategorys,
+      
+      })      
+      
+      const subCategories = await subCategoriesData.data.listSubCategorys.items.filter(item => !item._deleted)      
+      setSubCategories(subCategories)             
+  
+    } catch (err) { console.log(err) }
+  }
+
+  const fetchSubCategories2 = async () => {
+    try {
+      const subCategoriesData2 = await API.graphql({
+        query: listSubCategory2s,
+      
+      })     
+      const subCategories2 = await subCategoriesData2.data.listSubCategory2s.items.filter(item => !item._deleted)      
+      setSubCategories2(subCategories2)             
+  
+    } catch (err) { console.log(err) }
+  }
       
     useEffect(() => {
         fetchAttributes()
+        fetchBrands()
+        fetchCategories()
+        fetchSubCategories()
+        fetchSubCategories2()
     }, [])
 
   return (

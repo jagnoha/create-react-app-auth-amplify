@@ -14,11 +14,11 @@ Amplify.configure(aws_exports)
 export default function ExportFile(props) {
 
     const [products, setProducts] = useState([])
-    const [brands, setBrands] = useState([])
-    const [categories, setCategories] = useState([])
+    //const [brands, setBrands] = useState([])
+    //const [categories, setCategories] = useState([])
     //const [attributes, setAttributes] = useState([])
-    const [subCategories, setSubCategories] = useState([])
-    const [subCategories2, setSubCategories2] = useState([])    
+    //const [subCategories, setSubCategories] = useState([])
+    //const [subCategories2, setSubCategories2] = useState([])    
     const [data, setData] = useState([])
     
     let headers = [
@@ -136,10 +136,10 @@ export default function ExportFile(props) {
     ]*/
 
     const onPageRendered = async () => {
-        fetchBrands()
-        fetchCategories()
-        fetchSubCategories()
-        fetchSubCategories2()
+        //fetchBrands()
+        //fetchCategories()
+        //fetchSubCategories()
+        //fetchSubCategories2()
         //fetchAttributes()
         fetchProducts()
           
@@ -171,15 +171,15 @@ export default function ExportFile(props) {
             for (let item of products){
                 //console.log(item)
                 
-                let brand = brands.find(itemBrand => itemBrand.id === item.brandID) 
+                let brand = props.brands.find(itemBrand => itemBrand.id === item.brandID) 
                 let brandName = brand ? brand.name : ""
                 let title = item.title && item.title.store ? item.title.store : ""
                 let description = item.description && item.description.store ? item.description.store : ""
-                let category = categories.find(itemCategory => itemCategory.id === item.categoryID)
+                let category = props.categories.find(itemCategory => itemCategory.id === item.categoryID)
                 let categoryName = category ? category.name : ""
-                let subcategory = subCategories.find(itemSubCategory => itemSubCategory.id === item.subcategoryID)
+                let subcategory = props.subCategories.find(itemSubCategory => itemSubCategory.id === item.subcategoryID)
                 let subCategoryName = subcategory ? subcategory.name : ""
-                let subcategory2 = subCategories2.find(itemSubCategory2 => itemSubCategory2.id === item.subcategory2ID)
+                let subcategory2 = props.subCategories2.find(itemSubCategory2 => itemSubCategory2.id === item.subcategory2ID)
                 let subCategory2Name = subcategory2 && subcategory2.id !== '3dc30aff-66a5-49fa-9f20-49c76031a994' ? subcategory2.name : ""
                 let height = item.dimensions && item.dimensions.height ? item.dimensions.height : "" 
                 let length = item.dimensions && item.dimensions.length ? item.dimensions.length : ""
@@ -262,7 +262,7 @@ export default function ExportFile(props) {
         } catch (err) { console.log(err) }
     }
 
-    const fetchBrands = async () => {
+    /*const fetchBrands = async () => {
         try {
           const brandsData = await API.graphql({
             query: listBrands,
@@ -271,7 +271,7 @@ export default function ExportFile(props) {
           setBrands(brands)
 
         } catch (err) { console.log(err) }
-    }
+    }*/
 
     /*const fetchAttributes = async () => {
         try {
@@ -286,7 +286,7 @@ export default function ExportFile(props) {
         } catch (err) { console.log(err) }
     }*/
 
-    const fetchCategories = async () => {
+    /*const fetchCategories = async () => {
         try {
           const categoriesData = await API.graphql({
             query: listCategorys,
@@ -322,7 +322,7 @@ export default function ExportFile(props) {
           setSubCategories2(subCategories2)             
       
         } catch (err) { console.log(err) }
-      }
+      }*/
       
       
 

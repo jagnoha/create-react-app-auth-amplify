@@ -1990,8 +1990,8 @@ const handleGenerateHandle = () => {
           </Modal>
          
 
-
-              <Button.Group>
+              Bulk tasks: 
+              <Button.Group style = {{marginLeft: 10}}>
                   <Button onClick = {() => setEditCategoriesModal(true) } disabled = {productsSelected.length > 0 ? false : true} name="Edit Categories" icon>
                     <Popup content='Edit Product categories in bulk' position='top center' offset={[0, 15]} inverted trigger={<Icon name='sitemap' />} />
 
