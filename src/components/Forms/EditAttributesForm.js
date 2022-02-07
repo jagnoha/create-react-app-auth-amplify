@@ -4,7 +4,17 @@ import { Dropdown, Segment, Header, Icon, Divider, Grid, Accordion, Transition, 
 
 
 export default function EditAttributesForm(props) {
-    let attributes = props.attributes.map(item => { return {key: item.id, text: item.name, value: item.id } } )
+    let attributes = props.attributes.map(item => { return {key: item.id, text: item.name, value: item.id } } ).sort( (a,b) => {
+        let nameA = a.text.toUpperCase()
+        let nameB = b.text.toUpperCase()
+        if (nameA < nameB){
+          return -1                                      
+        }
+        if (nameA > nameB){
+          return 1
+        }
+        return 0
+      })
   
   return (
     <Form>

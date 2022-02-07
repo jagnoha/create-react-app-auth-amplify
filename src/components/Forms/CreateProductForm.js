@@ -6,17 +6,87 @@ import ImageUploading from 'react-images-uploading'
 
 
 export default function CreateProductForm(props) {
-  let brands = props.brands.map(item => { return {key: item.id, text: item.name, value: item.id } } )
-  let manufacturers = props.manufacturers.map(item => { return {key: item.id, text: item.name, value: item.id } } )
-  let categories = props.categories.map(item => { return {key: item.id, text: item.name, value: item.id } } )
-  let subCategories = props.subCategories.map(item => { return {key: item.id, text: item.name, value: item.id } } )
-  let subCategories2 = props.subCategories2.map(item => { return {key: item.id, text: item.name, value: item.id } } )
-  let ebayStoreCategorys = props.ebayStoreCategorys.map(item => { return {key: item.id, text: item.name, value: item.id } } )
-  let attributes = props.attributes.map(item => { return {key: item.id, text: item.name, value: item.id } } )
+  let brands = props.brands.map(item => { return {key: item.id, text: item.name, value: item.id } } ).sort( (a,b) => {
+    let nameA = a.text.toUpperCase()
+    let nameB = b.text.toUpperCase()
+    if (nameA < nameB){
+      return -1                                      
+    }
+    if (nameA > nameB){
+      return 1
+    }
+    return 0
+  })
+  let manufacturers = props.manufacturers.map(item => { return {key: item.id, text: item.name, value: item.id } } ).sort( (a,b) => {
+    let nameA = a.text.toUpperCase()
+    let nameB = b.text.toUpperCase()
+    if (nameA < nameB){
+      return -1                                      
+    }
+    if (nameA > nameB){
+      return 1
+    }
+    return 0
+  })
+  let categories = props.categories.map(item => { return {key: item.id, text: item.name, value: item.id } } ).sort( (a,b) => {
+    let nameA = a.text.toUpperCase()
+    let nameB = b.text.toUpperCase()
+    if (nameA < nameB){
+      return -1                                      
+    }
+    if (nameA > nameB){
+      return 1
+    }
+    return 0
+  })
+  let subCategories = props.subCategories.map(item => { return {key: item.id, text: item.name, value: item.id } } ).sort( (a,b) => {
+    let nameA = a.text.toUpperCase()
+    let nameB = b.text.toUpperCase()
+    if (nameA < nameB){
+      return -1                                      
+    }
+    if (nameA > nameB){
+      return 1
+    }
+    return 0
+  })
+  let subCategories2 = props.subCategories2.map(item => { return {key: item.id, text: item.name, value: item.id } } ).sort( (a,b) => {
+    let nameA = a.text.toUpperCase()
+    let nameB = b.text.toUpperCase()
+    if (nameA < nameB){
+      return -1                                      
+    }
+    if (nameA > nameB){
+      return 1
+    }
+    return 0
+  })
+  let ebayStoreCategorys = props.ebayStoreCategorys.map(item => { return {key: item.id, text: item.name, value: item.id } } ).sort( (a,b) => {
+    let nameA = a.text.toUpperCase()
+    let nameB = b.text.toUpperCase()
+    if (nameA < nameB){
+      return -1                                      
+    }
+    if (nameA > nameB){
+      return 1
+    }
+    return 0
+  })
+  let attributes = props.attributes.map(item => { return {key: item.id, text: item.name, value: item.id } } ).sort( (a,b) => {
+    let nameA = a.text.toUpperCase()
+    let nameB = b.text.toUpperCase()
+    if (nameA < nameB){
+      return -1                                      
+    }
+    if (nameA > nameB){
+      return 1
+    }
+    return 0
+  })
   //let statusList = [{key: 1, text: "Active", value: '1'},{key: 0, text: "Draft", value: '0'}]
   const [addImageVisible, setAddImageVisible] = useState(false)
   
-  
+  //console.log(brands)
   
   
   return (
