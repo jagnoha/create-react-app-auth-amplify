@@ -226,6 +226,20 @@ export const schema = {
                     "type": "String",
                     "isRequired": false,
                     "attributes": []
+                },
+                "shopifyMetaTitle": {
+                    "name": "shopifyMetaTitle",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "shopifyMetaDescription": {
+                    "name": "shopifyMetaDescription",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
                 }
             },
             "syncable": true,
@@ -1148,5 +1162,5 @@ export const schema = {
             }
         }
     },
-    "version": "b6a953057765cd849a313e8df549fb43"
+    "version": "813e76d682ea9dc62bfa782c6031a8cf"
 };

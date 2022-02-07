@@ -98,6 +98,8 @@ export declare class Product {
   readonly options?: string;
   readonly updateFlag?: boolean;
   readonly status?: string;
+  readonly shopifyMetaTitle?: string;
+  readonly shopifyMetaDescription?: string;
   constructor(init: ModelInit<Product>);
   static copyOf(source: Product, mutator: (draft: MutableModel<Product>) => MutableModel<Product> | void): Product;
 }

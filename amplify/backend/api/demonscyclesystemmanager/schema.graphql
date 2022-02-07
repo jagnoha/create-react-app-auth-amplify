@@ -87,6 +87,8 @@ type Product @model @key(name: "byBrand", fields: ["brandID"]) @key(name: "byMan
   options: String
   updateFlag: Boolean
   status: String
+  shopifyMetaTitle: String
+  shopifyMetaDescription: String
 }
 
 type Attribute @model @auth(rules: [{allow: public}]) {
