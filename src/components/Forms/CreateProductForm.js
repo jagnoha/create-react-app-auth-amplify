@@ -2,10 +2,14 @@ import React, {useState} from 'react'
 import { Form, Checkbox, GridRow, CardContent } from 'semantic-ui-react'
 import { Dropdown, Segment, Header, Icon, Divider, Grid, Accordion, Transition, Button, Card, Image, TextArea } from 'semantic-ui-react'
 import ImageUploading from 'react-images-uploading'
+//import ReactQuill from 'react-quill'
+//import 'react-quill/dist/quill.snow.css'
+import JoditEditor from "jodit-react"
 
 
 
 export default function CreateProductForm(props) {
+
   let brands = props.brands.map(item => { return {key: item.id, text: item.name, value: item.id } } ).sort( (a,b) => {
     let nameA = a.text.toUpperCase()
     let nameB = b.text.toUpperCase()
@@ -85,6 +89,13 @@ export default function CreateProductForm(props) {
   })
   //let statusList = [{key: 1, text: "Active", value: '1'},{key: 0, text: "Draft", value: '0'}]
   const [addImageVisible, setAddImageVisible] = useState(false)
+
+  const config = {
+    readonly: false,
+    height: 400
+  };
+
+  
   
   //console.log(brands)
   
@@ -331,40 +342,43 @@ export default function CreateProductForm(props) {
 
                     <Segment raised >
                         <Header>Description</Header>
-                    
-                        <Form.Field>
-                          <label>Store</label>
-                          <TextArea placeholder='Store Description' 
-                              value = {props.descriptionStore}
-                              onChange={props.handleDescriptionStore }
-                        />
-                          
-                        </Form.Field>
+                    <Form.Field>
+                        <label><h3>Store</h3></label>
 
+                        <JoditEditor
+                                //ref={editor}
+                                value={props.descriptionStore}
+                                config={config}
+                                //onBlur={handleUpdate}
+                                onChange={props.handleDescriptionStore}
+                              />
+
+                      </Form.Field>
                         
                         
                         <Grid>
                         <Grid.Row>
                           <Grid.Column width={8}>
-                          <Form.Field>
-                          <label>eBay</label>
-                          
-                        <TextArea placeholder='eBay Description' 
-                              value = {props.descriptionEbay}
-                              onChange={props.handleDescriptionEbay }
-                        />
-
-                        </Form.Field>
+                          <Form.Field> 
+                        <label><h3>eBay</h3></label>
+                        <JoditEditor
+                                //ref={editor}
+                                value={props.descriptionEbay}
+                                config={config}
+                                //onBlur={handleUpdate}
+                                onChange={props.handleDescriptionEbay}
+                              />
+                              </Form.Field>
                         </Grid.Column>
                         <Grid.Column width={8}>
-                        <Form.Field>
-                          <label>Amazon</label>
-                          <TextArea placeholder='Amazon Description' 
-                              value = {props.descriptionAmazon}
-                              onChange={props.handleDescriptionAmazon }
-                        />
-                          
-                        </Form.Field>
+                        <label><h3>Store</h3></label>
+                            <JoditEditor
+                                //ref={editor}
+                                value={props.descriptionAmazon}
+                                config={config}
+                                //onBlur={handleUpdate}
+                                onChange={props.descriptionAmazon}
+                              />
                         </Grid.Column>
                         </Grid.Row>
                         </Grid>

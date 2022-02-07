@@ -1380,31 +1380,43 @@ const handleAttributesSelectedCheckbox = (data) => {
         }));
     }
 
-    const handleDescriptionStore = (evt) => {
-      evt.persist();
+    const handleDescriptionStore = (value) => {
+      /*evt.persist();
       setProductForm((values) => ({
           ...values,
           descriptionStore: evt.target.value,
-      }));
+      }))*/
+      setProductForm((values) => ({
+        ...values,
+        descriptionStore: value,
+    }))
   }
 
-  const handleDescriptionEbay = (evt) => {
-    evt.persist();
+  const handleDescriptionEbay = (value) => {
+    //evt.persist();
 
     
-    setProductForm((values) => ({
+    /*setProductForm((values) => ({
         ...values,
         descriptionEbay: evt.target.value,
-    }))
+    }))*/
+    setProductForm((values) => ({
+      ...values,
+      descriptionEbay: value,
+  }))
   
 }
 
-const handleDescriptionAmazon = (evt) => {
-  evt.persist();
-  setProductForm((values) => ({
+const handleDescriptionAmazon = (value) => {
+  //evt.persist();
+  /*setProductForm((values) => ({
       ...values,
       descriptionAmazon: evt.target.value,
-  }));
+  }));*/
+  setProductForm((values) => ({
+    ...values,
+    descriptionAmazon: value,
+}))
 }
 
 const handleBullet1 = (evt) => {
@@ -2074,9 +2086,15 @@ const handleGenerateHandle = () => {
                       titleStore = { productForm.titleStore } handleTitleStore = {(e) => handleTitleStore(e)}
                       titleEbay = {productForm.titleEbay} handleTitleEbay = {(e) => handleTitleEbay(e)} ebayChars = {ebayTitleChars}
                       titleAmazon = {productForm.titleAmazon} handleTitleAmazon = {(e) => handleTitleAmazon(e)}
-                      descriptionStore = {productForm.descriptionStore} handleDescriptionStore = {(e) => handleDescriptionStore(e)}
-                      descriptionEbay = {productForm.descriptionEbay} handleDescriptionEbay = {(e) => handleDescriptionEbay(e)} 
-                      descriptionAmazon = {productForm.descriptionAmazon} handleDescriptionAmazon = {(e) => handleDescriptionAmazon(e)}
+                      //descriptionStore = {productForm.descriptionStore} handleDescriptionStore = {(e) => handleDescriptionStore(e)}
+                      descriptionStore = {productForm.descriptionStore} handleDescriptionStore = {(value) => handleDescriptionStore(value)}
+                      
+                      //descriptionEbay = {productForm.descriptionEbay} handleDescriptionEbay = {(e) => handleDescriptionEbay(e)} 
+                      descriptionEbay = {productForm.descriptionEbay} handleDescriptionEbay = {(value) => handleDescriptionEbay(value)} 
+                      
+                      //descriptionAmazon = {productForm.descriptionAmazon} handleDescriptionAmazon = {(e) => handleDescriptionAmazon(e)}
+                      descriptionAmazon = {productForm.descriptionAmazon} handleDescriptionAmazon = {(value) => handleDescriptionAmazon(value)}
+                      
                       bullet1 = {productForm.bullet1} handleBullet1 = {(e) => handleBullet1(e)}
                       bullet2 = {productForm.bullet2} handleBullet2 = {(e) => handleBullet2(e)}
                       bullet3 = {productForm.bullet3} handleBullet3 = {(e) => handleBullet3(e)}
