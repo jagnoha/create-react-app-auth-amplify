@@ -2216,10 +2216,10 @@ const handleGenerateHandle = () => {
          <div style = {paginationStyle}>
           <Pagination
               activePage={activePage}
-              boundaryRange={0}
-              ellipsisItem={null}
-              firstItem={null}
-              lastItem={null}
+              boundaryRange={1}
+              ellipsisItem='...'
+              firstItem='<<'
+              lastItem='>>'
               siblingRange={1}
               totalPages={ dataChunks.length }
               onPageChange={handlePaginationChange}              

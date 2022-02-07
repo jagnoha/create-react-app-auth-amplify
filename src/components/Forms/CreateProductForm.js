@@ -1,6 +1,6 @@
 import React, {useState} from 'react'
 import { Form, Checkbox, GridRow, CardContent } from 'semantic-ui-react'
-import { Dropdown, Segment, Header, Icon, Divider, Grid, Accordion, Transition, Button, Card, Image } from 'semantic-ui-react'
+import { Dropdown, Segment, Header, Icon, Divider, Grid, Accordion, Transition, Button, Card, Image, TextArea } from 'semantic-ui-react'
 import ImageUploading from 'react-images-uploading'
 
 
@@ -264,27 +264,36 @@ export default function CreateProductForm(props) {
                     
                         <Form.Field>
                           <label>Store</label>
-                          <input placeholder='Store Description' 
-                            value = {props.descriptionStore} 
-                            onChange={props.handleDescriptionStore }/>
+                          <TextArea placeholder='Store Description' 
+                              value = {props.descriptionStore}
+                              onChange={props.handleDescriptionStore }
+                        />
+                          
                         </Form.Field>
+
+                        
                         
                         <Grid>
                         <Grid.Row>
                           <Grid.Column width={8}>
                           <Form.Field>
                           <label>eBay</label>
-                          <input placeholder='eBay Description' 
-                            value = {props.descriptionEbay} 
-                            onChange={props.handleDescriptionEbay }/>
+                          
+                        <TextArea placeholder='eBay Description' 
+                              value = {props.descriptionEbay}
+                              onChange={props.handleDescriptionEbay }
+                        />
+
                         </Form.Field>
                         </Grid.Column>
                         <Grid.Column width={8}>
                         <Form.Field>
                           <label>Amazon</label>
-                          <input placeholder='Amazon Description' 
-                            value = {props.descriptionAmazon} 
-                            onChange={props.handleDescriptionAmazon }/>
+                          <TextArea placeholder='Amazon Description' 
+                              value = {props.descriptionAmazon}
+                              onChange={props.handleDescriptionAmazon }
+                        />
+                          
                         </Form.Field>
                         </Grid.Column>
                         </Grid.Row>
