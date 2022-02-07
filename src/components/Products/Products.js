@@ -956,10 +956,33 @@ const fetchProducts = async () => {
         
           }  )
 
+          let tempProducts7 = products.filter(itemFilter => { 
+            let category = categories.find(item => item.id === itemFilter.categoryID)
+            let categoryName = category ? category.name : ''
+            return categoryName ? categoryName.toLowerCase().includes(search.toLowerCase()) : "" 
+        
+          }  )
+
+          let tempProducts8 = products.filter(itemFilter => { 
+            let subCategory = subCategories.find(item => item.id === itemFilter.subcategoryID)
+            let subCategoryName = subCategory ? subCategory.name : ''
+            return subCategoryName ? subCategoryName.toLowerCase().includes(search.toLowerCase()) : "" 
+        
+          }  )
+
+          let tempProducts9 = products.filter(itemFilter => { 
+            let subCategory2 = subCategories2.find(item => item.id === itemFilter.subcategory2ID)
+            let subCategory2Name = subCategory2 ? subCategory2.name : ''
+            return subCategory2Name ? subCategory2Name.toLowerCase().includes(search.toLowerCase()) : "" 
+        
+          }  )
+          console.log("SOSODISODISODS: ", subCategories)
+
           
         
 
-        const mergeProducts = [...tempProducts1, ...tempProducts2, ...tempProducts3, ...tempProducts4, ...tempProducts5, ...tempProducts6 ]
+        const mergeProducts = [...tempProducts1, ...tempProducts2, ...tempProducts3, ...tempProducts4, ...tempProducts5, ...tempProducts6, 
+          ...tempProducts7, ...tempProducts8, ...tempProducts9 ]
         
         let set = new Set();
         let tempProducts = mergeProducts.filter(item => {
