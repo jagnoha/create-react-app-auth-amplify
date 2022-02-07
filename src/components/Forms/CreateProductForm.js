@@ -371,7 +371,7 @@ export default function CreateProductForm(props) {
                               </Form.Field>
                         </Grid.Column>
                         <Grid.Column width={8}>
-                        <label><h3>Store</h3></label>
+                        <label><h3>Amazon</h3></label>
                             <JoditEditor
                                 //ref={editor}
                                 value={props.descriptionAmazon}
