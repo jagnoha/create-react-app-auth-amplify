@@ -1,14 +1,17 @@
-import React, {useState} from 'react'
+import React, {useState, useRef} from 'react'
 import { Form, Checkbox, GridRow, CardContent } from 'semantic-ui-react'
 import { Dropdown, Segment, Header, Icon, Divider, Grid, Accordion, Transition, Button, Card, Image, TextArea } from 'semantic-ui-react'
 import ImageUploading from 'react-images-uploading'
-//import ReactQuill from 'react-quill'
-//import 'react-quill/dist/quill.snow.css'
-import JoditEditor from "jodit-react"
+import ReactQuill from 'react-quill'
+import 'react-quill/dist/quill.snow.css'
+/*import { Editor } from 'react-draft-wysiwyg'
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'*/
 
 
 
 export default function CreateProductForm(props) {
+
+  const editor = useRef(null)
 
   let brands = props.brands.map(item => { return {key: item.id, text: item.name, value: item.id } } ).sort( (a,b) => {
     let nameA = a.text.toUpperCase()
@@ -90,14 +93,33 @@ export default function CreateProductForm(props) {
   //let statusList = [{key: 1, text: "Active", value: '1'},{key: 0, text: "Draft", value: '0'}]
   const [addImageVisible, setAddImageVisible] = useState(false)
 
-  const config = {
+  /*const config = {
     readonly: false,
-    height: 400
-  };
+    height: 400,
+    spellcheck: false,
+  };*/
 
   
   
   //console.log(brands)
+  const modules = {
+    toolbar: [
+      [{ header: ['1','2','3','4','5','6']}],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+      [
+        { list: 'ordered' },
+        { list: 'bullet' },
+        { indent: '-1' },
+        { indent: '+1' },
+      ],
+      ['link', 'image', 'video'],
+      ['clean'],
+    ],
+    clipboard: {
+      // toggle to add extra line breaks when pasting HTML:
+      matchVisual: false,
+    },
+  }
   
   
   return (
@@ -126,7 +148,10 @@ export default function CreateProductForm(props) {
                       <label>Parent SKU</label>
                       <input placeholder='Parent SKU' 
                         value = {props.parentSKU} 
-                        onChange={props.handleParentSKU }/>
+                        //onBlur = {props.handleParentSKU}
+                        onChange={props.handleParentSKU }
+                        />
+                        
                     </Form.Field>
                     </Grid.Column>
                     <Grid.Column width={6}>
@@ -342,16 +367,29 @@ export default function CreateProductForm(props) {
 
                     <Segment raised >
                         <Header>Description</Header>
-                    <Form.Field>
-                        <label><h3>Store</h3></label>
 
-                        <JoditEditor
-                                //ref={editor}
+                        
+
+                    <Form.Field>
+                        <label id="store"><h3>Store</h3></label>
+                        <ReactQuill 
+                          theme="snow" 
+                          value={props.descriptionStore ? props.descriptionStore : ""} onChange={props.handleDescriptionStore}
+                          modules={modules}
+                          //scrollingContainer='#store'
+                          //readOnly={true}
+                          //scrollingContainer
+                          //formats={formats}
+                          
+                          />
+
+                        {/*<JoditEditor
+                                ref={editor}
                                 value={props.descriptionStore}
                                 config={config}
-                                //onBlur={handleUpdate}
-                                onChange={props.handleDescriptionStore}
-                              />
+                                onBlur={props.handleDescriptionStore}
+                                //onChange={props.handleDescriptionStore}
+                        />*/}
 
                       </Form.Field>
                         
@@ -361,24 +399,33 @@ export default function CreateProductForm(props) {
                           <Grid.Column width={8}>
                           <Form.Field> 
                         <label><h3>eBay</h3></label>
-                        <JoditEditor
-                                //ref={editor}
+                        {/*<JoditEditor
+                                ref={editor}
                                 value={props.descriptionEbay}
                                 config={config}
-                                //onBlur={handleUpdate}
-                                onChange={props.handleDescriptionEbay}
-                              />
+                                onBlur={props.handleDescriptionEbay}
+                                //onChange={props.handleDescriptionEbay}
+                        />*/}
+                        <ReactQuill 
+                          theme="snow" 
+                          value={props.descriptionEbay ? props.descriptionEbay : ""} onChange={props.handleDescriptionEbay}
+                          modules={modules}
+                          //style = {{fontSize: '18px',overflowY: 'visible' }}
+                          //formats={formats}
+                          
+                          />
                               </Form.Field>
                         </Grid.Column>
                         <Grid.Column width={8}>
                         <label><h3>Amazon</h3></label>
-                            <JoditEditor
-                                //ref={editor}
-                                value={props.descriptionAmazon}
-                                config={config}
-                                //onBlur={handleUpdate}
-                                onChange={props.descriptionAmazon}
-                              />
+                           
+                            <ReactQuill 
+                          theme="snow" 
+                          value={props.descriptionAmazon ? props.descriptionAmazon : ""} onChange={props.handleDescriptionAmazon}
+                          modules={modules}
+                          //formats={formats}
+                          
+                            />
                         </Grid.Column>
                         </Grid.Row>
                         </Grid>
@@ -771,6 +818,27 @@ export default function CreateProductForm(props) {
                       <input placeholder='Shopify Fitment Tags' 
                         value = {props.shopifyOnlyTags} 
                         onChange={props.handleShopifyOnlyTags }/>
+                    </Form.Field>
+                    </Grid.Column>
+                    </Grid.Row>
+                       </Grid>
+
+                       <Grid>
+                      <Grid.Row>
+                        <Grid.Column width={8}>
+                    <Form.Field>
+                      <label>Shopify Meta Title</label>
+                      <input placeholder='Shopify Meta Title' 
+                        value = {props.shopifyMetaTitle} 
+                        onChange={props.handleShopifyMetaTitle }/>
+                    </Form.Field>
+                    </Grid.Column>
+                    <Grid.Column width={8}>
+                    <Form.Field>
+                      <label>Shopify Meta Description</label>
+                      <input placeholder='Shopify Meta Description' 
+                        value = {props.shopifyMetaDescription} 
+                        onChange={props.handleShopifyMetaDescription }/>
                     </Form.Field>
                     </Grid.Column>
                     </Grid.Row>

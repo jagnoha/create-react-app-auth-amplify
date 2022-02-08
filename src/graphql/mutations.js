@@ -81,6 +81,8 @@ export const createProduct = /* GraphQL */ `
       options
       updateFlag
       status
+      shopifyMetaTitle
+      shopifyMetaDescription
       _version
       _deleted
       _lastChangedAt
@@ -169,6 +171,8 @@ export const updateProduct = /* GraphQL */ `
       options
       updateFlag
       status
+      shopifyMetaTitle
+      shopifyMetaDescription
       _version
       _deleted
       _lastChangedAt
@@ -257,6 +261,8 @@ export const deleteProduct = /* GraphQL */ `
       options
       updateFlag
       status
+      shopifyMetaTitle
+      shopifyMetaDescription
       _version
       _deleted
       _lastChangedAt

@@ -85,6 +85,8 @@ export default function Products() {
           subCategory2: {id: "", checked: false},
           ebayStoreCategory: {id:"", checked: false}
         })
+
+  //const [descriptionStore, setDescriptionStore] = useState('')
   
   
   
@@ -126,6 +128,8 @@ export default function Products() {
           handle: productForm.handle,
           shopifyFitmentTags: productForm.shopifyFitmentTags,
           shopifyOnlyTags: productForm.shopifyOnlyTags,
+          shopifyMetaTitle: productForm.shopifyMetaTitle,
+          shopifyMetaDescription: productForm.shopifyMetaDescription,        
           brandID: productForm.brandID,
           manufacturerID: productForm.manufacturerID,
           categoryID: productForm.categoryID,
@@ -139,6 +143,7 @@ export default function Products() {
           },
           description: {
             store: productForm.descriptionStore,
+            //store: descriptionStore,
             ebay: productForm.descriptionEbay,
             amazon: productForm.descriptionAmazon,
           },
@@ -336,6 +341,9 @@ export default function Products() {
           handle: productForm.handle,
           shopifyFitmentTags: productForm.shopifyFitmentTags,
           shopifyOnlyTags: productForm.shopifyOnlyTags,
+          shopifyMetaTitle: productForm.shopifyMetaTitle,
+          shopifyMetaDescription: productForm.shopifyMetaDescription,
+        
           brandID: productForm.brandID,
           manufacturerID: productForm.manufacturerID,
           categoryID: productForm.categoryID,
@@ -349,6 +357,7 @@ export default function Products() {
           },
           description: {
             store: productForm.descriptionStore,
+            //store: descriptionStore,
             ebay: productForm.descriptionEbay,
             amazon: productForm.descriptionAmazon,
           },
@@ -869,6 +878,7 @@ const fetchProducts = async () => {
         titleEbay: item.title ? item.title.ebay : "",
         titleAmazon: item.title ? item.title.amazon : "", 
         descriptionStore: item.description ? item.description.store : "",
+        
         descriptionEbay: item.description ? item.description.ebay : "",
         descriptionAmazon: item.description ? item.description.amazon : "",
         bullet1: item.bulletPoints ? item.bulletPoints.bullet1 : "",
@@ -888,6 +898,9 @@ const fetchProducts = async () => {
         width: item.dimensions ? item.dimensions.width : 0,
         shopifyFitmentTags: item.shopifyFitmentTags ? item.shopifyFitmentTags : "",
         shopifyOnlyTags: item.shopifyOnlyTags ? item.shopifyOnlyTags : "",
+        shopifyMetaTitle: item.shopifyMetaTitle ? item.shopifyMetaTitle : "",
+        shopifyMetaDescription: item.shopifyMetaDescription ? item.shopifyMetaDescription : "",
+        
         priceMSRP: item.price ? item.price.MSRP : 0,
         priceMAP: item.price ? item.price.MAP : 0,
         priceStore: item.price ? item.price.store : 0,
@@ -1082,6 +1095,31 @@ const fetchProducts = async () => {
             mpn: evt.target.value,
         }));
     }
+
+    const handleLegacyId = (evt) => {
+      evt.persist();
+      setProductForm((values) => ({
+          ...values,
+          legacyId: evt.target.value,
+      }));
+  }
+
+  const handleBinLocation = (evt) => {
+    evt.persist();
+    setProductForm((values) => ({
+        ...values,
+        binLocation: evt.target.value,
+    }));
+}
+
+  const handleParentSKU = (evt) => {
+    evt.persist();
+    setProductForm((values) => ({
+        ...values,
+        parentSKU: evt.target.value,
+    }));
+}
+
     const handleAttributes = (value) => {
       //evt.persist();
       
@@ -1346,6 +1384,22 @@ const handleAttributesSelectedCheckbox = (data) => {
               }));
           }
 
+          const handleShopifyMetaTitle = (evt) => {
+            evt.persist();
+            setProductForm((values) => ({
+                ...values,
+                shopifyMetaTitle: evt.target.value,
+            }));
+        }
+
+        const handleShopifyMetaDescription = (evt) => {
+          evt.persist();
+          setProductForm((values) => ({
+              ...values,
+              shopifyMetaDescription: evt.target.value,
+          }));
+      }
+
           const handleTitleStore = (evt) => {
             evt.persist();
             setProductForm((values) => ({
@@ -1386,10 +1440,14 @@ const handleAttributesSelectedCheckbox = (data) => {
           ...values,
           descriptionStore: evt.target.value,
       }))*/
+      
+      console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", value)
       setProductForm((values) => ({
         ...values,
         descriptionStore: value,
     }))
+    //setDescriptionStore(value)
+  
   }
 
   const handleDescriptionEbay = (value) => {
@@ -2071,12 +2129,15 @@ const handleGenerateHandle = () => {
                   <CreateProductForm 
                       sku = {productForm.sku} handleSKU = {(e) => handleSKU(e)}
                       mpn = {productForm.mpn} handleMPN = {(e) => handleMPN(e)}
-                      legacyId = {productForm.legacyId} handleLegacyId = {(e) => handleMPN(e)}
-                      parentSKU = {productForm.parentSKU} handleParentSKU = {(e) => handleMPN(e)}
-                      binLocation = {productForm.binLocation} handleBinLocation = {(e) => handleMPN(e)}
+                      legacyId = {productForm.legacyId} handleLegacyId = {(e) => handleLegacyId(e)}
+                      parentSKU = {productForm.parentSKU} handleParentSKU = {(e) => handleParentSKU(e)}
+                      binLocation = {productForm.binLocation} handleBinLocation = {(e) => handleBinLocation(e)}
                       handle = {productForm.handle} handleHandle = {(e) => handleHandle(e)}
                       shopifyFitmentTags = {productForm.shopifyFitmentTags} handleShopifyFitmentTags = {(e) => handleShopifyFitmentTags(e)}
                       shopifyOnlyTags = {productForm.shopifyOnlyTags} handleShopifyOnlyTags = {(e) => handleShopifyOnlyTags(e)}
+                      shopifyMetaTitle = {productForm.shopifyMetaTitle} handleShopifyMetaTitle = {(e) => handleShopifyMetaTitle(e)}
+                      shopifyMetaDescription = {productForm.shopifyMetaDescription} handleShopifyMetaDescription = {(e) => handleShopifyMetaDescription(e)}
+                      
                       brands = {brands} valueBrand = {productForm.brandID} handleBrand = {(e, { value }) => handleBrand(value)}
                       manufacturers = {manufacturers} valueManufacturer = {productForm.manufacturerID} handleManufacturer = {(e, { value }) => handleManufacturer(value)}
                       categories = {categories} valueCategory = {productForm.categoryID} handleCategory = {(e, { value }) => handleCategory(value)}
@@ -2087,6 +2148,7 @@ const handleGenerateHandle = () => {
                       titleEbay = {productForm.titleEbay} handleTitleEbay = {(e) => handleTitleEbay(e)} ebayChars = {ebayTitleChars}
                       titleAmazon = {productForm.titleAmazon} handleTitleAmazon = {(e) => handleTitleAmazon(e)}
                       //descriptionStore = {productForm.descriptionStore} handleDescriptionStore = {(e) => handleDescriptionStore(e)}
+                      //descriptionStore = {productForm.descriptionStore} handleDescriptionStore = {(value) => handleDescriptionStore(value)}
                       descriptionStore = {productForm.descriptionStore} handleDescriptionStore = {(value) => handleDescriptionStore(value)}
                       
                       //descriptionEbay = {productForm.descriptionEbay} handleDescriptionEbay = {(e) => handleDescriptionEbay(e)} 
@@ -2164,12 +2226,14 @@ const handleGenerateHandle = () => {
                 <CreateProductForm 
                       sku = {productForm.sku} handleSKU = {(e) => handleSKU(e)}
                       mpn = {productForm.mpn} handleMPN = {(e) => handleMPN(e)}
-                      legacyId = {productForm.legacyId} handleLegacyId = {(e) => handleMPN(e)}
-                      parentSKU = {productForm.parentSKU} handleParentSKU = {(e) => handleMPN(e)}
-                      binLocation = {productForm.binLocation} handleBinLocation = {(e) => handleMPN(e)}
+                      legacyId = {productForm.legacyId} handleLegacyId = {(e) => handleLegacyId(e)}
+                      parentSKU = {productForm.parentSKU} handleParentSKU = {(e) => handleParentSKU(e)}
+                      binLocation = {productForm.binLocation} handleBinLocation = {(e) => handleBinLocation(e)}
                       handle = {productForm.handle} handleHandle = {(e) => handleHandle(e)}
                       shopifyFitmentTags = {productForm.shopifyFitmentTags} handleShopifyFitmentTags = {(e) => handleShopifyFitmentTags(e)}
                       shopifyOnlyTags = {productForm.shopifyOnlyTags} handleShopifyOnlyTags = {(e) => handleShopifyOnlyTags(e)}
+                      shopifyMetaTitle = {productForm.shopifyMetaTitle} handleShopifyMetaTitle = {(e) => handleShopifyMetaTitle(e)}
+                      shopifyMetaDescription = {productForm.shopifyMetaDescription} handleShopifyMetaDescription = {(e) => handleShopifyMetaDescription(e)}                      
                       brands = {brands} valueBrand = {productForm.brandID} handleBrand = {(e, { value }) => handleBrand(value)}
                       manufacturers = {manufacturers} valueManufacturer = {productForm.manufacturerID} handleManufacturer = {(e, { value }) => handleManufacturer(value)}
                       categories = {categories} valueCategory = {productForm.categoryID} handleCategory = {(e, { value }) => handleCategory(value)}
@@ -2179,9 +2243,11 @@ const handleGenerateHandle = () => {
                       titleStore = { productForm.titleStore } handleTitleStore = {(e) => handleTitleStore(e)}
                       titleEbay = {productForm.titleEbay} handleTitleEbay = {(e) => handleTitleEbay(e)} ebayChars = {ebayTitleChars}
                       titleAmazon = {productForm.titleAmazon} handleTitleAmazon = {(e) => handleTitleAmazon(e)}
-                      descriptionStore = {productForm.descriptionStore} handleDescriptionStore = {(e) => handleDescriptionStore(e)}
-                      descriptionEbay = {productForm.descriptionEbay} handleDescriptionEbay = {(e) => handleDescriptionEbay(e)} 
-                      descriptionAmazon = {productForm.descriptionAmazon} handleDescriptionAmazon = {(e) => handleDescriptionAmazon(e)}
+                      descriptionStore = {productForm.descriptionStore} handleDescriptionStore = {(value) => handleDescriptionStore(value)}
+                      //descriptionStore = {descriptionStore} handleDescriptionStore = {(value) => handleDescriptionStore(value)}
+                      
+                      descriptionEbay = {productForm.descriptionEbay} handleDescriptionEbay = {(value) => handleDescriptionEbay(value)} 
+                      descriptionAmazon = {productForm.descriptionAmazon} handleDescriptionAmazon = {(value) => handleDescriptionAmazon(value)}
                       bullet1 = {productForm.bullet1} handleBullet1 = {(e) => handleBullet1(e)}
                       bullet2 = {productForm.bullet2} handleBullet2 = {(e) => handleBullet2(e)}
                       bullet3 = {productForm.bullet3} handleBullet3 = {(e) => handleBullet3(e)}

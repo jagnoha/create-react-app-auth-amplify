@@ -78,6 +78,8 @@ export const getProduct = /* GraphQL */ `
       options
       updateFlag
       status
+      shopifyMetaTitle
+      shopifyMetaDescription
       _version
       _deleted
       _lastChangedAt
@@ -107,21 +109,16 @@ export const listProducts = /* GraphQL */ `
         subcategory2ID
         ebaystorecategoryID
         binLocation
-        handle
-        weight
-        dimensionalWeight
-        appliedWeight
-        shopifyFitmentTags
-        shopifyOnlyTags
-        cost
-        options
-        updateFlag
-        status
-        _version
-        _deleted
-        _lastChangedAt
-        createdAt
-        updatedAt
+        description {
+          store
+          ebay
+          amazon
+        }
+        dimensions {
+          height
+          length
+          width
+        }
         price {
           MSRP
           MAP
@@ -133,10 +130,26 @@ export const listProducts = /* GraphQL */ `
           scratchLow
           scratchHigh
         }
+        images {
+          image1
+          image2
+          image3
+          image4
+          image5
+          image6
+          image7
+          image8
+          image9
+          image10
+        }
         title {
-          amazon
-          ebay
           store
+          ebay
+          amazon
+        }
+        source {
+          warehouse
+          dropship
         }
         bulletPoints {
           bullet1
@@ -147,32 +160,23 @@ export const listProducts = /* GraphQL */ `
           bullet6
           bullet7
         }
-        description {
-          amazon
-          ebay
-          store
-        }
-        dimensions {
-          height
-          length
-          width
-        }
-        images {
-          image1
-          image10
-          image2
-          image3
-          image4
-          image5
-          image6
-          image7
-          image8
-          image9
-        }
-        source {
-          dropship
-          warehouse
-        }
+        handle
+        weight
+        dimensionalWeight
+        appliedWeight
+        shopifyFitmentTags
+        shopifyOnlyTags
+        cost
+        options
+        updateFlag
+        status
+        shopifyMetaTitle
+        shopifyMetaDescription
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
       }
       nextToken
       startedAt
@@ -216,6 +220,8 @@ export const syncProducts = /* GraphQL */ `
         options
         updateFlag
         status
+        shopifyMetaTitle
+        shopifyMetaDescription
         _version
         _deleted
         _lastChangedAt
