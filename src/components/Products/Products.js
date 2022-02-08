@@ -17,6 +17,7 @@ import { parse } from 'uuid'
 import EditCategoriesForm from '../Forms/EditCategoriesForm'
 import SubCategories from '../SubCategories/SubCategories'
 import EditAttributesForm from '../Forms/EditAttributesForm'
+import FindReplaceForm from '../Forms/FindReplaceForm'
 Amplify.configure(aws_exports)
 
 
@@ -73,7 +74,14 @@ export default function Products() {
   const [editAttributesModal, setEditAttributesModal] = useState(false)
   const [editPricesModal, setEditPricesModal] = useState(false)
   const [editStatusModal, setEditStatusModal] = useState(false)
+  const [findReplaceModal, setFindReplaceModal] = useState(false)
 
+  const [findText, setFindText] = useState("")
+  const [replaceText, setReplaceText] = useState("")
+  
+  
+
+  
   const [statusProduct, setStatusProduct] = useState('ALL')
 
   const [productQty, setProductQty] = useState(0)
@@ -950,6 +958,9 @@ const fetchProducts = async () => {
         
         let tempProducts3 = products.filter(itemFilter => itemFilter.title && itemFilter.title.store ? itemFilter.title.store.toLowerCase().includes(search.toLowerCase()) : "" )
         
+        let tempProducts10 = products.filter(itemFilter => itemFilter.description && itemFilter.description.store ? itemFilter.description.store.toLowerCase().includes(search.toLowerCase()) : "" )
+        
+
         let tempProducts4 = products.filter(itemFilter => { 
             let brand = brands.find(item => item.id === itemFilter.brandID)
             let brandName = brand ? brand.name : ''
@@ -995,7 +1006,7 @@ const fetchProducts = async () => {
         
 
         const mergeProducts = [...tempProducts1, ...tempProducts2, ...tempProducts3, ...tempProducts4, ...tempProducts5, ...tempProducts6, 
-          ...tempProducts7, ...tempProducts8, ...tempProducts9 ]
+          ...tempProducts7, ...tempProducts8, ...tempProducts9, ...tempProducts10 ]
         
         let set = new Set();
         let tempProducts = mergeProducts.filter(item => {
@@ -1680,6 +1691,164 @@ const handleSourceDropship = (evt) => {
   }))
 }
 
+const handleFindText = (evt) => {
+  evt.persist()
+  setFindText(evt.target.value)
+}
+
+const handleReplaceText = (evt) => {
+  evt.persist()
+  setReplaceText(evt.target.value)
+}
+
+/*********************************************************************** */
+
+const updateFindReplace = async (id) => {
+  try {
+    let product = products.find(item => item.id === id)
+    let version = product._version
+    let titleStoreOld = product.title && product.title.store ? product.title.store : ""
+    let titleEbayOld = product.title && product.title.ebay ? product.title.ebay : ""
+    let titleAmazonOld = product.title && product.title.amazon ? product.title.amazon : ""
+
+    let descriptionStoreOld = product.description && product.description.store ? product.description.store : ""
+    let descriptionEbayOld = product.description && product.description.ebay ? product.description.ebay : ""
+    let descriptionAmazonOld = product.description && product.description.amazon ? product.description.amazon : ""
+
+    //let handleOld = product.handle ? product.handle : ""
+
+    let shopifyMetaTitleOld = product.shopifyMetaTitle ? product.shopifyMetaTitle : ""
+    let shopifyMetaDescriptionOld = product.shopifyMetaDescription ? product.shopifyMetaDescription : ""
+
+    let shopifyOnlyTagsOld = product.shopifyOnlyTags ? product.shopifyOnlyTags : ""
+    let shopifyFitmentTagsOld = product.shopifyFitmentTags ? product.shopifyFitmentTags : ""
+
+
+    let productDetails = {
+      id,
+      title: {
+        store: titleStoreOld.replace(findText, replaceText),
+        ebay: titleEbayOld.replace(findText, replaceText),
+        amazon: titleAmazonOld.replace(findText, replaceText),
+      },
+      description: {
+        store: descriptionStoreOld.replace(findText, replaceText),
+        ebay: descriptionEbayOld.replace(findText, replaceText),
+        amazon: descriptionAmazonOld.replace(findText, replaceText),
+      },
+      //handle: handleOld.replace(findText, replaceText).toLowerCase(),
+      shopifyMetaDescription: shopifyMetaDescriptionOld.replace(findText, replaceText),
+      shopifyMetaTitle: shopifyMetaTitleOld.replace(findText, replaceText),
+      shopifyOnlyTags: shopifyOnlyTagsOld.replace(findText, replaceText),
+      shopifyFitmentTags: shopifyFitmentTagsOld.replace(findText, replaceText),
+      _version: version,          
+    }
+    await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+
+    
+
+  } catch (err) {
+    console.log('error creating Product:', err)
+    setTimeout(() => {
+      toast({
+          type: 'error',
+          icon: 'times',
+          size: 'tiny',              
+          title: 'Error updating Products',
+          description: err,              
+          time: 2000,              
+      });
+    }, 200);
+  }
+}
+
+
+
+/*********************************************************************** */
+
+const handleApplyFindText = () => {
+  console.log(findText + ' | ' + replaceText)
+  
+  
+  let tempProducts1 = products.filter(itemFilter => itemFilter.title && itemFilter.title.store ? itemFilter.title.store.includes(findText) : "" )
+  
+  let tempProducts2 = products.filter(itemFilter => itemFilter.title && itemFilter.title.ebay ? itemFilter.title.ebay.includes(findText) : "" )
+  
+  let tempProducts3 = products.filter(itemFilter => itemFilter.title && itemFilter.title.amazon ? itemFilter.title.amazon.includes(findText) : "" )
+  
+  let tempProducts4 = products.filter(itemFilter => itemFilter.description && itemFilter.description.store ? itemFilter.description.store.includes(findText) : "" )
+  
+  let tempProducts5 = products.filter(itemFilter => itemFilter.description && itemFilter.description.ebay ? itemFilter.description.ebay.includes(findText) : "" )
+  
+  let tempProducts6 = products.filter(itemFilter => itemFilter.description && itemFilter.description.amazon ? itemFilter.description.amazon.includes(findText) : "" )
+  
+  //let tempProducts7 = products.filter(itemFilter => itemFilter.handle ? itemFilter.handle.toLowerCase().includes(findText.toLowerCase()) : "" )
+  
+  let tempProducts8 = products.filter(itemFilter => itemFilter.shopifyMetaTitle ? itemFilter.shopifyMetaTitle.includes(findText) : "" )
+
+  let tempProducts9 = products.filter(itemFilter => itemFilter.shopifyMetaDescription ? itemFilter.shopifyMetaDescription.includes(findText) : "" )
+  
+
+  
+
+  const mergeProducts = [...tempProducts1, ...tempProducts2, ...tempProducts3, ...tempProducts4, ...tempProducts5, ...tempProducts6, 
+     ...tempProducts8, ...tempProducts9 ]
+  
+  let set = new Set()
+  let tempProducts = mergeProducts.filter(item => {
+    if (!set.has(item.id)) {
+      set.add(item.id);
+      return true;
+    }
+    return false;
+  }, set);
+
+ /* setProductForm((values) => ({
+    ...values,
+    title: {
+      store: productForm.title && productForm.title.store ? productForm.title.store.replace(findText, replaceText) : '',
+      ebay: productForm.title && productForm.title.ebay ? productForm.title.ebay.replace(findText, replaceText) : '',
+      amazon: productForm.title && productForm.title.amazon ? productForm.title.amazon.replace(findText, replaceText) : '',      
+    },
+    description: {
+      store: productForm.description && productForm.description.store ? productForm.description.store.replace(findText, replaceText) : '',
+      ebay: productForm.description && productForm.description.ebay ? productForm.description.ebay.replace(findText, replaceText) : '',
+      amazon: productForm.description && productForm.description.amazon ? productForm.description.title.amazon.replace(findText, replaceText) : '',      
+    },
+}))*/
+
+try {
+  for (let item of tempProducts){
+    console.log("**********************************************",item)
+    updateFindReplace(item.id)
+  }
+  setTimeout(() => {
+    toast({
+        type: 'success',
+        //icon: 'check circle outline',
+        size: 'small',              
+        description: `Changes applied to ${tempProducts.length} products`,
+        time: 2000,              
+    })
+  }, 200
+  )
+  setFindText('')
+  setReplaceText('')
+  setFindReplaceModal(false)
+  
+  } catch (error) {
+    console.log(error)
+  }
+
+  //console.log("PRODUCTS: ", tempProducts.length)
+  //setProductQty(tempProducts.length)
+  
+  
+  
+
+
+}
+
 const handleImages = (imageList, addUpdateIndex) => {
     //console.log("IMAGE LIST >>>>>>>>>>>>>", imageList, addUpdateIndex)
     console.log("IMAGE LIST >>>",imageList)
@@ -1921,6 +2090,20 @@ const handleGenerateHandle = () => {
           <SemanticToastContainer position="top-center" />
         <h1>Products</h1>
 
+        <div style={{marginTop:10, marginBottom:10}}>
+          <span>
+                  <Button onClick = {() => setFindReplaceModal(true) } name="Find and replace..." size='tiny'>
+                    <span>Find and Replace...</span>
+                  </Button>
+            </span> 
+            
+             </div>                      
+                   
+                
+
+
+
+
         <Grid>
           <Grid.Column width={8}>
           <Input
@@ -2002,6 +2185,36 @@ const handleGenerateHandle = () => {
               <Button positive disabled = {!Object.keys(editCategoriesSelected).some( (k) => { return editCategoriesSelected[k].checked === true })} 
               onClick={() => handleApplyCategoriesChanges()}>
                 Apply changes
+              </Button>
+ 
+              </Modal.Actions>
+          </Modal>
+
+          <Modal
+              closeOnEscape={true}
+              closeOnDimmerClick={false}            
+              onClose={() => setFindReplaceModal(false)}              
+              open={findReplaceModal}              
+            >
+              <Modal.Header>Find and Replace... <span style={{fontSize: 14}}></span></Modal.Header>
+              <Modal.Content >
+                <Modal.Description>
+                  <FindReplaceForm 
+                      findText = {findText}
+                      replaceText = {replaceText}
+                      handleFindText = {(e) => handleFindText(e)}
+                      handleReplaceText = {(e) => handleReplaceText(e)}
+                  />
+                  </Modal.Description>
+              </Modal.Content>
+              <Modal.Actions>
+              <Button negative onClick={() => setFindReplaceModal(false)}>
+                Cancel
+              </Button>
+              <Button positive disabled = {findText && findText.length > 0 && replaceText && replaceText.length > 0 ? false : true} 
+              onClick={() => handleApplyFindText()}
+              >
+                Replace
               </Button>
  
               </Modal.Actions>
@@ -2092,17 +2305,17 @@ const handleGenerateHandle = () => {
                   <Button onClick = {() => setEditAttributesModal(true)} disabled = {productsSelected.length > 0 ? false : true} icon>
                   <Popup content='Edit Product Attributes in bulk' position='top center' offset={[0, 15]} inverted trigger={<Icon name='sliders horizontal' />} />
                   </Button>
-                  {/*
+                  
                   <Button onClick = {() => setEditPricesModal(true)} disabled = {productsSelected.length > 0 ? false : true} icon>
                   <Popup content='Edit Prices' position='top center' offset={[0, 15]} inverted trigger={<Icon name='money bill alternate' />} />
                   </Button>
                   <Button onClick = {() => setEditStatusModal(true)} disabled = {productsSelected.length > 0 ? false : true} icon>
                   <Popup content='Change Status' position='top center' offset={[0, 15]} inverted trigger={<Icon name='checkmark' />} />
                   </Button>
-                  <Button disabled = {productsSelected.length > 0 ? false : true} icon>
+                  {/*<Button disabled = {productsSelected.length > 0 ? false : true} icon>
                   <Popup content='Remove Products' position='top center' offset={[0, 15]} inverted trigger={<Icon name='delete' />} />
-                  </Button>
-                  */}
+          </Button>*/}
+                  
                 </Button.Group>
 
 
