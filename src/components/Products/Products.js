@@ -18,6 +18,7 @@ import EditCategoriesForm from '../Forms/EditCategoriesForm'
 import SubCategories from '../SubCategories/SubCategories'
 import EditAttributesForm from '../Forms/EditAttributesForm'
 import FindReplaceForm from '../Forms/FindReplaceForm'
+import Filter from '../Filter/Filter'
 Amplify.configure(aws_exports)
 
 
@@ -780,8 +781,17 @@ const fetchProducts = async () => {
     const sortItems = (list, direction, column) => {
       if (direction === 'descending'){
         list.sort(function(a, b) {
-          let nameA = column !== 'title' ? ( a[column] ? a[column].toUpperCase() : "" ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
+          /*let nameA = column !== 'title' ? ( a[column] ? a[column].toUpperCase() : "" ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
           let nameB = column !== 'title' ? ( b[column] ? b[column].toUpperCase() : "" ) : ( b.title.store ? b.title.store.toUpperCase() : "")  // ignore upper and lowercase
+          */
+          /*let nameA = column !== 'title' ? ( a[column] ? a[column] : "" ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
+          let nameB = column !== 'title' ? ( b[column] ? b[column] : "" ) : ( b.title.store ? b.title.store.toUpperCase() : "")  // ignore upper and lowercase
+          */
+          
+          let nameA = column !== 'title' ? ( column !== 'MSRP' ? a[column] : a.price.MSRP ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
+          let nameB = column !== 'title' ? ( column !== 'MSRP' ? b[column] : b.price.MSRP ) : ( b.title.store ? b.title.store.toUpperCase() : "") // ignore upper and lowercase
+          
+
           if (nameA < nameB) {
             return -1;
           }
@@ -794,8 +804,16 @@ const fetchProducts = async () => {
         });
       } else {
         list.sort(function(a, b) {
-          let nameA = column !== 'title' ? ( a[column] ? a[column].toUpperCase() : "" ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
+          /*let nameA = column !== 'title' ? ( a[column] ? a[column].toUpperCase() : "" ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
           let nameB = column !== 'title' ? ( b[column] ? b[column].toUpperCase() : "" ) : ( b.title.store ? b.title.store.toUpperCase() : "")  // ignore upper and lowercase
+          */          
+          /*let nameA = column !== 'title' ? ( a[column] ? a[column] : "" ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
+          let nameB = column !== 'title' ? ( b[column] ? b[column] : "" ) : ( b.title.store ? b.title.store.toUpperCase() : "")  // ignore upper and lowercase
+          */
+          let nameA = column !== 'title' ? ( column !== 'MSRP' ? a[column] : a.price.MSRP ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
+          let nameB = column !== 'title' ? ( column !== 'MSRP' ? b[column] : b.price.MSRP ) : ( b.title.store ? b.title.store.toUpperCase() : "") // ignore upper and lowercase
+          
+
           if (nameB < nameA) {
             return -1;
           }
@@ -2091,13 +2109,16 @@ const handleGenerateHandle = () => {
         <h1>Products</h1>
 
         <div style={{marginTop:10, marginBottom:10}}>
-          <span>
+            <span>
                   <Button onClick = {() => setFindReplaceModal(true) } name="Find and replace..." size='tiny'>
                     <span>Find and Replace...</span>
                   </Button>
             </span> 
+            <span>
+              <Filter />             
+            </span>
             
-             </div>                      
+          </div>                      
                    
                 
 

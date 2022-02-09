@@ -108,6 +108,10 @@ export default function ProductTable(props) {
                 onClick={() => props.handleOrder('subcategoryID')} >SubCategory</Table.HeaderCell>
             <Table.HeaderCell width={1} sorted={props.orderColumn.column === 'subcategory2ID' ? props.orderColumn.direction : null}
                 onClick={() => props.handleOrder('subcategory2ID')} >SubCategory 2</Table.HeaderCell>
+            <Table.HeaderCell width={1} sorted={props.orderColumn.column === 'MSRP' ? props.orderColumn.direction : null}
+                onClick={() => props.handleOrder('MSRP')} >MSRP</Table.HeaderCell>
+            <Table.HeaderCell sorted={props.orderColumn.column === 'cost' ? props.orderColumn.direction : null}
+                onClick={() => props.handleOrder('cost')}>Cost</Table.HeaderCell>
             <Table.HeaderCell width={1} sorted={props.orderColumn.column === 'createdAt' ? props.orderColumn.direction : null}
                 onClick={() => props.handleOrder('createdAt')}>Created</Table.HeaderCell>
             <Table.HeaderCell width={1} sorted={props.orderColumn.column === 'updatedAt' ? props.orderColumn.direction : null}
@@ -166,6 +170,8 @@ export default function ProductTable(props) {
                     subCategory2 ? (subCategory2.id === '3dc30aff-66a5-49fa-9f20-49c76031a994' ? "" : subCategory2.name) : ""
 
                 }</Table.Cell>
+                <Table.Cell onClick = {()=>props.openForm(item)}> {item.price && item.price.MSRP ? '$'+item.price.MSRP : ""}</Table.Cell>
+                <Table.Cell onClick = {()=>props.openForm(item)}> {item.cost ? '$'+item.cost : ""}</Table.Cell>
                 <Table.Cell onClick = {()=>props.openForm(item)} >{new Date(item.createdAt).toString().split(' GMT')[0]}</Table.Cell>
                 <Table.Cell onClick = {()=>props.openForm(item)} >{new Date(item.updatedAt).toString().split(' GMT')[0]}</Table.Cell>
 
