@@ -778,13 +778,13 @@ const fetchProducts = async () => {
       let resultToken = true
 
       while (resultToken) {
-        let productsTemp2 = await API.graphql(graphqlOperation(listProducts, {limit: 1000, nextToken: token} ))
+        let productsTemp2 = await API.graphql(graphqlOperation(listProducts, {limit: 2000, nextToken: token} ))
         
         const products = productsTemp2.data.listProducts.items.filter(item => !item._deleted)
         console.log(products)
         const token = productsTemp2.data.listProducts.nextToken
         productList = productList.concat(products)
-        if (productList.length < 1000){
+        if (productList.length < 2000){
           setChunkProducts( sliceIntoChunks(productList, productsByPage ))
           //setProductQty(productList.length)
           setProducts(productList)

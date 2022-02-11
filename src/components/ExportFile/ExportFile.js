@@ -663,7 +663,7 @@ export default function ExportFile(props) {
             Create export file for FlxPoint
             
         </CSVLink>
-        <hr></hr>
+        {/*<hr></hr>
         <label htmlFor="upload">Upload to AWS</label><br></br>
           <input
               type="file"
@@ -679,7 +679,7 @@ export default function ExportFile(props) {
               id="upload"
               onChange={readUploadNewProducts}
           />
-          
+        */} 
 
       </div>    
     );
