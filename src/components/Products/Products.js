@@ -23,7 +23,7 @@ Amplify.configure(aws_exports)
 
 
 
-export default function Products() {
+export default function Products(props) {
   const [chunckProducts, setChunkProducts] = useState(null)
   const [products, setProducts] = useState([])
 
@@ -32,7 +32,7 @@ export default function Products() {
   //const [images, setImages] = React.useState([{"data_url":"https://cdn.shopify.com/s/files/1/0338/9682/4876/products/28890339_600x.jpg?v=1627667600"}]);
   const [images, setImages] = React.useState([]);
   
-  const [productsByPage, setProductsByPage] = useState(25)
+  const [productsByPage, setProductsByPage] = useState(50)
   
   const [brands, setBrands] = useState([])
   const [brand, setBrand] = useState(null)
@@ -131,7 +131,7 @@ export default function Products() {
           id,
           SKU: productForm.sku, 
           mpn: productForm.mpn,
-          legacyId: productForm.legacyId,
+          legacyID: productForm.legacyID,
           parentSKU: productForm.parentSKU,
           binLocation: productForm.binLocation,
           handle: productForm.handle,
@@ -344,7 +344,7 @@ export default function Products() {
           id,
           SKU: productForm.sku, 
           mpn: productForm.mpn,
-          legacyId: productForm.legacyId,
+          legacyID: productForm.legacyID,
           parentSKU: productForm.parentSKU,
           binLocation: productForm.binLocation,
           handle: productForm.handle,
@@ -638,8 +638,10 @@ const fetchBrands = async () => {
     })      
 
     //console.log(brandsData)
-    
-    const brands = await brandsData.data.listBrands.items.filter(item => !item._deleted)   
+    const brandsTemp = await API.graphql(graphqlOperation(listBrands, { limit: 2000})) 
+    const brands = brandsTemp.data.listBrands.items.filter(item => !item._deleted)
+      
+    //const brands = await brandsData.data.listBrands.items.filter(item => !item._deleted)   
     //console.log("QUE TENEMOS AQUI:", Products)  
     //sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
     setBrands(brands)
@@ -654,11 +656,15 @@ const fetchManufacturers = async () => {
     const manufacturersData = await API.graphql({
       query: listManufacturers,
     
-    })      
+    })
+    
+    const manufacturersTemp = await API.graphql(graphqlOperation(listManufacturers, { limit: 2000})) 
+    const manufacturers = manufacturersTemp.data.listManufacturers.items.filter(item => !item._deleted)
+      
 
     //console.log(manufacturersData)
     
-    const manufacturers = await manufacturersData.data.listManufacturers.items.filter(item => !item._deleted)      
+    //const manufacturers = await manufacturersData.data.listManufacturers.items.filter(item => !item._deleted)      
     setManufacturers(manufacturers)   
     
 
@@ -686,11 +692,15 @@ const fetchCategories = async () => {
     const categoriesData = await API.graphql({
       query: listCategorys,
     
-    })      
+    })
+    
+    const categorysTemp = await API.graphql(graphqlOperation(listCategorys, { limit: 1000})) 
+    const categories = categorysTemp.data.listCategorys.items.filter(item => !item._deleted)
+       
 
     //console.log(manufacturersData)
     
-    const categories = await categoriesData.data.listCategorys.items.filter(item => !item._deleted)      
+    //const categories = await categoriesData.data.listCategorys.items.filter(item => !item._deleted)      
     setCategories(categories)   
     
 
@@ -705,8 +715,12 @@ const fetchSubCategories = async () => {
     })      
 
     //console.log(manufacturersData)
+
+    const subCategorysTemp = await API.graphql(graphqlOperation(listSubCategorys, { limit: 1000})) 
+    const subCategories = subCategorysTemp.data.listSubCategorys.items.filter(item => !item._deleted)
+      
     
-    const subCategories = await subCategoriesData.data.listSubCategorys.items.filter(item => !item._deleted)      
+    //const subCategories = await subCategoriesData.data.listSubCategorys.items.filter(item => !item._deleted)      
     setSubCategories(subCategories)   
     
 
@@ -752,19 +766,50 @@ const fetchProducts = async () => {
       const productData = await API.graphql({
         query: listProducts,
       
-      })      
+      })
+      
+
+
+      //const productsTemp = await API.graphql(graphqlOperation(listProducts )) 
+      let productList = []
+      //const products = productsTemp.data.listProducts.items.filter(item => !item._deleted)
+      //const token = productsTemp
+      //console.log("*********************** ESTE ES EL TOKEN: " + token.data.listProducts.nextToken)
+      let resultToken = true
+
+      while (resultToken) {
+        let productsTemp2 = await API.graphql(graphqlOperation(listProducts, {limit: 1000, nextToken: token} ))
+        
+        const products = productsTemp2.data.listProducts.items.filter(item => !item._deleted)
+        console.log(products)
+        const token = productsTemp2.data.listProducts.nextToken
+        productList = productList.concat(products)
+        if (productList.length < 1000){
+          setChunkProducts( sliceIntoChunks(productList, productsByPage ))
+          //setProductQty(productList.length)
+          setProducts(productList)
+        }
+        if (!token) {
+          resultToken = false 
+        }
+      }
+       
+      console.log("ESTE ES EL PRODUCT LIST: ", productList)
+      
 
       //console.log(productData)
-      const products = await productData.data.listProducts.items.filter(item => !item._deleted)  
+      //const products = await productData.data.listProducts.items.filter(item => !item._deleted)  
       
       
       
       //console.log("QUE TENEMOS AQUI:", Products)  
       //sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
-      setChunkProducts( sliceIntoChunks(products, productsByPage ))
-      setProductQty(products.length)
+      
+      
+      setChunkProducts( sliceIntoChunks(productList, productsByPage ))
+      setProductQty(productList.length)
 
-      setProducts(products)
+      setProducts(productList)
       
       //console.log("esta es una prueba *****", products)
       
@@ -1129,7 +1174,7 @@ const fetchProducts = async () => {
       evt.persist();
       setProductForm((values) => ({
           ...values,
-          legacyId: evt.target.value,
+          legacyID: evt.target.value,
       }));
   }
 
@@ -2363,7 +2408,7 @@ const handleGenerateHandle = () => {
                   <CreateProductForm 
                       sku = {productForm.sku} handleSKU = {(e) => handleSKU(e)}
                       mpn = {productForm.mpn} handleMPN = {(e) => handleMPN(e)}
-                      legacyId = {productForm.legacyId} handleLegacyId = {(e) => handleLegacyId(e)}
+                      legacyId = {productForm.legacyID} handleLegacyId = {(e) => handleLegacyId(e)}
                       parentSKU = {productForm.parentSKU} handleParentSKU = {(e) => handleParentSKU(e)}
                       binLocation = {productForm.binLocation} handleBinLocation = {(e) => handleBinLocation(e)}
                       handle = {productForm.handle} handleHandle = {(e) => handleHandle(e)}
@@ -2460,7 +2505,7 @@ const handleGenerateHandle = () => {
                 <CreateProductForm 
                       sku = {productForm.sku} handleSKU = {(e) => handleSKU(e)}
                       mpn = {productForm.mpn} handleMPN = {(e) => handleMPN(e)}
-                      legacyId = {productForm.legacyId} handleLegacyId = {(e) => handleLegacyId(e)}
+                      legacyId = {productForm.legacyID} handleLegacyId = {(e) => handleLegacyId(e)}
                       parentSKU = {productForm.parentSKU} handleParentSKU = {(e) => handleParentSKU(e)}
                       binLocation = {productForm.binLocation} handleBinLocation = {(e) => handleBinLocation(e)}
                       handle = {productForm.handle} handleHandle = {(e) => handleHandle(e)}

@@ -227,11 +227,12 @@ const fetchSubCategorys = async () => {
   try {
       const subCategoryData = await API.graphql({
         query: listSubCategorys,
-      
+        limit: 10,
       })      
-      
-      const subCategorys = await subCategoryData.data.listSubCategorys.items.filter(item => !item._deleted)   
-      console.log("QUE TENEMOS AQUI:", subCategorys)  
+      const subCategorysTemp = await API.graphql(graphqlOperation(listSubCategorys, { limit: 1000})) 
+      const subCategorys = subCategorysTemp.data.listSubCategorys.items.filter(item => !item._deleted)
+      //const subCategorys = await subCategoryData.data.listSubCategorys.items.filter(item => !item._deleted)   
+      console.log("QUE TENEMOS AQUI:", subCategorys.length)  
       sortItems(subCategorys, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
       setChunkSubCategorys( sliceIntoChunks(subCategorys, 10 ))
       setSubCategorys(subCategorys)

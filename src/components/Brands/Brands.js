@@ -228,9 +228,13 @@ const fetchBrands = async () => {
       const brandData = await API.graphql({
         query: listBrands,
       
-      })      
+      })
       
-      const brands = await brandData.data.listBrands.items.filter(item => !item._deleted)   
+      const brandsTemp = await API.graphql(graphqlOperation(listBrands, { limit: 2000})) 
+      const brands = brandsTemp.data.listBrands.items.filter(item => !item._deleted)
+      
+      
+      //const brands = await brandData.data.listBrands.items.filter(item => !item._deleted)   
       console.log("QUE TENEMOS AQUI:", brands)  
       sortItems(brands, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
       setChunkBrands( sliceIntoChunks(brands, 10 ))

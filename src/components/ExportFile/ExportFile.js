@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react'
 import Amplify, { API, graphqlOperation, Storage } from 'aws-amplify'
 import { SemanticToastContainer, toast } from 'react-semantic-toasts'
-import { Pagination, Input, Segment, Button, Icon, Grid, Modal, Header, Form, ItemContent} from 'semantic-ui-react'
+import { Pagination, Input, Segment, Button, Icon, Grid, Modal, Header, Form, ItemContent, Item} from 'semantic-ui-react'
 import { listProducts, listBrands, listCategorys, listSubCategorys, listSubCategory2s, listEbayStoreCategorys, listAttributes } from '../../graphql/queries'
 import aws_exports from '../../aws-exports'
 import { CSVLink } from 'react-csv'
 import { attachEventProps } from '@aws-amplify/ui-react/lib-esm/react-component-lib/utils'
+//import Papa from "papaparse"
+import {ExcelToJson} from 'excel-to-json-in-react-js'
+import xlsx from 'xlsx'
+import { v4 as uuidv4 } from 'uuid'
+import { createCategory, createSubCategory, createManufacturer, createProduct } from '../../graphql/mutations'
+
 //import Attributes from '../Attributes/Attributes'
 
 Amplify.configure(aws_exports)
@@ -14,6 +20,7 @@ Amplify.configure(aws_exports)
 export default function ExportFile(props) {
 
     const [products, setProducts] = useState([])
+    const [JsonData,setJsonData]=useState("")
     //const [brands, setBrands] = useState([])
     //const [categories, setCategories] = useState([])
     //const [attributes, setAttributes] = useState([])
@@ -323,6 +330,320 @@ export default function ExportFile(props) {
       
         } catch (err) { console.log(err) }
       }*/
+
+      const readUploadFile = (e) => {
+        e.preventDefault();
+        if (e.target.files) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = e.target.result;
+                const workbook = xlsx.read(data, { type: "array" });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const json = xlsx.utils.sheet_to_json(worksheet);
+                //console.log(json);
+                handleApplyCategoriesChanges(json)
+            };
+            reader.readAsArrayBuffer(e.target.files[0]);
+        }
+    }
+
+
+    const updateItems = async (item) => {
+      try {
+        console.log(item)
+        let id = uuidv4()
+        let name = item.name
+        //let product = products.find(item => item.id === id)
+        //let version = product._version
+        //let categoryOld = product.categoryID
+        //let subCategoryOld = product.subcategoryID
+        //let subCategoryOld2 = product.subcategory2ID
+        //let ebayStoreCategoryOld = product.ebaystorecategoryID
+        
+        let itemDetails = {
+          id,
+          name,
+          /*categoryID: editCategoriesSelected.category.checked ? editCategoriesSelected.category.id : categoryOld, 
+          subcategoryID: editCategoriesSelected.subCategory.checked ? editCategoriesSelected.subCategory.id : subCategoryOld,
+          subcategory2ID: editCategoriesSelected.subCategory2.checked ? editCategoriesSelected.subCategory2.id : subCategoryOld2,
+          ebaystorecategoryID: editCategoriesSelected.ebayStoreCategory.checked ? editCategoriesSelected.ebayStoreCategory.id : ebayStoreCategoryOld,
+          _version: version,*/          
+        }
+        await API.graphql(graphqlOperation(createManufacturer, { input: itemDetails }))
+        
+        
+    
+      } catch (err) {
+        //console.log('error creating Product:', err)
+        setTimeout(() => {
+          toast({
+              type: 'error',
+              icon: 'times',
+              size: 'tiny',              
+              title: 'Error updating Categories',
+              description: err,              
+              time: 2000,              
+          });
+        }, 200);
+      }
+    }
+    
+    const handleApplyCategoriesChanges = (excelFile) => {
+      try {
+      for (let item of excelFile){
+        //console.log(item)
+        updateItems(item)
+      }
+      setTimeout(() => {
+        toast({
+            type: 'success',
+            icon: 'check circle outline',
+            size: 'tiny',              
+            description: 'Products successfully updated',
+            time: 2000,              
+        })
+      }, 200
+      )
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
+    const updateProducts = async (item) => {
+      try {
+        console.log(item)
+        let id = uuidv4()
+        
+        let itemDetails = {
+          id,
+          SKU: item.SKU,
+          title: item.title,
+          source: item.source,
+          status: item.status,
+          legacyID: item.legacyID,
+          mpn: item.mpn,
+          Attributes: item.Attributes,
+          parentSKU: item.parentSKU,
+          brandID: item.brandID,
+          manufacturerID: item.manufacturerID,
+          categoryID: item.categoryID,
+          subcategoryID: item.subcategoryID,
+          subcategory2ID: item.subcategory2ID,
+          ebaystorecategoryID: item.ebaystorecategoryID,
+          binLocation: item.binLocation,
+          title: item.title,
+          description: item.description,
+          handle: item.handle,
+          weight: item.weight,
+          dimensionalWeight: item.dimensionalWeight,
+          appliedWeight: item.appliedWeight,
+          dimensions: item.dimensions,
+          shopifyFitmentTags: item.shopifyFitmentTags,
+          shopifyOnlyTags: item.shopifyOnlyTags,
+          price: item.price,
+          cost: item.cost,
+          shopifyMetaTitle: item.shopifyMetaTitle,
+          shopifyMetaDescription: item.shopifyMetaDescription,
+        }
+
+          /*categoryID: editCategoriesSelected.category.checked ? editCategoriesSelected.category.id : categoryOld, 
+          subcategoryID: editCategoriesSelected.subCategory.checked ? editCategoriesSelected.subCategory.id : subCategoryOld,
+          subcategory2ID: editCategoriesSelected.subCategory2.checked ? editCategoriesSelected.subCategory2.id : subCategoryOld2,
+          ebaystorecategoryID: editCategoriesSelected.ebayStoreCategory.checked ? editCategoriesSelected.ebayStoreCategory.id : ebayStoreCategoryOld,
+          _version: version,*/          
+        
+        await API.graphql(graphqlOperation(createProduct, { input: itemDetails }))
+        
+        
+    
+      } catch (err) {
+        console.log('error creating Product:', err)
+        setTimeout(() => {
+          toast({
+              type: 'error',
+              icon: 'times',
+              size: 'tiny',              
+              title: 'Error updating Product',
+              description: err,              
+              time: 2000,              
+          });
+        }, 200);
+      }
+    }
+
+    const handleApplyProductsChanges = (excelFile) => {
+      try {
+      for (let item of excelFile){
+        //console.log(item.SKU + ' - ', item.OptionName1)
+        
+        let options = []
+        let attributesProduct = []
+
+        options.push({name: item.OptionName1, value: item.OptionValue1})
+        options.push({name: item.OptionName2, value: item.OptionValue2})
+        options.push({name: item.OptionName3, value: item.OptionValue3})
+        options.push({name: item.OptionName4, value: item.OptionValue4})
+        options.push({name: item.OptionName5, value: item.OptionValue5})
+
+
+        for (let i of options){
+          if (i.name) {
+            attributesProduct.push({id: props.attributes.find(item => item.name === i.name) ? props.attributes.find(item => item.name === i.name).id : "ERROR", value: i.value, option: true  })
+            //console.log(i.name)
+            //console.log(props.attributes.find(item => item.name === i.name).id)
+          }
+        }
+
+        let attributeList = []
+        attributeList.push({name: 'Apparel Gender', value: item.ApparelGender})
+        attributeList.push({name: 'Apparel Material', value: item.ApparelMaterial})
+        attributeList.push({name: 'Apparel Size', value: item.ApparelSize})
+        attributeList.push({name: 'Apparel Size Segment', value: item.ApparelSizeSegment})
+        attributeList.push({name: 'Apparel Size Modifier', value: item.ApparelSizeModifier})
+        attributeList.push({name: 'Apparel Style', value: item.ApparelStyle})
+        attributeList.push({name: 'Battery Code', value: item.BatteryCode})
+        attributeList.push({name: 'Bearing Size', value: item.BearingSize})
+        attributeList.push({name: 'Bolt Pattern', value: item.BoltPattern})
+        attributeList.push({name: 'Bore', value: item.Bore})
+        attributeList.push({name: 'Compression', value: item.Compression })
+        attributeList.push({name: 'Container Size', value: item.ContainerSize      })
+        attributeList.push({name: 'Diameter', value: item.Diameter})
+        attributeList.push({name: 'Handlebar Blinkers', value: item.HandlebarBlinkers      })
+        attributeList.push({name: 'Handlebar Clamping Diameter', value: item.HandlebarClampingDiameter      })
+        attributeList.push({name: 'Handlebar Configuration', value: item.HandlebarConfiguration      })
+        attributeList.push({name: 'Handlebar Control Color', value: item.HandlebarControlColor      })
+        attributeList.push({name: 'Handlebar Rise', value: item.HandlebarRise      })
+        attributeList.push({name: 'Handlebar Pullback', value: item.HandlebarPullback      })
+        attributeList.push({name: 'Handlebar Diameter', value: item.HandlebarDiameter      })
+        attributeList.push({name: 'Handlebar Switch Color', value: item.HandlebarSwitchColor      })
+        attributeList.push({name: 'Handlebar Style', value: item.HandlebarStyle      })
+        attributeList.push({name: 'Lens Style', value: item.LensStyle   })
+        attributeList.push({name: 'Load Rating', value: item.LoadRating  })
+        attributeList.push({name: 'Material', value: item.Material      })
+        attributeList.push({name: 'Seat Style', value: item.SeatStyle      })
+        attributeList.push({name: 'Seat Width Driver', value: item.SeatWidthDriver   })
+        attributeList.push({name: 'Seat Width Passenger', value: item.SeatWidthPassenger     })
+        attributeList.push({name: 'Shape', value: item.Shape     })
+        attributeList.push({name: 'Sizing', value: item.Sizing    })
+        attributeList.push({name: 'Speed', value: item.Speed      })
+        attributeList.push({name: 'Spring Rate', value: item.SpringRate})
+        attributeList.push({name: 'Sprocket Position', value: item.SprocketPosition   })
+        attributeList.push({name: 'Sprocket Teeth', value: item.SprocketTeeth      })
+        attributeList.push({name: 'Sprocket Size', value: item.SprocketSize      })
+        attributeList.push({name: 'Thickness', value: item.Thickness      })
+        attributeList.push({name: 'Tire Application', value: item.TireApplication    })
+        attributeList.push({name: 'Tire Construction', value: item.TireConstruction      })
+        attributeList.push({name: 'Tire Ply', value: item.TirePly      })
+        attributeList.push({name: 'Tire Rim Offset', value: item.TireRimOffset      })
+        attributeList.push({name: 'Tire Speed Rating', value: item.TireSpeedRating     })
+        attributeList.push({name: 'Tire Type', value: item.TireType    })
+        attributeList.push({name: 'Wheel Diameter', value: item.WheelDiameter     })
+        attributeList.push({name: 'Wheel Disc', value: item.WheelDisc     })
+        attributeList.push({name: 'Wheel Spoke Count', value: item.WheelSpokeCount    })
+        attributeList.push({name: 'Wheel Spoke Finish', value: item.WheelSpokeFinish    })
+        attributeList.push({name: 'Wheel Width', value: item.WheelWidth      })
+
+
+        for (let i of attributeList){
+          //let errors = []
+          if (i.value) {
+            attributesProduct.push({id: props.attributes.find(item => item.name === i.name) ? props.attributes.find(item => item.name === i.name).id : "ERROR", value: i.value, option: false  })
+            if (!props.attributes.find(item => item.name === i.name)){
+              console.log({sku: item.SKU, value: i.value })
+            }
+            //console.log(i.name)
+            //console.log(props.attributes.find(item => item.name === i.name).id)
+          }
+        }
+
+        //console.log("item sku", item.SKU, " ***************************")
+        //console.log(JSON.stringify(attributesProduct))
+        let attributesString = JSON.stringify(attributesProduct) ? JSON.stringify(attributesProduct) : ""
+        
+        //id	SKU	legacyID	mpn	Attributes	parentSKU	source	brandID	manufacturerID	categoryID	subcategoryID	subcategory2ID	ebaystorecategoryID	binLocation	title	
+        //description	bulletPoints	images	handle	weight	dimensionalWeight	appliedWeight	dimensions	shopifyFitmentTags	shopifyOnlyTags	price	cost	options	
+        //updateFlag	status	shopifyMetaTitle	shopifyMetaDescription
+
+        //SKU	MPN	Source	BinLocation	Brand	BrandID	ManufacturerID	PartsSKU	TuckerSKU	WPSSKU	ItemName	BodyDescription	Handle	Category	CategoryID	
+        //SubCategory	SubCategoryID	SubCategory2	SubCategory2ID	Weight	Height	Length	Width	ShopifyFitmentTags	
+        //ShopifyOnlyTags	Image	ApparelGender	ApparelMaterial	ApparelSize	ApparelSizeSegment	ApparelSizeModifier	ApparelStyle	BatteryCode	
+        //BearingSize	BoltPattern	Bore	Compression	ContainerSize	Diameter	HandlebarBlinkers	HandlebarClampingDiameter	HandlebarConfiguration	
+        //HandlebarControlColor	HandlebarPullback	HandlebarRise	HandlebarDiameter	HandlebarSwitchColor	HandlebarStyle	HandlebarWidth	LensStyle	LoadRating	
+        //Material	Pitch	SeatStyle	SeatWidthDriver	SeatWidthPassenger	Shape	Sizing	Speed	SpringRate	SprocketPosition	SprocketTeeth	SprocketSize	
+        //Thickness	TireApplication	TireConstruction	TirePly	TireRimOffset	TireSpeedRating	TireType	WheelDiameter	WheelDisc	WheelSpokeCount	WheelSpokeFinish
+        //	WheelWidth	OptionName1	OptionValue1	OptionName2	OptionValue2	OptionName3	OptionValue3	OptionName4	OptionValue4	OptionName5	
+        //OptionValue5	MSRP	Cost	ListPrice	MyStorePrice	SellPrice	UpdateFlag
+
+        let product = {
+          SKU: item.SKU,
+          legacyID: "",
+          mpn: item.MPN,
+          Attributes: attributesString ? attributesString : '',
+          parentSKU: item.BinLocation ? item.BinLocation: '',
+          source: {"warehouse":  item.Source === 'DEMONS' ? true : false ,"dropship": item.Source === 'DROPSHIP' ? true : false},
+          brandID: item.BrandID ? item.BrandID : '',
+          manufacturerID: item.ManufacturerID ? item.ManufacturerID : "" ,
+          categoryID: item.CategoryID ? item.CategoryID : undefined,
+          subcategoryID: item.SubCategoryID ? item.SubCategoryID : undefined,
+          subcategory2ID: item.SubCategory2ID ? item.SubCategory2ID : undefined,
+          ebaystorecategoryID: undefined,
+          binLocation: '',
+          title: { store: item.ItemName ? item.ItemName : '' },
+          description: { store: item.BodyDescription ? item.BodyDescription : ''},
+          handle: item.Handle ? item.handle : '',
+          weight: item.Weight ? item.Weight : 0,
+          dimensionalWeight: item.Weight ? item.Weight : 0,
+          appliedWeight: item.Weight ? item.Weight : 0,
+          dimensions: {height: item.Height ? item.Height : 0, length: item.Length ? item.Length : 0, width: item.Width ? item.Width : 0},
+          shopifyFitmentTags: item.ShopifyFitmentTags ? item.ShopifyFitmentTags : '',
+          shopifyOnlyTags: item.ShopifyOnlyTags ? item.ShopifyOnlyTags : '',
+          price: {"MSRP": item.MSRP ? item.MSRP : 0},
+          cost: item.Cost ? item.Cost : 0,
+          status: 'Active',
+          shopifyMetaTitle: '',
+          shopifyMetaDescription: ''
+        }
+
+        console.log(product)
+
+
+        //}
+
+        updateProducts(product)
+      }
+      setTimeout(() => {
+        toast({
+            type: 'success',
+            icon: 'check circle outline',
+            size: 'tiny',              
+            description: 'Products successfully updated',
+            time: 2000,              
+        })
+      }, 200
+      )
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    
+    const readUploadNewProducts = (e) => {
+      e.preventDefault();
+      if (e.target.files) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+              const data = e.target.result;
+              const workbook = xlsx.read(data, { type: "array" });
+              const sheetName = workbook.SheetNames[0];
+              const worksheet = workbook.Sheets[sheetName];
+              const json = xlsx.utils.sheet_to_json(worksheet);
+              //console.log(json);
+              handleApplyProductsChanges(json)
+          };
+          reader.readAsArrayBuffer(e.target.files[0]);
+      }
+  }
+
       
       
 
@@ -342,7 +663,25 @@ export default function ExportFile(props) {
             Create export file for FlxPoint
             
         </CSVLink>
-      </div>  
+        <hr></hr>
+        <label htmlFor="upload">Upload to AWS</label><br></br>
+          <input
+              type="file"
+              name="upload"
+              id="upload"
+              onChange={readUploadFile}
+          />
+        <hr></hr>
+        <label htmlFor="upload">Upload New Products</label><br></br>
+          <input
+              type="file"
+              name="upload"
+              id="upload"
+              onChange={readUploadNewProducts}
+          />
+          
+
+      </div>    
     );
     
   }

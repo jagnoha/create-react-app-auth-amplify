@@ -146,7 +146,7 @@ export default function ProductTable(props) {
             </Table.Cell>
             <Table.Cell onClick = {()=>props.openForm(item)}>
                 
-                <Image src={item.images.image1 ? JSON.parse(item.images.image1).data_url : ""} size='mini' />
+                <Image src={item.images && item.images.image1 ? JSON.parse(item.images.image1).data_url : ""} size='mini' />
             
             </Table.Cell>
             <Table.Cell onClick = {()=>props.openForm(item)}>{item.SKU}</Table.Cell>

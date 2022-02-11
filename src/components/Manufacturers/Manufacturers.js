@@ -231,9 +231,12 @@ const fetchManufacturers = async () => {
       const manufacturerData = await API.graphql({
         query: listManufacturers,
       
-      })      
+      })
       
-      const manufacturers = await manufacturerData.data.listManufacturers.items.filter(item => !item._deleted)   
+      const manufacturersTemp = await API.graphql(graphqlOperation(listManufacturers, { limit: 2000})) 
+      const manufacturers = manufacturersTemp.data.listManufacturers.items.filter(item => !item._deleted)
+      
+      //const manufacturers = await manufacturerData.data.listManufacturers.items.filter(item => !item._deleted)   
       console.log("QUE TENEMOS AQUI:", manufacturers)  
       sortItems(manufacturers, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
       setChunckManufacturers( sliceIntoChunks(manufacturers, 10 ))

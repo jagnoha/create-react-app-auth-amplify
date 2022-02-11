@@ -228,9 +228,13 @@ const fetchCategorys = async () => {
       const categoryData = await API.graphql({
         query: listCategorys,
       
-      })      
+      })   
       
-      const categorys = await categoryData.data.listCategorys.items.filter(item => !item._deleted)   
+      const categorysTemp = await API.graphql(graphqlOperation(listCategorys, { limit: 1000})) 
+      const categorys = categorysTemp.data.listCategorys.items.filter(item => !item._deleted)
+      
+      
+      //const categorys = await categoryData.data.listCategorys.items.filter(item => !item._deleted)   
       console.log("QUE TENEMOS AQUI:", categorys)  
       sortItems(categorys, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
       setChunkCategorys( sliceIntoChunks(categorys, 10 ))

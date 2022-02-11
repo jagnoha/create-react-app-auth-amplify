@@ -15,7 +15,7 @@ import EbayStoreCategories from '../EbayStoreCategories/EbayStoreCategories'
 import Attributes from '../Attributes/Attributes'
 import ExportFile from '../ExportFile/ExportFile'
 import Amplify, { API, graphqlOperation, Storage } from 'aws-amplify'
-import { listAttributes, listBrands, listCategorys, listSubCategorys, listSubCategory2s } from '../../graphql/queries'
+import { listAttributes, listBrands, listCategorys, listSubCategorys, listSubCategory2s, listProducts } from '../../graphql/queries'
 import aws_exports from '../../aws-exports'
 
 //const Home = () => <h1>Home</h1>;
@@ -31,7 +31,8 @@ export default function Main(props) {
   const [brands, setBrands] = useState([])
   const [categories, setCategories] = useState([])
   const [subCategories, setSubCategories] = useState([])
-  const [subCategories2, setSubCategories2] = useState([]) 
+  const [subCategories2, setSubCategories2] = useState([])
+  const [products, setProducts] = useState([]) 
     
 
     const routes = [
@@ -155,12 +156,72 @@ export default function Main(props) {
         } catch (err) { console.log(err) }
     }
 
+    
+const fetchProducts = async () => {
+  try {
+      const productData = await API.graphql({
+        query: listProducts,
+      
+      })
+      
+
+
+      //const productsTemp = await API.graphql(graphqlOperation(listProducts )) 
+      let productList = []
+      //const products = productsTemp.data.listProducts.items.filter(item => !item._deleted)
+      //const token = productsTemp
+      //console.log("*********************** ESTE ES EL TOKEN: " + token.data.listProducts.nextToken)
+      let resultToken = true
+
+      while (resultToken) {
+        let productsTemp2 = await API.graphql(graphqlOperation(listProducts, {limit: 1000, nextToken: token} ))
+        
+        const products = productsTemp2.data.listProducts.items.filter(item => !item._deleted)
+        console.log(products)
+        const token = productsTemp2.data.listProducts.nextToken
+        productList = productList.concat(products)
+        if (productList.length < 1000){
+          //setChunkProducts( sliceIntoChunks(productList, productsByPage ))
+          //setProductQty(productList.length)
+          setProducts(productList)
+        }
+        if (!token) {
+          resultToken = false 
+        }
+      }
+       
+      console.log("ESTE ES EL PRODUCT LIST: ", productList)
+      
+
+      //console.log(productData)
+      //const products = await productData.data.listProducts.items.filter(item => !item._deleted)  
+      
+      
+      
+      //console.log("QUE TENEMOS AQUI:", Products)  
+      //sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
+      
+      
+      //setChunkProducts( sliceIntoChunks(productList, productsByPage ))
+      //setProductQty(productList.length)
+
+      setProducts(productList)
+      
+      //console.log("esta es una prueba *****", products)
+      
+
+  } catch (err) { console.log(err) }}
+
     const fetchBrands = async () => {
       try {
         const brandsData = await API.graphql({
           query: listBrands,
-        })      
-        const brands = await brandsData.data.listBrands.items.filter(item => !item._deleted)   
+        })
+        
+        const brandsTemp = await API.graphql(graphqlOperation(listBrands, { limit: 2000})) 
+        const brands = brandsTemp.data.listBrands.items.filter(item => !item._deleted)
+      
+        //const brands = await brandsData.data.listBrands.items.filter(item => !item._deleted)   
         setBrands(brands)
 
       } catch (err) { console.log(err) }
@@ -171,8 +232,12 @@ export default function Main(props) {
       const categoriesData = await API.graphql({
         query: listCategorys,
       
-      })      
-      const categories = await categoriesData.data.listCategorys.items.filter(item => !item._deleted)      
+      })
+
+      const categorysTemp = await API.graphql(graphqlOperation(listCategorys, { limit: 1000})) 
+      const categories = categorysTemp.data.listCategorys.items.filter(item => !item._deleted)
+            
+      //const categories = await categoriesData.data.listCategorys.items.filter(item => !item._deleted)      
       setCategories(categories)   
       
   
@@ -184,9 +249,13 @@ export default function Main(props) {
       const subCategoriesData = await API.graphql({
         query: listSubCategorys,
       
-      })      
+      }) 
       
-      const subCategories = await subCategoriesData.data.listSubCategorys.items.filter(item => !item._deleted)      
+      const subCategorysTemp = await API.graphql(graphqlOperation(listSubCategorys, { limit: 1000})) 
+      const subCategories = subCategorysTemp.data.listSubCategorys.items.filter(item => !item._deleted)
+      
+      
+      //const subCategories = await subCategoriesData.data.listSubCategorys.items.filter(item => !item._deleted)      
       setSubCategories(subCategories)             
   
     } catch (err) { console.log(err) }
@@ -205,6 +274,7 @@ export default function Main(props) {
   }
       
     useEffect(() => {
+        fetchProducts()
         fetchAttributes()
         fetchBrands()
         fetchCategories()
