@@ -6,8 +6,10 @@
     "@aws-amplify/ui-react": "^1.2.26",
     "aws-amplify": "^4.3.12",
     "draft-js": "^0.11.7",
+    "excel-to-json-in-react-js": "^1.0.2",
     "jodit": "^3.13.2",
     "jodit-react": "^1.1.20",
+    "papaparse": "^5.3.1",
     "react": "^16.13.1",
     "react-alert": "^7.0.3",
     "react-alert-template-basic": "^1.0.2",
@@ -23,7 +25,8 @@
     "semantic-ui-react": "^2.0.4",
     "underscore": "^1.13.2",
     "url-slug": "^3.0.3",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "xlsx": "^0.18.0"
   },
   "resolutions": {
     "set-value": "^2.0.1",
