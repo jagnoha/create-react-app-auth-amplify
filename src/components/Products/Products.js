@@ -3,7 +3,7 @@ import Amplify, { API, graphqlOperation, Storage } from 'aws-amplify'
 import { Pagination, Input, Button, Icon, Grid, Modal, Dropdown, Form, Popup, Label} from 'semantic-ui-react'
 import { SemanticToastContainer, toast } from 'react-semantic-toasts'
 import 'react-semantic-toasts/styles/react-semantic-alert.css'
-import { listProducts, listBrands, listManufacturers, listCategorys, listSubCategorys, listSubCategory2s, listEbayStoreCategorys, listAttributes } from '../../graphql/queries'
+import { listProducts, syncProducts, listBrands, listManufacturers, listCategorys, listSubCategorys, listSubCategory2s, listEbayStoreCategorys, listAttributes } from '../../graphql/queries'
 import { createProduct, updateProduct } from '../../graphql/mutations'
 import * as subscriptions from '../../graphql/subscriptions'
 import { v4 as uuidv4 } from 'uuid'
@@ -19,20 +19,35 @@ import SubCategories from '../SubCategories/SubCategories'
 import EditAttributesForm from '../Forms/EditAttributesForm'
 import FindReplaceForm from '../Forms/FindReplaceForm'
 import Filter from '../Filter/Filter'
+import { DataStore, Predicates, SortDirection } from 'aws-amplify'
+import { Product } from '../../models'
+
 Amplify.configure(aws_exports)
 
+DataStore.configure({
+  maxRecordsToSync: 30000,
+  syncPageSize: 1000
+})
 
 
-export default function Products(props) {
+
+export default function Products() {
   const [chunckProducts, setChunkProducts] = useState(null)
   const [products, setProducts] = useState([])
+  const [tokenLeft, setTokenLeft] = useState("")
+  const [tokenRight, setTokenRight] = useState("")
+
+  //const [productsLessFields, setProductsLessFields] = useState([])
 
 
 
   //const [images, setImages] = React.useState([{"data_url":"https://cdn.shopify.com/s/files/1/0338/9682/4876/products/28890339_600x.jpg?v=1627667600"}]);
+  //const [productStore, setProductStore] = useState([]) 
   const [images, setImages] = React.useState([]);
+
+  const [pageNumber, setPageNumber] = useState(0)
   
-  const [productsByPage, setProductsByPage] = useState(50)
+  const [productsByPage, setProductsByPage] = useState(25)
   
   const [brands, setBrands] = useState([])
   const [brand, setBrand] = useState(null)
@@ -145,17 +160,24 @@ export default function Products(props) {
           subcategoryID: productForm.subcategoryID,
           subcategory2ID: productForm.subcategory2ID,
           ebaystorecategoryID: productForm.ebaystorecategoryID,
-          title: {
+          /*title: {
             store: productForm.titleStore,
             ebay: productForm.titleEbay,
             amazon: productForm.titleAmazon,
-          },
-          description: {
+          },*/
+          titleStore: productForm.titleStore,
+          titleEbay: productForm.titleEbay,
+          titleAmazon: productForm.titleAmazon,
+          /*description: {
             store: productForm.descriptionStore,
             //store: descriptionStore,
             ebay: productForm.descriptionEbay,
             amazon: productForm.descriptionAmazon,
-          },
+          },*/
+          descriptionStore: productForm.descriptionStore,
+          //store: descriptionStore,
+          descriptionEbay: productForm.descriptionEbay,
+          descriptionAmazon: productForm.descriptionAmazon,
           images: {
             image1: JSON.stringify(imageList[0]),
             image2: JSON.stringify(imageList[1]),
@@ -177,15 +199,18 @@ export default function Products(props) {
             bullet6: productForm.bullet6,
             bullet7: productForm.bullet7,            
           },
-          dimensions: {
+          /*dimensions: {
             height: productForm.height,
             length: productForm.length,
             width: productForm.width,
-          },
+          },*/
+          dimensionHeight: productForm.height,
+          dimensionLength: productForm.length,
+          dimensionWidth: productForm.width,
           weight: productForm.weight,
           dimensionalWeight: productForm.dimensionalWeight,
           appliedWeight: productForm.appliedWeight,
-          price: {
+          /*price: {
             MSRP: productForm.priceMSRP,
             MAP: productForm.priceMAP,
             store: productForm.priceStore,
@@ -195,18 +220,29 @@ export default function Products(props) {
             wholesaleHigh: productForm.priceWholesaleHigh,
             scratchLow: productForm.priceScratchLow,
             scratchHigh: productForm.priceScratchHigh,
-          },
+          },*/
+          priceMSRP: productForm.priceMSRP,
+          priceMAP: productForm.priceMAP,
+          priceStore: productForm.priceStore,
+          priceEbay: productForm.priceEbay,
+          priceAmazon: productForm.priceAmazon,
+          priceWholesaleLow: productForm.priceWholesaleLow,
+          priceWholesaleHigh: productForm.priceWholesaleHigh,
+          priceScratchLow: productForm.priceScratchLow,
+          priceScratchHigh: productForm.priceScratchHigh,
           cost: productForm.cost,
-          source: {
+          /*source: {
             warehouse: productForm.sourceWarehouse,
             dropship: productForm.sourceDropship,
-          },
+          },*/
+          sourceWarehouse: productForm.sourceWarehouse,
+          sourceDropship: productForm.sourceDropship,
           Attributes: productForm.Attributes,
           status: productForm.status,          
         }
-        setProducts([...products, productInput])        
+        //setProducts([...products, productInput])        
         await API.graphql(graphqlOperation(createProduct, { input: productInput }))
-        //fetchProducts()
+        fetchProducts()
         setProductForm({})
         setStatusProduct('ALL')
         setTimeout(() => {
@@ -255,14 +291,14 @@ export default function Products(props) {
         ...values,
         images: [],
       }))*/
-      console.log("AQUI VAN UNAS IMAGENES!!!!!!!!!!!!!")
+      //console.log("AQUI VAN UNAS IMAGENES!!!!!!!!!!!!!")
       let tempList = []
-      console.log("**************************",images)
+      //console.log("**************************",images)
       for (const item of images) {
         
         let name = uuidv4()
         
-        console.log("ESTE ES EL TIPO:", item)
+        //console.log("ESTE ES EL TIPO:", item)
         
         if (!item.old){
         const result = await Storage.put(item.file ? item.file.name : name, item.file, {
@@ -292,7 +328,7 @@ export default function Products(props) {
       
       }
 
-      console.log("LISTA TEMPORAL: ", tempList)
+      //console.log("LISTA TEMPORAL: ", tempList)
     /*
       setProductForm((values) => ({
         ...values,
@@ -317,28 +353,20 @@ export default function Products(props) {
 
   const modifyProduct = async (imageList) => {
     try {
-      //let imageList = result.then(value =>console.log(value))
-      //console.log("IMAGES: ", images)  
-      //console.log("IMAGE LIST: ", imageList)
+        const id = productForm.id        
+        const product = await DataStore.query(Product, id);
         const sku = productForm.sku
-        const id = productForm.id
-        //console.log("AQUI VA ProductS ********")
-        //console.log(products)
-        let tempProducts = [...products]
+        /*let tempProducts = [...products]
         let index = tempProducts.findIndex(item => item.id === id)
         tempProducts[index].sku = sku
-        setProducts(tempProducts)        
-        const version = tempProducts[index]._version     
+        setProducts(tempProducts)     */   
+        const version = product._version     
         
-        //saveImages()
+        //const version = products.filter(item => item.id === productForm.id )._version
         
-        /*const productDetails = {
-          id: id,
-          SKU: productEdit.sku,
-          mpn: productEdit.mpn,
-          _version: version
-        };*/
-        //console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM  ", productForm)
+        //console.log("ESTA ES LA VERSION:", version)
+         
+        
 
         let productDetails = {
           id,
@@ -359,17 +387,24 @@ export default function Products(props) {
           subcategoryID: productForm.subcategoryID,
           subcategory2ID: productForm.subcategory2ID,
           ebaystorecategoryID: productForm.ebaystorecategoryID,
-          title: {
+          /*title: {
             store: productForm.titleStore,
             ebay: productForm.titleEbay,
             amazon: productForm.titleAmazon,
-          },
-          description: {
+          },*/
+          titleStore: productForm.titleStore,
+          titleEbay: productForm.titleEbay,
+          titleAmazon: productForm.titleAmazon,         
+          /*description: {
             store: productForm.descriptionStore,
             //store: descriptionStore,
             ebay: productForm.descriptionEbay,
             amazon: productForm.descriptionAmazon,
-          },
+          },*/
+          descriptionStore: productForm.descriptionStore,
+          //store: descriptionStore,
+          descriptionEbay: productForm.descriptionEbay,
+          descriptionAmazon: productForm.descriptionAmazon,          
           images: {
             image1: JSON.stringify(imageList[0]),
             image2: JSON.stringify(imageList[1]),
@@ -391,15 +426,18 @@ export default function Products(props) {
             bullet6: productForm.bullet6,
             bullet7: productForm.bullet7,            
           },
-          dimensions: {
+          /*dimensions: {
             height: productForm.height,
             length: productForm.length,
             width: productForm.width,
-          },
+          },*/
+          dimensionHeight: productForm.height,
+          dimensionLength: productForm.length,
+          dimensionWidth: productForm.width,          
           weight: productForm.weight,
           dimensionalWeight: productForm.dimensionalWeight,
           appliedWeight: productForm.appliedWeight,
-          price: {
+          /*price: {
             MSRP: productForm.priceMSRP,
             MAP: productForm.priceMAP,
             store: productForm.priceStore,
@@ -409,19 +447,69 @@ export default function Products(props) {
             wholesaleHigh: productForm.priceWholesaleHigh,
             scratchLow: productForm.priceScratchLow,
             scratchHigh: productForm.priceScratchHigh,
-          },
+          },*/
+          priceMSRP: productForm.priceMSRP,
+          priceMAP: productForm.priceMAP,
+          priceStore: productForm.priceStore,
+          priceEbay: productForm.priceEbay,
+          priceAmazon: productForm.priceAmazon,
+          priceWholesaleLow: productForm.priceWholesaleLow,
+          priceWholesaleHigh: productForm.priceWholesaleHigh,
+          priceScratchLow: productForm.priceScratchLow,
+          priceScratchHigh: productForm.priceScratchHigh,
           cost: productForm.cost,
-          source: {
+          /*source: {
             warehouse: productForm.sourceWarehouse,
             dropship: productForm.sourceDropship,
-          },
+          },*/
+          sourceWarehouse: productForm.sourceWarehouse,
+          sourceDropship: productForm.sourceDropship,          
           Attributes: attributesSelected ? JSON.stringify(attributesSelected) : "",//productForm.Attributes,
           status: productForm.status,
           _version: version,          
         }
         await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
-        //fetchProducts()
+        /*console.log("PRODUCTS LIST: ", products.map(item => 
+            {
+              if (item.id === id) {
+                return (productDetails)
+              }
+              return (item)
+            }
 
+            
+          ))*/
+        
+          let newList = products.map(item => 
+            {
+              if (item.id === id) {
+                return (productDetails)
+              }
+              return (item)
+            }            
+          )
+          setProducts(newList)
+          setChunkProducts( sliceIntoChunks(newList, productsByPage ))
+        //let ne
+        /*let newList = products.map(item => {
+          if (item.id === id){
+            return productDetails
+          } 
+          return item
+        })*/
+
+        //setProducts(newList)
+        //fetchProductsRefresh()
+        //subscriptionUpdate()
+
+        /*let tempProductList = products.filter(item => item.id !== productDetails.id)
+        setProducts(tempProductList.concat(productDetails)) */
+        
+        /*let tempProductList = products.filter(item => item.id !== productDetails.id)
+        console.log("PRODUCTS DETAILS: ", productDetails)
+        
+        setProducts(tempProductList.concat(productDetails))*/
+        
         setProductForm({})
         setAttributesSelected([])
         setStatusProduct('ALL')
@@ -440,7 +528,7 @@ export default function Products(props) {
 
            
     } catch (err) {
-        //console.log('error updating Product:', err)
+        console.log('error updating Product:', err)
         setProductForm({})
         setStatusProduct('ALL')
         setTimeout(() => {
@@ -460,7 +548,7 @@ export default function Products(props) {
     graphqlOperation(subscriptions.onCreateProduct)
 ).subscribe({
     next: (item) => { 
-      fetchProducts()
+      //fetchProducts()
       let product = item.value.data.onCreateProduct;
       //console.log(product)
        
@@ -478,19 +566,29 @@ const subscriptionUpdate = async () => await API.graphql(
   graphqlOperation(subscriptions.onUpdateProduct)
 ).subscribe({
   next: (item) => { 
-    fetchProducts()
+    //fetchProducts()
     //console.log(item)
     let productTemp = item.value.data.onUpdateProduct;
-    //console.log(productTemp)
+    //console.log("PRODUCT TEMP >>>>>>>>>>>>>>>>>>>>>>>>>>>", productTemp.title.store)
+    //console.log("KKKKKKKKKKKKKKKKKKKKKKK ", products)
+    let tempProductList = products.filter(item => item.id !== productTemp.id)
+    //console.log(tempProductList)
+        
+    setProducts(tempProductList.concat(productTemp)) 
+    //setChunkProducts( sliceIntoChunks(tempProductList.concat(productTemp), productsByPage ))
+    //setProductQty(tempProductList.concat(productTemp).length)
     
-    let tempProducts = [...products]
+    //console.log("PRODUCT TEMP ****************", productTemp)
+    
+    /*let tempProducts = [...products]
     let index = tempProducts.findIndex(item => item.id === productTemp.id)
     
     if (tempProducts) {
       tempProducts[index] = productTemp
       setProducts(tempProducts)
-    }
-   
+    }*/
+
+    
 
   },
   error: error => console.warn(error)
@@ -582,7 +680,7 @@ const onPageRendered = async () => {
   fetchEbayStoreCategorys()
   fetchAttributes()
   
-  subscriptionCreate()
+  //subscriptionCreate()
   subscriptionUpdate()
 
   //subscriptions.onCreateProduct.unsubscribe()
@@ -599,7 +697,18 @@ const onPageRendered = async () => {
 
 
   useEffect(() => {
-    onPageRendered()
+    
+    fetchProducts()
+  fetchBrands()
+  fetchManufacturers()
+  fetchCategories()
+  fetchSubCategories()
+  fetchSubCategories2()
+  fetchEbayStoreCategorys()
+  fetchAttributes()
+  
+  //subscriptionCreate()
+  //subscriptionUpdate()
     
 }, [])
 
@@ -760,62 +869,213 @@ const fetchEbayStoreCategorys = async () => {
 }
 
 
+const handleMoveRight = async() => {
 
-const fetchProducts = async () => {
-  try {
-      const productData = await API.graphql({
-        query: listProducts,
-      
-      })
-      
+   
 
+  /*let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage, nextToken: tokenRight }))
+  setTokenLeft(tokenRight)
+  setTokenRight(productsTemp.data.listProducts.nextToken)
 
-      //const productsTemp = await API.graphql(graphqlOperation(listProducts )) 
-      let productList = []
-      //const products = productsTemp.data.listProducts.items.filter(item => !item._deleted)
-      //const token = productsTemp
-      //console.log("*********************** ESTE ES EL TOKEN: " + token.data.listProducts.nextToken)
-      let resultToken = true
+  console.log('TOKEN_LEFT: ', tokenRight)
+  console.log('TOKEN_RIGHT: ', productsTemp.data.listProducts.nextToken )
 
-      while (resultToken) {
-        let productsTemp2 = await API.graphql(graphqlOperation(listProducts, {limit: 2000, nextToken: token} ))
-        
-        const products = productsTemp2.data.listProducts.items.filter(item => !item._deleted)
-        console.log(products)
-        const token = productsTemp2.data.listProducts.nextToken
-        productList = productList.concat(products)
-        if (productList.length < 2000){
-          setChunkProducts( sliceIntoChunks(productList, productsByPage ))
-          //setProductQty(productList.length)
-          setProducts(productList)
-        }
-        if (!token) {
-          resultToken = false 
-        }
-      }
-       
-      console.log("ESTE ES EL PRODUCT LIST: ", productList)
-      
-
-      //console.log(productData)
-      //const products = await productData.data.listProducts.items.filter(item => !item._deleted)  
-      
-      
-      
-      //console.log("QUE TENEMOS AQUI:", Products)  
-      //sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
-      
+  let productList = productsTemp.data.listProducts.items
       
       setChunkProducts( sliceIntoChunks(productList, productsByPage ))
       setProductQty(productList.length)
+     
+      setProducts(productList)*/
 
-      setProducts(productList)
+      let productsStore = await DataStore.query(Product, Predicates.ALL, {
+        page: pageNumber + 1,
+        limit: productsByPage,
+      })
+
+      setPageNumber(pageNumber + 1)
+  
+      let newProductStore = productsStore.map(item => item)
+      //console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMM", newProductStore[0])
+
+      //setChunkProducts( sliceIntoChunks(newProductStore, productsByPage ))
+      setProductQty(newProductStore.length)
+      setProducts(newProductStore)
+      setAttributesSelected([])
+      setProductsSelected([]) 
+      setProductsSelectedAll(false)
+
       
-      //console.log("esta es una prueba *****", products)
+      
+      
+      //Using datastore
+      /*let productsStore = await DataStore.query(Product, Predicates.ALL, {
+        page: pageNumber + 1,
+        limit: productsByPage,
+      })
+
+      setPageNumber(pageNumber + 1)
+  
+      let newProductStore = productsStore.map(item => item)
+      console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMM", newProductStore[0])
+
+      setChunkProducts( sliceIntoChunks(newProductStore, productsByPage ))
+      setProductQty(newProductStore.length)
+     
+      setProducts(newProductStore)*/
+      
+      
+
+}
+
+const handleMoveLeft = async() => {
+
+  /*let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage, nextToken: tokenLeft }))
+  setTokenRight(tokenLeft)
+  setTokenLeft(productsTemp.data.listProducts.nextToken)
+
+  console.log('TOKEN_LEFT: ', productsTemp.data.listProducts.nextToken )
+  console.log('TOKEN_RIGHT: ', tokenLeft)
+  
+
+
+  let productList = productsTemp.data.listProducts.items
+      
+      setChunkProducts( sliceIntoChunks(productList, productsByPage ))
+      setProductQty(productList.length)
+     
+      setProducts(productList)*/
+
+//Using datastore
+
+if (pageNumber > 0){
+
+      let productsStore = await DataStore.query(Product, Predicates.ALL, {
+        page: pageNumber > 0 ? pageNumber - 1 : 0,
+        limit: productsByPage,
+      })
+
+      setPageNumber(pageNumber > 0 ? pageNumber - 1 : 0)
+  
+      let newProductStore = productsStore.map(item => item)
+      console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMM", newProductStore[0])
+
+      //setChunkProducts( sliceIntoChunks(newProductStore, productsByPage ))
+      setProductQty(newProductStore.length)
+      setProducts(newProductStore)
+      setAttributesSelected([])
+      setProductsSelected([]) 
+      setProductsSelectedAll(false)
+    }
+  /*let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage, nextToken: tokenLeft }))
+  setTokenRight(tokenLeft)
+  setTokenLeft(productsTemp.data.listProducts.nextToken)
+
+  let productList = productsTemp.data.listProducts.items
+      
+      setChunkProducts( sliceIntoChunks(productList, productsByPage ))
+      setProductQty(productList.length)
+     
+      setProducts(productList)
+*/
+
+/*let productsStore = await DataStore.query(Product, Predicates.ALL, {
+  page: pageNumber > 0 ? pageNumber - 1 : 0,
+  limit: productsByPage,
+})
+
+setPageNumber(pageNumber > 0 ? pageNumber - 1 : 0)
+
+
+
+//setProductStore(await DataStore.query(Product))
+let newProductStore = productsStore.map(item => item)
+//console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMM", newProductStore[0])
+
+setChunkProducts( sliceIntoChunks(newProductStore, productsByPage ))
+setProductQty(newProductStore.length)
+
+setProducts(newProductStore)*/
+
+}
+
+const fetchProducts = async () => {
+  try {
+
+    let productsStore = await DataStore.query(Product, Predicates.ALL, {
+      page: 0,
+      limit: productsByPage,
+    })
+
+    let newProductStore = productsStore.map(item => item)
+    //console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMM", newProductStore[0])
+
+    //setChunkProducts( sliceIntoChunks(newProductStore, productsByPage ))
+    setProductQty(newProductStore.length)
+    setProducts(newProductStore)
+
+    
+    /*let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage }))
+  //setTokenLeft(tokenRight)
+  setTokenRight(productsTemp.data.listProducts.nextToken)
+
+  let productList = productsTemp.data.listProducts.items
+      
+      setChunkProducts( sliceIntoChunks(productList, productsByPage ))
+      setProductQty(productList.length)
+     
+      setProducts(productList)
+    
+    //setPageNumber(pageNumber > 0 ? pageNumber - 1 : 0)*/
+    
+    
+    
+    //setProductStore(await DataStore.query(Product))
+    /*let newProductStore = productsStore.map(item => item)
+    console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMM", newProductStore.length)
+    
+    setChunkProducts( sliceIntoChunks(newProductStore, productsByPage ))
+    setProductQty(newProductStore.length)
+    
+    setProducts(newProductStore)*/
+      
+      /*let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage}))
+      setTokenLeft(tokenRight)
+      setTokenRight(productsTemp.data.listProducts.nextToken)
+      
+      let productList = productsTemp.data.listProducts.items
+      
+      setChunkProducts( sliceIntoChunks(productList, productsByPage ))
+      setProductQty(productList.length)
+     
+      setProducts(productList)*/
+      
       
 
   } catch (err) { console.log(err) }}
 
+  const fetchProductsRefresh = async (value) => {
+    try {
+
+     setProductsByPage(value) 
+
+      let productsStore = await DataStore.query(Product, Predicates.ALL, {
+        page: 0,
+        limit: value,
+      })
+  
+      let newProductStore = productsStore.map(item => item)
+     
+      setChunkProducts( sliceIntoChunks(newProductStore, value ))
+      setProductQty(newProductStore.length)
+      setProducts(newProductStore)
+
+      setAttributesSelected([])
+      setProductsSelected([]) 
+      setProductsSelectedAll(false)
+      
+     
+    } catch (err) { console.log(err) }}
+  
   
 
     let dataChunks = ((chunckProducts === null ? [] : chunckProducts ))
@@ -871,8 +1131,8 @@ const fetchProducts = async () => {
         });
       }
 
-      console.log(list)
-      console.log(direction)
+      //console.log(list)
+      //console.log(direction)
 
     }
     
@@ -915,7 +1175,7 @@ const fetchProducts = async () => {
     
       if (item.images){
         for (const property in item.images){
-          console.log("IMAGES PROPERTY: ",item.images[property])
+          //console.log("IMAGES PROPERTY: ",item.images[property])
           if (item.images[property]) {
             //tempImages.push({data_url:urlBase+item.images[property]})
             tempImages.push({...JSON.parse(item.images[property]),old: true})   
@@ -924,7 +1184,7 @@ const fetchProducts = async () => {
           
         }
       }
-      console.log("IMAGENES TEMPORALES ***********:  ",tempImages)
+      //console.log("IMAGENES TEMPORALES ***********:  ",tempImages)
       
       setImages(tempImages)
       //key: item.id, text: item.name, value: item.id
@@ -943,15 +1203,15 @@ const fetchProducts = async () => {
         ebaystorecategoryID: item.ebaystorecategoryID,
         binLocation: item.binLocation ? item.binLocation : "",
         //title: item.title,
-        sourceDropship: item.source ? item.source.dropship : false,
-        sourceWarehouse: item.source ? item.source.warehouse : false,
-        titleStore: item.title ? item.title.store : "",
-        titleEbay: item.title ? item.title.ebay : "",
-        titleAmazon: item.title ? item.title.amazon : "", 
-        descriptionStore: item.description ? item.description.store : "",
+        sourceDropship: item.source ? item.sourceDropship : false,
+        sourceWarehouse: item.source ? item.sourceWarehouse : false,
+        titleStore: item.titleStore ? item.titleStore : "",
+        titleEbay: item.titleEbay ? item.titleEbay : "",
+        titleAmazon: item.titleAmazon ? item.titleAmazon : "", 
+        descriptionStore: item.descriptionStore ? item.descriptionStore : "",
         
-        descriptionEbay: item.description ? item.description.ebay : "",
-        descriptionAmazon: item.description ? item.description.amazon : "",
+        descriptionEbay: item.descriptionEbay ? item.descriptionEbay : "",
+        descriptionAmazon: item.descriptionAmazon ? item.descriptionAmazon : "",
         bullet1: item.bulletPoints ? item.bulletPoints.bullet1 : "",
         bullet2: item.bulletPoints ? item.bulletPoints.bullet2 : "",
         bullet3: item.bulletPoints ? item.bulletPoints.bullet3 : "",
@@ -964,23 +1224,23 @@ const fetchProducts = async () => {
         images: tempImages, 
         dimensionalWeight: item.dimensionalWeight ? item.dimensionalWeight : 0,
         appliedWeight: item.appliedWeight ? item.appliedWeight : 0,
-        height: item.dimensions ? item.dimensions.height : 0,
-        length: item.dimensions ? item.dimensions.length : 0,
-        width: item.dimensions ? item.dimensions.width : 0,
+        height: item.dimensionHeight ? item.dimensionHeight : 0,
+        length: item.dimensionLength ? item.dimensionLength : 0,
+        width: item.dimensionWidth ? item.dimensionWidth : 0,
         shopifyFitmentTags: item.shopifyFitmentTags ? item.shopifyFitmentTags : "",
         shopifyOnlyTags: item.shopifyOnlyTags ? item.shopifyOnlyTags : "",
         shopifyMetaTitle: item.shopifyMetaTitle ? item.shopifyMetaTitle : "",
         shopifyMetaDescription: item.shopifyMetaDescription ? item.shopifyMetaDescription : "",
         
-        priceMSRP: item.price ? item.price.MSRP : 0,
-        priceMAP: item.price ? item.price.MAP : 0,
-        priceStore: item.price ? item.price.store : 0,
-        priceEbay: item.price ? item.price.ebay : 0,
-        priceAmazon: item.price ? item.price.amazon : 0,
-        priceWholesaleLow: item.price ? item.price.wholesaleLow : 0,
-        priceWholesaleHigh: item.price ? item.price.wholesaleHigh : 0,
-        priceScratchLow: item.price ? item.price.scratchLow : 0,
-        priceScratchHigh: item.price ? item.price.scratchHigh : 0,
+        priceMSRP: item.priceMSRP ? item.priceMSRP : 0,
+        priceMAP: item.priceMAP ? item.priceMAP : 0,
+        priceStore: item.priceStore ? item.priceStore : 0,
+        priceEbay: item.priceEbay ? item.priceEbay : 0,
+        priceAmazon: item.priceAmazon ? item.priceAmazon : 0,
+        priceWholesaleLow: item.priceWholesaleLow ? item.priceWholesaleLow : 0,
+        priceWholesaleHigh: item.priceWholesaleHigh ? item.priceWholesaleHigh : 0,
+        priceScratchLow: item.priceScratchLow ? item.priceScratchLow : 0,
+        priceScratchHigh: item.priceScratchHigh ? item.priceScratchHigh : 0,
         cost: item.cost ? item.cost : 0,
         status: item.status ? item.status : "Draft",
         
@@ -1010,7 +1270,7 @@ const fetchProducts = async () => {
         /*let tempProducts = products.filter(  
           item => item.SKU.toLowerCase().includes(search.toLowerCase()) 
         )*/
-        console.log(products)
+        //console.log(products)
 
         //lista.filter(item => item.a.includes('1') || item.b.includes('ch'))
         //console.log(search.toLowerCase())
@@ -1063,7 +1323,7 @@ const fetchProducts = async () => {
             return subCategory2Name ? subCategory2Name.toLowerCase().includes(search.toLowerCase()) : "" 
         
           }  )
-          console.log("SOSODISODISODS: ", subCategories)
+          //console.log("SOSODISODISODS: ", subCategories)
 
           
         
@@ -1148,8 +1408,8 @@ const fetchProducts = async () => {
         setProductsSelected(productsSelected.filter(item => item !== id))
       }
 
-      console.log("**************************** ",productsSelected)
-      console.log("PRODUCTS IN PAGE", chunckProducts[activePage - 1])
+      //console.log("**************************** ",productsSelected)
+      //console.log("PRODUCTS IN PAGE", chunckProducts[activePage - 1])
       
     }
 
@@ -1308,92 +1568,92 @@ const handleAttributesSelectedCheckbox = (data) => {
 
           const handleCategorySelectedBulk = ({value}) => {
             //evt.persist();
-            console.log(value)
+            //console.log(value)
             setEditCategoriesSelected((values) => ({
               ...values,
               category: {id: value, checked: editCategoriesSelected.category.checked},
           }))
-          console.log(editCategoriesSelected)
+          //console.log(editCategoriesSelected)
             //setCategory(value)
             //console.log(value)
           }
 
           const handleCategorySelectedBulkChecked = (e, data) => {
             //evt.persist();
-            console.log(data.checked)
+            //console.log(data.checked)
             let value = data.checked
             setEditCategoriesSelected((values) => ({
               ...values,
               category: {id: editCategoriesSelected.category.id, checked: value},
           }))
-          console.log(editCategoriesSelected)
+          //console.log(editCategoriesSelected)
           }
 
           const handleSubCategorySelectedBulkChecked = (e, data) => {
             //evt.persist();
-            console.log(data.checked)
+            //console.log(data.checked)
             let value = data.checked
             setEditCategoriesSelected((values) => ({
               ...values,
               subCategory: {id: editCategoriesSelected.subCategory.id, checked: value},
           }))
-          console.log(editCategoriesSelected)
+          //console.log(editCategoriesSelected)
           }
 
           const handleSubCategorySelectedBulk = ({value}) => {
             //evt.persist();
-            console.log(value)
+            //console.log(value)
             setEditCategoriesSelected((values) => ({
               ...values,
               subCategory: {id: value, checked: editCategoriesSelected.subCategory.checked},
           }))
-          console.log(editCategoriesSelected)
+          //console.log(editCategoriesSelected)
             //setCategory(value)
             //console.log(value)
           }
 
           const handleSubCategory2SelectedBulkChecked = (e, data) => {
             //evt.persist();
-            console.log(data.checked)
+            //console.log(data.checked)
             let value = data.checked
             setEditCategoriesSelected((values) => ({
               ...values,
               subCategory2: {id: editCategoriesSelected.subCategory2.id, checked: value},
           }))
-          console.log(editCategoriesSelected)
+          //console.log(editCategoriesSelected)
           }
 
           const handleSubCategory2SelectedBulk = ({value}) => {
             //evt.persist();
-            console.log(value)
+            //console.log(value)
             setEditCategoriesSelected((values) => ({
               ...values,
               subCategory2: {id: value, checked: editCategoriesSelected.subCategory2.checked},
           }))
-          console.log(editCategoriesSelected)
+          //console.log(editCategoriesSelected)
             //setCategory(value)
             //console.log(value)
           }
 
           const handleEbayStoreCategorySelectedBulkChecked = (e, data) => {
             //evt.persist();
-            console.log(data.checked)
+            //console.log(data.checked)
             let value = data.checked
             setEditCategoriesSelected((values) => ({
               ...values,
               ebayStoreCategory: {id: editCategoriesSelected.ebayStoreCategory.id, checked: value},
           }))
-          console.log(editCategoriesSelected)
+          //console.log(editCategoriesSelected)
           }
 
           const handleEbayStoreCategorySelectedBulk = ({value}) => {
             //evt.persist();
-            console.log(value)
+            //console.log(value)
             setEditCategoriesSelected((values) => ({
               ...values,
               ebayStoreCategory: {id: value, checked: editCategoriesSelected.ebayStoreCategory.checked},
           }))
-          console.log(editCategoriesSelected)
+          //console.log(editCategoriesSelected)
             //setCategory(value)
             //console.log(value)
           }
@@ -1515,7 +1775,7 @@ const handleAttributesSelectedCheckbox = (data) => {
           descriptionStore: evt.target.value,
       }))*/
       
-      console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", value)
+      //console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$", value)
       setProductForm((values) => ({
         ...values,
         descriptionStore: value,
@@ -1738,7 +1998,7 @@ const handleStatus = (evt) => {
   evt.persist();
 
   //console.log(!productForm.sourceWarehouse)
-  console.log(evt)
+  //console.log(evt)
   setProductForm((values) => ({
       ...values,
       status: productForm.status === "Active" ? "Draft" : "Active",
@@ -1830,7 +2090,7 @@ const updateFindReplace = async (id) => {
 /*********************************************************************** */
 
 const handleApplyFindText = () => {
-  console.log(findText + ' | ' + replaceText)
+  //console.log(findText + ' | ' + replaceText)
   
   
   let tempProducts1 = products.filter(itemFilter => itemFilter.title && itemFilter.title.store ? itemFilter.title.store.includes(findText) : "" )
@@ -1882,7 +2142,7 @@ const handleApplyFindText = () => {
 
 try {
   for (let item of tempProducts){
-    console.log("**********************************************",item)
+    //console.log("**********************************************",item)
     updateFindReplace(item.id)
   }
   setTimeout(() => {
@@ -1914,7 +2174,7 @@ try {
 
 const handleImages = (imageList, addUpdateIndex) => {
     //console.log("IMAGE LIST >>>>>>>>>>>>>", imageList, addUpdateIndex)
-    console.log("IMAGE LIST >>>",imageList)
+    //console.log("IMAGE LIST >>>",imageList)
     //console.log(addUpdateIndex)
     setImages(imageList)
 
@@ -1938,7 +2198,7 @@ const updateAttributes = async (id) => {
     }, set);
     
 
-    console.log("NEW PRODUCT ATTRIBUTES",newProductAttributes)
+    //console.log("NEW PRODUCT ATTRIBUTES",newProductAttributes)
     let attributes = JSON.stringify(newProductAttributes) 
     let version = product._version
     
@@ -2006,7 +2266,7 @@ const handleApplyCategoriesChanges = () => {
   setEditCategoriesModal(false)
   try {
   for (let item of productsSelected){
-    console.log(item)
+    //console.log(item)
     updateCategories(item)
   }
   setTimeout(() => {
@@ -2027,24 +2287,24 @@ const handleApplyCategoriesChanges = () => {
 }
 
 const handleStatusProduct = (value) => {
-  console.log(value)
-  console.log(products)
+  //console.log(value)
+  //console.log(products)
   let productList = []
   
   if (value === 'ACTIVE'){
-    console.log('Active')
+    //console.log('Active')
     productList = sliceIntoChunks(products.filter(item => item.status === 'Active'), productsByPage )
     setChunkProducts( productList )
   }
 
   if (value === 'DRAFT'){
-    console.log('Draft')
+    //console.log('Draft')
     productList = sliceIntoChunks(products.filter(item => item.status === 'Draft'), productsByPage )
     setChunkProducts( productList )
   }
 
   if (value === 'ALL'){
-    console.log('All')
+    //console.log('All')
     productList = sliceIntoChunks(products.filter(item => item.status === 'Draft' || item.status === 'Active'), productsByPage )
     setChunkProducts( productList )
   }
@@ -2074,7 +2334,7 @@ const handleApplyAttributesChanges = () => {
   setEditAttributesModal(false)
   try {
   for (let item of productsSelected){
-    console.log(item)
+    //console.log(item)
     updateAttributes(item)
   }
   setTimeout(() => {
@@ -2119,7 +2379,11 @@ const handleGenerateHandle = () => {
  
 }
 
-
+const handleChangeProductsByPage = (e, {value}) => { 
+    //setProductsByPage(value) 
+    fetchProductsRefresh(value)
+    //console.log(value)
+  }
 
               
 
@@ -2145,7 +2409,7 @@ const handleGenerateHandle = () => {
     //console.log(attributesSelected)
     //console.log("Los atributos ************** ", attributesSelected)
     //console.log("^^^^^^^^^^^^^^^^^^^", productForm)
-    console.log(attributesSelected)
+    //console.log(attributesSelected)
     //console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%", attributes)
     return (
       
@@ -2185,10 +2449,34 @@ const handleGenerateHandle = () => {
           </Grid.Column>
           <Grid.Column width={4}>
              
-            <Label style={{marginTop:6}}>
+            {/*<Label style={{marginTop:6}}>
             Products:
             <Label.Detail>{productQty}</Label.Detail>
-          </Label>
+            </Label>*/}
+            <Button basic disabled = {pageNumber > 0 ? false : true} size='mini' onClick = {()=>handleMoveLeft()} icon='chevron left' />
+            {/*<Label basic>
+                Page {pageNumber + 1} ( {(pageNumber * productsByPage + 1)} - {pageNumber * productsByPage + productsByPage}    )
+            </Label>*/}
+            <Dropdown
+                style={{fontSize: 14, marginLeft: 10, marginRight: 10}}
+                onChange={handleChangeProductsByPage}
+                size='mini'
+                compact
+                text={'Page ' + (pageNumber + 1) + ' (' + (pageNumber * productsByPage + 1) + '-' + (pageNumber * productsByPage + productsByPage) + ')'}
+                options={[{ key: 25, text: '25 Per Page', value: 25 },
+                { key: 50, text: '50 Per Page', value: 50 },
+                { key: 100, text: '100 Per Page', value: 100 },
+                { key: 500, text: '500 Per Page', value: 500 },
+                { key: 1000, text: '1000 Per Page', value: 1000 }]
+              }
+              value = {productsByPage}
+               // defaultValue={}
+                //placeholder='Choose an option'
+                selection
+                //value={value}
+          />
+            <Button basic size='mini' onClick = {()=>handleMoveRight()} icon='chevron right' />
+            
           <span style={{marginLeft: 15}}>
            Filter by Status: 
           <Dropdown
@@ -2584,9 +2872,11 @@ const handleGenerateHandle = () => {
            
         </Grid>
 
-        {console.log(brands)}
+        {/*console.log(brands)*/}
         <ProductTable 
-              data = {dataChunks[activePage - 1]} 
+              //data = {dataChunks[activePage - 1]}
+              data = {products}
+              //products = {products} 
               categories = {categories}
               subCategories = {subCategories}
               subCategories2 = {subCategories2}
@@ -2600,7 +2890,9 @@ const handleGenerateHandle = () => {
               productsSelectedAll = {productsSelectedAll}
               openForm = {handleOpenEditForm} />
          <div style = {paginationStyle}>
-          <Pagination
+          
+          
+          {/*<Pagination
               activePage={activePage}
               boundaryRange={1}
               ellipsisItem='...'
@@ -2609,7 +2901,12 @@ const handleGenerateHandle = () => {
               siblingRange={1}
               totalPages={ dataChunks.length }
               onPageChange={handlePaginationChange}              
-            />
+          />*/}
+            
+            
+            
+            
+            
             
             
             </div>

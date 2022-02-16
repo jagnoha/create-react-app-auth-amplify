@@ -148,7 +148,7 @@ const subscriptionUpdate = async () => await API.graphql(
   graphqlOperation(subscriptions.onUpdateBrand)
 ).subscribe({
   next: (item) => { 
-    fetchBrands()
+    //fetchBrands()
     console.log(item)
     let brandTemp = item.value.data.onUpdateBrand;
     console.log(brandTemp)
@@ -240,6 +240,7 @@ const fetchBrands = async () => {
       setChunkBrands( sliceIntoChunks(brands, 10 ))
       setBrands(brands)
       console.log("esta es una prueba *****", brands)
+      subscriptionUpdate()
       
 
   } catch (err) { console.log(err) }}

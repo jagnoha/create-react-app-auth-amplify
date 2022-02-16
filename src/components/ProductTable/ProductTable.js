@@ -60,7 +60,7 @@ export default function ProductTable(props) {
 
     } 
 
-    console.log("ESTA ES LA DATA: ",props.data)
+    //console.log("ESTA ES LA DATA: ",props.data)
 
 
     return (
@@ -112,8 +112,8 @@ export default function ProductTable(props) {
                 onClick={() => props.handleOrder('MSRP')} >MSRP</Table.HeaderCell>
             <Table.HeaderCell sorted={props.orderColumn.column === 'cost' ? props.orderColumn.direction : null}
                 onClick={() => props.handleOrder('cost')}>Cost</Table.HeaderCell>
-            <Table.HeaderCell width={1} sorted={props.orderColumn.column === 'createdAt' ? props.orderColumn.direction : null}
-                onClick={() => props.handleOrder('createdAt')}>Created</Table.HeaderCell>
+            {/*<Table.HeaderCell width={1} sorted={props.orderColumn.column === 'createdAt' ? props.orderColumn.direction : null}
+                onClick={() => props.handleOrder('createdAt')}>Created</Table.HeaderCell>*/}
             <Table.HeaderCell width={1} sorted={props.orderColumn.column === 'updatedAt' ? props.orderColumn.direction : null}
                 onClick={() => props.handleOrder('updatedAt')}>Updated</Table.HeaderCell>
             
@@ -151,10 +151,10 @@ export default function ProductTable(props) {
             </Table.Cell>
             <Table.Cell onClick = {()=>props.openForm(item)}>{item.SKU}</Table.Cell>
             <Table.Cell onClick = {()=>props.openForm(item)}>
-                {item.source.warehouse ? <Label color='blue' size={"mini"}>Warehouse</Label> : ''}  
-                {item.source.dropship ? <Label color='orange' size={"mini"}>Dropship</Label> : ''}          
+                {item.sourceWarehouse ? <Label color='blue' size={"mini"}>Warehouse</Label> : ''}  
+                {item.sourceDropship ? <Label color='orange' size={"mini"}>Dropship</Label> : ''}          
             </Table.Cell>
-            <Table.Cell onClick = {()=>props.openForm(item)}>{item.title.store}</Table.Cell>
+            <Table.Cell onClick = {()=>props.openForm(item)}>{item.titleStore}</Table.Cell>
             <Table.Cell onClick = {()=>props.openForm(item)}>{item.mpn}</Table.Cell>
             <Table.Cell onClick = {()=>props.openForm(item)}>{brand ? brand.name : ""}</Table.Cell>
             <Table.Cell onClick = {()=>props.openForm(item)}><AttributeList attributesSelected = {item.Attributes} attributes = {props.attributes} /></Table.Cell>
@@ -170,10 +170,10 @@ export default function ProductTable(props) {
                     subCategory2 ? (subCategory2.id === '3dc30aff-66a5-49fa-9f20-49c76031a994' ? "" : subCategory2.name) : ""
 
                 }</Table.Cell>
-                <Table.Cell onClick = {()=>props.openForm(item)}> {item.price && item.price.MSRP ? '$'+item.price.MSRP : ""}</Table.Cell>
+                <Table.Cell onClick = {()=>props.openForm(item)}> {item.priceMSRP ? '$'+item.priceMSRP : ""}</Table.Cell>
                 <Table.Cell onClick = {()=>props.openForm(item)}> {item.cost ? '$'+item.cost : ""}</Table.Cell>
-                <Table.Cell onClick = {()=>props.openForm(item)} >{new Date(item.createdAt).toString().split(' GMT')[0]}</Table.Cell>
-                <Table.Cell onClick = {()=>props.openForm(item)} >{new Date(item.updatedAt).toString().split(' GMT')[0]}</Table.Cell>
+                {/*<Table.Cell onClick = {()=>props.openForm(item)} >{new Date(item._lastChangedAt).toString().split(' GMT')[0]}</Table.Cell>*/}
+                <Table.Cell onClick = {()=>props.openForm(item)} >{new Date(item._lastChangedAt).toString().split(' GMT')[0]}</Table.Cell>
 
 
           </Table.Row>

@@ -32,7 +32,7 @@ export default function Main(props) {
   const [categories, setCategories] = useState([])
   const [subCategories, setSubCategories] = useState([])
   const [subCategories2, setSubCategories2] = useState([])
-  const [products, setProducts] = useState([]) 
+  //const [products, setProducts] = useState([]) 
     
 
     const routes = [
@@ -157,60 +157,6 @@ export default function Main(props) {
     }
 
     
-const fetchProducts = async () => {
-  try {
-      const productData = await API.graphql({
-        query: listProducts,
-      
-      })
-      
-
-
-      //const productsTemp = await API.graphql(graphqlOperation(listProducts )) 
-      let productList = []
-      //const products = productsTemp.data.listProducts.items.filter(item => !item._deleted)
-      //const token = productsTemp
-      //console.log("*********************** ESTE ES EL TOKEN: " + token.data.listProducts.nextToken)
-      let resultToken = true
-
-      while (resultToken) {
-        let productsTemp2 = await API.graphql(graphqlOperation(listProducts, {limit: 1000, nextToken: token} ))
-        
-        const products = productsTemp2.data.listProducts.items.filter(item => !item._deleted)
-        console.log(products)
-        const token = productsTemp2.data.listProducts.nextToken
-        productList = productList.concat(products)
-        if (productList.length < 1000){
-          //setChunkProducts( sliceIntoChunks(productList, productsByPage ))
-          //setProductQty(productList.length)
-          setProducts(productList)
-        }
-        if (!token) {
-          resultToken = false 
-        }
-      }
-       
-      console.log("ESTE ES EL PRODUCT LIST: ", productList)
-      
-
-      //console.log(productData)
-      //const products = await productData.data.listProducts.items.filter(item => !item._deleted)  
-      
-      
-      
-      //console.log("QUE TENEMOS AQUI:", Products)  
-      //sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending');
-      
-      
-      //setChunkProducts( sliceIntoChunks(productList, productsByPage ))
-      //setProductQty(productList.length)
-
-      setProducts(productList)
-      
-      //console.log("esta es una prueba *****", products)
-      
-
-  } catch (err) { console.log(err) }}
 
     const fetchBrands = async () => {
       try {
@@ -274,7 +220,7 @@ const fetchProducts = async () => {
   }
       
     useEffect(() => {
-        fetchProducts()
+        //fetchProducts()
         fetchAttributes()
         fetchBrands()
         fetchCategories()

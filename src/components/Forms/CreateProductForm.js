@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react'
+import React, {useState, useRef, memo} from 'react'
 import { Form, Checkbox, GridRow, CardContent } from 'semantic-ui-react'
 import { Dropdown, Segment, Header, Icon, Divider, Grid, Accordion, Transition, Button, Card, Image, TextArea } from 'semantic-ui-react'
 import ImageUploading from 'react-images-uploading'
@@ -92,6 +92,10 @@ export default function CreateProductForm(props) {
   })
   //let statusList = [{key: 1, text: "Active", value: '1'},{key: 0, text: "Draft", value: '0'}]
   const [addImageVisible, setAddImageVisible] = useState(false)
+
+  
+
+  
 
   /*const config = {
     readonly: false,
@@ -338,7 +342,9 @@ export default function CreateProductForm(props) {
                           <label>Store</label>
                           <input placeholder='Store Title' 
                             value = {props.titleStore} 
-                            onChange={props.handleTitleStore }/>
+                            onChange={props.handleTitleStore }
+                            />
+                            
                         </Form.Field>
                         
                         <Grid>
@@ -372,7 +378,7 @@ export default function CreateProductForm(props) {
 
                     <Form.Field>
                         <label id="store"><h3>Store</h3></label>
-                        <ReactQuill 
+                        {<ReactQuill 
                           theme="snow" 
                           value={props.descriptionStore ? props.descriptionStore : ""} onChange={props.handleDescriptionStore}
                           modules={modules}
@@ -381,15 +387,9 @@ export default function CreateProductForm(props) {
                           //scrollingContainer
                           //formats={formats}
                           
-                          />
+                        />}
 
-                        {/*<JoditEditor
-                                ref={editor}
-                                value={props.descriptionStore}
-                                config={config}
-                                onBlur={props.handleDescriptionStore}
-                                //onChange={props.handleDescriptionStore}
-                        />*/}
+                       
 
                       </Form.Field>
                         
@@ -399,33 +399,24 @@ export default function CreateProductForm(props) {
                           <Grid.Column width={8}>
                           <Form.Field> 
                         <label><h3>eBay</h3></label>
-                        {/*<JoditEditor
-                                ref={editor}
-                                value={props.descriptionEbay}
-                                config={config}
-                                onBlur={props.handleDescriptionEbay}
-                                //onChange={props.handleDescriptionEbay}
-                        />*/}
-                        <ReactQuill 
+                        {<ReactQuill 
                           theme="snow" 
                           value={props.descriptionEbay ? props.descriptionEbay : ""} onChange={props.handleDescriptionEbay}
                           modules={modules}
                           //style = {{fontSize: '18px',overflowY: 'visible' }}
                           //formats={formats}
                           
-                          />
+                        />}
                               </Form.Field>
                         </Grid.Column>
                         <Grid.Column width={8}>
                         <label><h3>Amazon</h3></label>
                            
-                            <ReactQuill 
+                            {<ReactQuill 
                           theme="snow" 
                           value={props.descriptionAmazon ? props.descriptionAmazon : ""} onChange={props.handleDescriptionAmazon}
                           modules={modules}
-                          //formats={formats}
-                          
-                            />
+                            />}
                         </Grid.Column>
                         </Grid.Row>
                         </Grid>

@@ -100,6 +100,26 @@ export declare class Product {
   readonly status?: string;
   readonly shopifyMetaTitle?: string;
   readonly shopifyMetaDescription?: string;
+  readonly sourceDropship?: boolean;
+  readonly sourceWarehouse?: boolean;
+  readonly titleStore?: string;
+  readonly titleEbay?: string;
+  readonly titleAmazon?: string;
+  readonly descriptionStore?: string;
+  readonly descriptionEbay?: string;
+  readonly descriptionAmazon?: string;
+  readonly dimensionHeight?: number;
+  readonly dimensionLength?: number;
+  readonly dimensionWidth?: number;
+  readonly priceMSRP?: number;
+  readonly priceMAP?: number;
+  readonly priceStore?: number;
+  readonly priceEbay?: number;
+  readonly priceAmazon?: number;
+  readonly priceWholesaleLow?: number;
+  readonly priceWholesaleHigh?: number;
+  readonly priceScratchLow?: number;
+  readonly priceScratchHigh?: number;
   constructor(init: ModelInit<Product>);
   static copyOf(source: Product, mutator: (draft: MutableModel<Product>) => MutableModel<Product> | void): Product;
 }

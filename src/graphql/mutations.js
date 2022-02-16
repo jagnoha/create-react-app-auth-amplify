@@ -83,6 +83,26 @@ export const createProduct = /* GraphQL */ `
       status
       shopifyMetaTitle
       shopifyMetaDescription
+      sourceDropship
+      sourceWarehouse
+      titleStore
+      titleEbay
+      titleAmazon
+      descriptionStore
+      descriptionEbay
+      descriptionAmazon
+      dimensionHeight
+      dimensionLength
+      dimensionWidth
+      priceMSRP
+      priceMAP
+      priceStore
+      priceEbay
+      priceAmazon
+      priceWholesaleLow
+      priceWholesaleHigh
+      priceScratchLow
+      priceScratchHigh
       _version
       _deleted
       _lastChangedAt
@@ -173,6 +193,26 @@ export const updateProduct = /* GraphQL */ `
       status
       shopifyMetaTitle
       shopifyMetaDescription
+      sourceDropship
+      sourceWarehouse
+      titleStore
+      titleEbay
+      titleAmazon
+      descriptionStore
+      descriptionEbay
+      descriptionAmazon
+      dimensionHeight
+      dimensionLength
+      dimensionWidth
+      priceMSRP
+      priceMAP
+      priceStore
+      priceEbay
+      priceAmazon
+      priceWholesaleLow
+      priceWholesaleHigh
+      priceScratchLow
+      priceScratchHigh
       _version
       _deleted
       _lastChangedAt
@@ -263,6 +303,26 @@ export const deleteProduct = /* GraphQL */ `
       status
       shopifyMetaTitle
       shopifyMetaDescription
+      sourceDropship
+      sourceWarehouse
+      titleStore
+      titleEbay
+      titleAmazon
+      descriptionStore
+      descriptionEbay
+      descriptionAmazon
+      dimensionHeight
+      dimensionLength
+      dimensionWidth
+      priceMSRP
+      priceMAP
+      priceStore
+      priceEbay
+      priceAmazon
+      priceWholesaleLow
+      priceWholesaleHigh
+      priceScratchLow
+      priceScratchHigh
       _version
       _deleted
       _lastChangedAt

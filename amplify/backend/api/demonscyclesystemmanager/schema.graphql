@@ -89,6 +89,26 @@ type Product @model @key(name: "byBrand", fields: ["brandID"]) @key(name: "byMan
   status: String
   shopifyMetaTitle: String
   shopifyMetaDescription: String
+  sourceDropship: Boolean
+  sourceWarehouse: Boolean
+  titleStore: String
+  titleEbay: String
+  titleAmazon: String
+  descriptionStore: String
+  descriptionEbay: String
+  descriptionAmazon: String
+  dimensionHeight: Float
+  dimensionLength: Float
+  dimensionWidth: Float
+  priceMSRP: Float
+  priceMAP: Float
+  priceStore: Float
+  priceEbay: Float
+  priceAmazon: Float
+  priceWholesaleLow: Float
+  priceWholesaleHigh: Float
+  priceScratchLow: Float
+  priceScratchHigh: Float
 }
 
 type Attribute @model @auth(rules: [{allow: public}]) {

@@ -10,7 +10,7 @@ import { attachEventProps } from '@aws-amplify/ui-react/lib-esm/react-component-
 import {ExcelToJson} from 'excel-to-json-in-react-js'
 import xlsx from 'xlsx'
 import { v4 as uuidv4 } from 'uuid'
-import { createCategory, createSubCategory, createManufacturer, createProduct } from '../../graphql/mutations'
+import { createCategory, createSubCategory, createManufacturer, createProduct, updateProduct } from '../../graphql/mutations'
 
 //import Attributes from '../Attributes/Attributes'
 
@@ -644,6 +644,69 @@ export default function ExportFile(props) {
       }
   }
 
+  const updateItem = async (item) => {
+    try {
+      //console.log(item.id)
+      //console.log(item._version)
+
+      let productDetails = {
+        id: item.id,
+        sourceDropship: item.source ? item.source.dropship : '',
+        sourceWarehouse: item.source ? item.source.warehouse : '',
+        titleStore: item.title ? item.title.store : '',
+        titleEbay: item.title ? item.title.ebay : '',
+        titleAmazon: item.title ? item.title.amazon : '',
+        descriptionStore: item.description ? item.description.store : '',
+        descriptionEbay: item.description ? item.description.ebay : '',
+        descriptionAmazon: item.description ? item.description.amazon : '',
+        priceMSRP: item.price ? item.price.MSRP : 0,
+        dimensionHeight: item.dimensions ? item.dimensions.height : 0,
+        dimensionLength: item.dimensions ? item.dimensions.length : 0,
+        dimensionWidth: item.dimensions ? item.dimensions.width : 0,
+        _version: item._version
+      }
+      console.log("=================", productDetails, "========================")
+      await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+      
+
+
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const handleUpdateFields = async () => {
+    //let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: 1000, nextToken: tokenLeft }))
+    let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: 1000 }))
+    let productList = productsTemp.data.listProducts.items   
+    let token = productsTemp.data.listProducts.nextToken
+    console.log("ESSSSSSSSSSTE ES EL TOKEN: ", token)
+    
+    while (token) {
+
+      let productsPart = await API.graphql(graphqlOperation(listProducts, {limit: 1000, nextToken: token }))
+      token = productsPart.data.listProducts.nextToken
+      productList = productList.concat(productsPart.data.listProducts.items)
+
+    }
+
+    console.log(productList.length)
+    
+    let n = 33500
+    //console.log(productsTemp)
+    try {
+
+      for (let item of productList.slice(33500,34000)){
+        n++
+        console.log(n)
+        updateItem(item)
+      }
+
+    } catch(error) {
+      console.log(error)
+    }
+  }
       
       
 
@@ -678,9 +741,15 @@ export default function ExportFile(props) {
               name="upload"
               id="upload"
               onChange={readUploadNewProducts}
-          />
-        */} 
-
+          />          
+        */}
+        {/*<hr></hr>
+          <label htmlFor="upload">Update products</label><br></br>
+          <button
+              onClick={handleUpdateFields}
+          >Update Products</button>
+        
+        */}
       </div>    
     );
     

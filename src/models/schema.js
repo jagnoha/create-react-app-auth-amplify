@@ -240,15 +240,152 @@ export const schema = {
                     "type": "String",
                     "isRequired": false,
                     "attributes": []
+                },
+                "sourceDropship": {
+                    "name": "sourceDropship",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "sourceWarehouse": {
+                    "name": "sourceWarehouse",
+                    "isArray": false,
+                    "type": "Boolean",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "titleStore": {
+                    "name": "titleStore",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "titleEbay": {
+                    "name": "titleEbay",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "titleAmazon": {
+                    "name": "titleAmazon",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "descriptionStore": {
+                    "name": "descriptionStore",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "descriptionEbay": {
+                    "name": "descriptionEbay",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "descriptionAmazon": {
+                    "name": "descriptionAmazon",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dimensionHeight": {
+                    "name": "dimensionHeight",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dimensionLength": {
+                    "name": "dimensionLength",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "dimensionWidth": {
+                    "name": "dimensionWidth",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "priceMSRP": {
+                    "name": "priceMSRP",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "priceMAP": {
+                    "name": "priceMAP",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "priceStore": {
+                    "name": "priceStore",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "priceEbay": {
+                    "name": "priceEbay",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "priceAmazon": {
+                    "name": "priceAmazon",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "priceWholesaleLow": {
+                    "name": "priceWholesaleLow",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "priceWholesaleHigh": {
+                    "name": "priceWholesaleHigh",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "priceScratchLow": {
+                    "name": "priceScratchLow",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "priceScratchHigh": {
+                    "name": "priceScratchHigh",
+                    "isArray": false,
+                    "type": "Float",
+                    "isRequired": false,
+                    "attributes": []
                 }
             },
             "syncable": true,
             "pluralName": "Products",
             "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
+                {},                                
                 {
                     "type": "key",
                     "properties": {
@@ -316,7 +453,7 @@ export const schema = {
                                     "read"
                                 ]
                             },
-                            {
+                            /*{
                                 "provider": "userPools",
                                 "ownerField": "owner",
                                 "allow": "owner",
@@ -324,7 +461,7 @@ export const schema = {
                                     "create"
                                 ],
                                 "identityClaim": "cognito:username"
-                            }
+                            }*/
                         ]
                     }
                 }
@@ -1162,5 +1299,5 @@ export const schema = {
             }
         }
     },
-    "version": "813e76d682ea9dc62bfa782c6031a8cf"
+    "version": "b5924249677df63daca42065feb90070"
 };

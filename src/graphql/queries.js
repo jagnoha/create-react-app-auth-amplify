@@ -80,6 +80,26 @@ export const getProduct = /* GraphQL */ `
       status
       shopifyMetaTitle
       shopifyMetaDescription
+      sourceDropship
+      sourceWarehouse
+      titleStore
+      titleEbay
+      titleAmazon
+      descriptionStore
+      descriptionEbay
+      descriptionAmazon
+      dimensionHeight
+      dimensionLength
+      dimensionWidth
+      priceMSRP
+      priceMAP
+      priceStore
+      priceEbay
+      priceAmazon
+      priceWholesaleLow
+      priceWholesaleHigh
+      priceScratchLow
+      priceScratchHigh
       _version
       _deleted
       _lastChangedAt
@@ -109,11 +129,48 @@ export const listProducts = /* GraphQL */ `
         subcategory2ID
         ebaystorecategoryID
         binLocation
+        source {
+          warehouse
+          dropship
+        }
+        title {
+          store
+          ebay
+          amazon
+        }
         description {
           store
           ebay
           amazon
         }
+        bulletPoints {
+          bullet1
+          bullet2
+          bullet3
+          bullet4
+          bullet5
+          bullet6
+          bullet7
+        }
+        images {
+          image1
+          image2
+          image3
+          image4
+          image5
+          image6
+          image7
+          image8
+          image9
+          image10
+        }        
+        handle
+        weight
+        dimensionalWeight
+        appliedWeight
+        shopifyFitmentTags
+        shopifyOnlyTags
+        cost
         dimensions {
           height
           length
@@ -130,48 +187,31 @@ export const listProducts = /* GraphQL */ `
           scratchLow
           scratchHigh
         }
-        images {
-          image1
-          image2
-          image3
-          image4
-          image5
-          image6
-          image7
-          image8
-          image9
-          image10
-        }
-        title {
-          store
-          ebay
-          amazon
-        }
-        source {
-          warehouse
-          dropship
-        }
-        bulletPoints {
-          bullet1
-          bullet2
-          bullet3
-          bullet4
-          bullet5
-          bullet6
-          bullet7
-        }
-        handle
-        weight
-        dimensionalWeight
-        appliedWeight
-        shopifyFitmentTags
-        shopifyOnlyTags
-        cost
         options
         updateFlag
         status
         shopifyMetaTitle
         shopifyMetaDescription
+        sourceDropship
+        sourceWarehouse
+        titleStore
+        titleEbay
+        titleAmazon
+        descriptionStore
+        descriptionEbay
+        descriptionAmazon
+        dimensionHeight
+        dimensionLength
+        dimensionWidth
+        priceMSRP
+        priceMAP
+        priceStore
+        priceEbay
+        priceAmazon
+        priceWholesaleLow
+        priceWholesaleHigh
+        priceScratchLow
+        priceScratchHigh
         _version
         _deleted
         _lastChangedAt
@@ -222,6 +262,26 @@ export const syncProducts = /* GraphQL */ `
         status
         shopifyMetaTitle
         shopifyMetaDescription
+        sourceDropship
+        sourceWarehouse
+        titleStore
+        titleEbay
+        titleAmazon
+        descriptionStore
+        descriptionEbay
+        descriptionAmazon
+        dimensionHeight
+        dimensionLength
+        dimensionWidth
+        priceMSRP
+        priceMAP
+        priceStore
+        priceEbay
+        priceAmazon
+        priceWholesaleLow
+        priceWholesaleHigh
+        priceScratchLow
+        priceScratchHigh
         _version
         _deleted
         _lastChangedAt
