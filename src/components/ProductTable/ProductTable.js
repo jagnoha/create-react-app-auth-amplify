@@ -1,5 +1,5 @@
 import React from 'react'
-import { Table, Loader, Container, Image, Label, Icon, Checkbox } from 'semantic-ui-react'
+import { Table, Loader, Container, Image, Label, Icon, Checkbox, Segment, Header } from 'semantic-ui-react'
 
 function AttributeList(props){
     let attributeParse = props.attributesSelected ? JSON.parse( props.attributesSelected) : [] 
@@ -58,7 +58,23 @@ export default function ProductTable(props) {
         
     );
 
-    } 
+    }
+    
+    if (props.data && props.data.length === 0) {  
+
+        return (
+            
+            <Container style={{padding: 50}}>    
+                    <Segment placeholder>
+                    <Header style={{textAlign: 'center'}}>                    
+                    Nothing matches your filters
+                    </Header>                    
+                </Segment>    
+            </Container>
+            
+        );
+    
+        } 
 
     //console.log("ESTA ES LA DATA: ",props.data)
 
@@ -109,13 +125,13 @@ export default function ProductTable(props) {
             <Table.HeaderCell width={1} sorted={props.orderColumn.column === 'subcategory2ID' ? props.orderColumn.direction : null}
                 onClick={() => props.handleOrder('subcategory2ID')} >SubCategory 2</Table.HeaderCell>
             <Table.HeaderCell width={1} sorted={props.orderColumn.column === 'MSRP' ? props.orderColumn.direction : null}
-                onClick={() => props.handleOrder('MSRP')} >MSRP</Table.HeaderCell>
+                onClick={() => props.handleOrder('priceMSRP')} >MSRP</Table.HeaderCell>
             <Table.HeaderCell sorted={props.orderColumn.column === 'cost' ? props.orderColumn.direction : null}
                 onClick={() => props.handleOrder('cost')}>Cost</Table.HeaderCell>
             {/*<Table.HeaderCell width={1} sorted={props.orderColumn.column === 'createdAt' ? props.orderColumn.direction : null}
                 onClick={() => props.handleOrder('createdAt')}>Created</Table.HeaderCell>*/}
-            <Table.HeaderCell width={1} sorted={props.orderColumn.column === 'updatedAt' ? props.orderColumn.direction : null}
-                onClick={() => props.handleOrder('updatedAt')}>Updated</Table.HeaderCell>
+            <Table.HeaderCell width={1} /*sorted={props.orderColumn.column === 'updatedAt' ? props.orderColumn.direction : null}
+                onClick={() => props.handleOrder('_lastChangedAt')}*/>Updated</Table.HeaderCell>
             
           </Table.Row>
         </Table.Header>

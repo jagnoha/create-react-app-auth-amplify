@@ -33,7 +33,7 @@ DataStore.configure({
 
 export default function Products() {
   const [chunckProducts, setChunkProducts] = useState(null)
-  const [products, setProducts] = useState([])
+  const [products, setProducts] = useState(null)
   const [tokenLeft, setTokenLeft] = useState("")
   const [tokenRight, setTokenRight] = useState("")
 
@@ -79,7 +79,7 @@ export default function Products() {
 
   const [activePage, setActivePage] = useState(1)
   const [search, setSearch] = useState("")
-  const [orderColumn, setOrderColumn] = useState({column: null, direction: 'descending'})
+  const [orderColumn, setOrderColumn] = useState({column: null, direction: 'ascending'})
   const [open, setOpen] = useState(false)
   const [openEdit, setOpenEdit] = useState(false)
   const [productForm, setProductForm] = useState({})
@@ -241,10 +241,20 @@ export default function Products() {
           status: productForm.status,          
         }
         //setProducts([...products, productInput])        
-        await API.graphql(graphqlOperation(createProduct, { input: productInput }))
-        fetchProducts()
-        setProductForm({})
-        setStatusProduct('ALL')
+        let productInfo = await API.graphql(graphqlOperation(createProduct, { input: productInput }))
+
+        
+        console.log(productInfo.data.createProduct)
+        let newList = [productInfo.data.createProduct, ...products]
+
+        setProducts(newList)
+        setChunkProducts( sliceIntoChunks(newList, productInput ))
+      
+      
+      setProductForm({})
+      setAttributesSelected([])
+      setStatusProduct('ALL')
+
         setTimeout(() => {
           toast({
               type: 'success',
@@ -468,7 +478,7 @@ export default function Products() {
           status: productForm.status,
           _version: version,          
         }
-        await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+        let productEdited = await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
         /*console.log("PRODUCTS LIST: ", products.map(item => 
             {
               if (item.id === id) {
@@ -483,32 +493,14 @@ export default function Products() {
           let newList = products.map(item => 
             {
               if (item.id === id) {
-                return (productDetails)
+                return (productEdited.data.updateProduct)
               }
               return (item)
             }            
           )
           setProducts(newList)
           setChunkProducts( sliceIntoChunks(newList, productsByPage ))
-        //let ne
-        /*let newList = products.map(item => {
-          if (item.id === id){
-            return productDetails
-          } 
-          return item
-        })*/
-
-        //setProducts(newList)
-        //fetchProductsRefresh()
-        //subscriptionUpdate()
-
-        /*let tempProductList = products.filter(item => item.id !== productDetails.id)
-        setProducts(tempProductList.concat(productDetails)) */
         
-        /*let tempProductList = products.filter(item => item.id !== productDetails.id)
-        console.log("PRODUCTS DETAILS: ", productDetails)
-        
-        setProducts(tempProductList.concat(productDetails))*/
         
         setProductForm({})
         setAttributesSelected([])
@@ -681,7 +673,7 @@ const onPageRendered = async () => {
   fetchAttributes()
   
   //subscriptionCreate()
-  subscriptionUpdate()
+  //subscriptionUpdate()
 
   //subscriptions.onCreateProduct.unsubscribe()
   //subscriptions.onUpdateProduct.unsubscribe()
@@ -697,8 +689,9 @@ const onPageRendered = async () => {
 
 
   useEffect(() => {
+    onPageRendered()
     
-    fetchProducts()
+    /*fetchProducts()
   fetchBrands()
   fetchManufacturers()
   fetchCategories()
@@ -708,7 +701,7 @@ const onPageRendered = async () => {
   fetchAttributes()
   
   //subscriptionCreate()
-  //subscriptionUpdate()
+  //subscriptionUpdate()*/
     
 }, [])
 
@@ -868,24 +861,40 @@ const fetchEbayStoreCategorys = async () => {
 } catch (err) { console.log(err) }
 }
 
+const handleFilter = async (incr, productsByPage) => {
 
-const handleMoveRight = async() => {
+  let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
+  let brandId = brandIdFinder ? brandIdFinder.id : null
+  let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
+  let manufacturerId = manufacturerIdFinder ? manufacturerIdFinder.id : null
 
-   
+  let categoryIdFinder = categories.find(item => item.name.toLowerCase() === search.toLowerCase())
+  let categoryId = categoryIdFinder ? categoryIdFinder.id : null
 
-  /*let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage, nextToken: tokenRight }))
-  setTokenLeft(tokenRight)
-  setTokenRight(productsTemp.data.listProducts.nextToken)
+  let subCategoryIdFinder = subCategories.find(item => item.name.toLowerCase() === search.toLowerCase())
+  let subCategoryId = subCategoryIdFinder ? subCategoryIdFinder.id : null
 
-  console.log('TOKEN_LEFT: ', tokenRight)
-  console.log('TOKEN_RIGHT: ', productsTemp.data.listProducts.nextToken )
+  let subCategory2IdFinder = subCategories2.find(item => item.name.toLowerCase() === search.toLowerCase())
+  let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null
 
-  let productList = productsTemp.data.listProducts.items
-      
-      setChunkProducts( sliceIntoChunks(productList, productsByPage ))
-      setProductQty(productList.length)
-     
-      setProducts(productList)*/
+      const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
+        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ), {
+         sort: orderColumn.column ?  
+            s => orderColumn.direction === 'descending' ? s[orderColumn.column](SortDirection.DESCENDING) : s[orderColumn.column](SortDirection.ASCENDING) 
+            : null,
+        })
+
+        
+        setProducts(list.slice((pageNumber + incr) * productsByPage, (pageNumber + incr) * productsByPage + productsByPage))
+        setPageNumber(pageNumber + incr)
+
+}
+
+const handleMoveRight = async() => {   
+  setProducts(null)
+ 
+
+      if (search.length === 0){
 
       let productsStore = await DataStore.query(Product, Predicates.ALL, {
         page: pageNumber + 1,
@@ -903,7 +912,37 @@ const handleMoveRight = async() => {
       setAttributesSelected([])
       setProductsSelected([]) 
       setProductsSelectedAll(false)
+    } else {
+      await handleFilter(1, productsByPage)
+     /* let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
+        let brandId = brandIdFinder ? brandIdFinder.id : null
 
+        let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let manufacturerId = manufacturerIdFinder ? manufacturerIdFinder.id : null
+
+      let categoryIdFinder = categories.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let categoryId = categoryIdFinder ? categoryIdFinder.id : null
+
+      let subCategoryIdFinder = subCategories.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let subCategoryId = subCategoryIdFinder ? subCategoryIdFinder.id : null
+
+      let subCategory2IdFinder = subCategories2.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null
+        
+
+      const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
+        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ), {
+         sort: orderColumn.column ?  
+            s => orderColumn.direction !== 'descending' ? s[orderColumn.column](SortDirection.DESCENDING) : s[orderColumn.column](SortDirection.ASCENDING) 
+            : null,
+        })
+
+
+        setProducts(list.slice((pageNumber + 1) * productsByPage, (pageNumber + 1) * productsByPage + productsByPage))
+        setPageNumber(pageNumber + 1)*/
+       
+      
+    }
       
       
       
@@ -929,25 +968,12 @@ const handleMoveRight = async() => {
 
 const handleMoveLeft = async() => {
 
-  /*let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage, nextToken: tokenLeft }))
-  setTokenRight(tokenLeft)
-  setTokenLeft(productsTemp.data.listProducts.nextToken)
-
-  console.log('TOKEN_LEFT: ', productsTemp.data.listProducts.nextToken )
-  console.log('TOKEN_RIGHT: ', tokenLeft)
   
 
+//if (pageNumber > 0){
+  setProducts(null)
 
-  let productList = productsTemp.data.listProducts.items
-      
-      setChunkProducts( sliceIntoChunks(productList, productsByPage ))
-      setProductQty(productList.length)
-     
-      setProducts(productList)*/
-
-//Using datastore
-
-if (pageNumber > 0){
+   if (search.length === 0){
 
       let productsStore = await DataStore.query(Product, Predicates.ALL, {
         page: pageNumber > 0 ? pageNumber - 1 : 0,
@@ -965,89 +991,128 @@ if (pageNumber > 0){
       setAttributesSelected([])
       setProductsSelected([]) 
       setProductsSelectedAll(false)
-    }
-  /*let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage, nextToken: tokenLeft }))
-  setTokenRight(tokenLeft)
-  setTokenLeft(productsTemp.data.listProducts.nextToken)
 
-  let productList = productsTemp.data.listProducts.items
+      } else {
+
+        await handleFilter(-1, productsByPage)
+        /*let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
+        let brandId = brandIdFinder ? brandIdFinder.id : null
+
+        let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let manufacturerId = manufacturerIdFinder ? manufacturerIdFinder.id : null
+
+      let categoryIdFinder = categories.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let categoryId = categoryIdFinder ? categoryIdFinder.id : null
+
+      let subCategoryIdFinder = subCategories.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let subCategoryId = subCategoryIdFinder ? subCategoryIdFinder.id : null
+
+      let subCategory2IdFinder = subCategories2.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null
+  
+  
+        const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
+        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ), {
+          //sort: s => direction === 'descending' ? s.SKU(SortDirection.DESCENDING) : s.SKU(SortDirection.ASCENDING) ,
+          //sort: s => orderColumn.direction !== 'descending' ? s[orderColumn.column](SortDirection.DESCENDING) : s[orderColumn.column](SortDirection.ASCENDING) ,
+          sort: orderColumn.column ?  
+            s => orderColumn.direction !== 'descending' ? s[orderColumn.column](SortDirection.DESCENDING) : s[orderColumn.column](SortDirection.ASCENDING) 
+            : null,
+          //page: pageNumber,
+          //limit: productsByPage
+        })
+  
+          //console.log("LISTA: ", list)
+          
+          //setProducts(list.slice((pageNumber - 1) * productsByPage + 1, (pageNumber - 1) * productsByPage + productsByPage))
+          setProducts(list.slice( (pageNumber - 1) * productsByPage, (pageNumber - 1) * productsByPage + productsByPage  ))
+          setPageNumber(pageNumber > 0 ? pageNumber - 1 : 0)
+          //setActivePage(0)
+          //setProductsByPage(25)*/
+        
+      }
+
+
+      /*
+
+       let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let brandId = brandIdFinder ? brandIdFinder.id : null
       
-      setChunkProducts( sliceIntoChunks(productList, productsByPage ))
-      setProductQty(productList.length)
+      let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let manufacturerId = manufacturerIdFinder ? manufacturerIdFinder.id : null
+
+      let categoryIdFinder = categories.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let categoryId = categoryIdFinder ? categoryIdFinder.id : null
+
+      let subCategoryIdFinder = subCategories.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let subCategoryId = subCategoryIdFinder ? subCategoryIdFinder.id : null
+
+      let subCategory2IdFinder = subCategories2.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null
+
+
+      console.log(direction)
+      setProducts(null)
      
-      setProducts(productList)
-*/
+      //if (direction === 'descending'){
+        //if (column === 'SKU'){
+          console.log(column)
+          const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
+          .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ), {
+            //sort: s => direction === 'descending' ? s.SKU(SortDirection.DESCENDING) : s.SKU(SortDirection.ASCENDING) ,
+            sort: s => direction === 'descending' ? s[column](SortDirection.DESCENDING) : s[column](SortDirection.ASCENDING) ,
+            //page: pageNumber,
+            //limit: productsByPage
+          })
+        
+          console.log(list)
+            setProducts(list.slice(pageNumber * productsByPage, pageNumber * productsByPage + productsByPage))
 
-/*let productsStore = await DataStore.query(Product, Predicates.ALL, {
-  page: pageNumber > 0 ? pageNumber - 1 : 0,
-  limit: productsByPage,
-})
-
-setPageNumber(pageNumber > 0 ? pageNumber - 1 : 0)
-
-
-
-//setProductStore(await DataStore.query(Product))
-let newProductStore = productsStore.map(item => item)
-//console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMM", newProductStore[0])
-
-setChunkProducts( sliceIntoChunks(newProductStore, productsByPage ))
-setProductQty(newProductStore.length)
-
-setProducts(newProductStore)*/
+      */
+    
+    
+    //}
+  
 
 }
 
 const fetchProducts = async () => {
   try {
+    /*let salida = false
+    while( !salida ){
+          console.log("ARRANCANDO EL FETCH PRODUCT!!!!!")
+         let productsStore = await DataStore.query(Product, Predicates.ALL, {
+            page: 0,
+            limit: !productsByPage ? 0 : productsByPage ,
+          })
 
-    let productsStore = await DataStore.query(Product, Predicates.ALL, {
-      page: 0,
-      limit: productsByPage,
-    })
+          let productsStore = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage }))
 
-    let newProductStore = productsStore.map(item => item)
-    //console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMM", newProductStore[0])
+          if (productsStore){
+            salida = true
+            setProductQty(productsStore.length)
+            setProducts(productsStore)
+            setPageNumber(0)
+          }
+            //let newProductStore = productsStore.map(item => item)
+            //console.log("------------- VEEEEEEEEEEEEEEEERSIA: --------------- ", productsStore)*/
+            
+            /*const productsStore = await DataStore.query(Product, Predicates.ALL, {
+              sort: s => s.SKU(SortDirection.DESCENDING)
+            })*/
 
-    //setChunkProducts( sliceIntoChunks(newProductStore, productsByPage ))
-    setProductQty(newProductStore.length)
-    setProducts(newProductStore)
-
-    
-    /*let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage }))
-  //setTokenLeft(tokenRight)
-  setTokenRight(productsTemp.data.listProducts.nextToken)
-
-  let productList = productsTemp.data.listProducts.items
+            //console.log(productsStore.length)
+            //console.log(list)
+            
+            let productList = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage }))
+            let productsStore = productList.data.listProducts.items
+            setProductQty(productsStore.length)
+            setProducts(productsStore)
+            setPageNumber(0)
       
-      setChunkProducts( sliceIntoChunks(productList, productsByPage ))
-      setProductQty(productList.length)
-     
-      setProducts(productList)
+
     
-    //setPageNumber(pageNumber > 0 ? pageNumber - 1 : 0)*/
-    
-    
-    
-    //setProductStore(await DataStore.query(Product))
-    /*let newProductStore = productsStore.map(item => item)
-    console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMM", newProductStore.length)
-    
-    setChunkProducts( sliceIntoChunks(newProductStore, productsByPage ))
-    setProductQty(newProductStore.length)
-    
-    setProducts(newProductStore)*/
-      
-      /*let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage}))
-      setTokenLeft(tokenRight)
-      setTokenRight(productsTemp.data.listProducts.nextToken)
-      
-      let productList = productsTemp.data.listProducts.items
-      
-      setChunkProducts( sliceIntoChunks(productList, productsByPage ))
-      setProductQty(productList.length)
-     
-      setProducts(productList)*/
+
       
       
 
@@ -1055,23 +1120,81 @@ const fetchProducts = async () => {
 
   const fetchProductsRefresh = async (value) => {
     try {
-
+      
      setProductsByPage(value) 
 
-      let productsStore = await DataStore.query(Product, Predicates.ALL, {
-        page: 0,
-        limit: value,
-      })
-  
-      let newProductStore = productsStore.map(item => item)
-     
-      setChunkProducts( sliceIntoChunks(newProductStore, value ))
-      setProductQty(newProductStore.length)
-      setProducts(newProductStore)
+      
 
-      setAttributesSelected([])
-      setProductsSelected([]) 
-      setProductsSelectedAll(false)
+
+      if (search.length === 0){
+
+        let productsStore = await DataStore.query(Product, Predicates.ALL, {
+          page: 0,
+          limit: value,
+        })
+    
+        let newProductStore = productsStore.map(item => item)
+       
+        setChunkProducts( sliceIntoChunks(newProductStore, value ))
+        setProductQty(newProductStore.length)
+        setProducts(newProductStore)
+  
+        setAttributesSelected([])
+        setProductsSelected([]) 
+        setProductsSelectedAll(false)
+
+      } else {
+        /*let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
+        let brandId = brandIdFinder ? brandIdFinder.id : null
+
+        let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let manufacturerId = manufacturerIdFinder ? manufacturerIdFinder.id : null
+
+      let categoryIdFinder = categories.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let categoryId = categoryIdFinder ? categoryIdFinder.id : null
+
+      let subCategoryIdFinder = subCategories.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let subCategoryId = subCategoryIdFinder ? subCategoryIdFinder.id : null
+
+      let subCategory2IdFinder = subCategories2.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null 
+  
+  
+       
+
+        const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
+        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ), {
+          sort: orderColumn.column ?  
+            s => orderColumn.direction !== 'descending' ? s[orderColumn.column](SortDirection.DESCENDING) : s[orderColumn.column](SortDirection.ASCENDING) 
+            : null,
+        })
+  
+          
+          setProducts(list.slice(0, value))
+          setPageNumber(0) */
+          await handleFilter(-pageNumber, value)       
+        
+      }
+        
+        
+        
+        //Using datastore
+        /*let productsStore = await DataStore.query(Product, Predicates.ALL, {
+          page: pageNumber + 1,
+          limit: productsByPage,
+        })
+  
+        setPageNumber(pageNumber + 1)
+    
+        let newProductStore = productsStore.map(item => item)
+        console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMM", newProductStore[0])
+  
+        setChunkProducts( sliceIntoChunks(newProductStore, productsByPage ))
+        setProductQty(newProductStore.length)
+       
+        setProducts(newProductStore)*/
+        
+        
       
      
     } catch (err) { console.log(err) }}
@@ -1083,15 +1206,44 @@ const fetchProducts = async () => {
     const handlePaginationChange = (e, { activePage }) => { console.log("ORDER COLUMN:", orderColumn);setActivePage(activePage); setProductsSelected([]); setProductsSelectedAll(false); };
     
     
-    const sortItems = (list, direction, column) => {
+    
+    const sortItems = async (listProducts, direction, column) => {
+      
+      let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let brandId = brandIdFinder ? brandIdFinder.id : null
+      
+      let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let manufacturerId = manufacturerIdFinder ? manufacturerIdFinder.id : null
+
+      let categoryIdFinder = categories.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let categoryId = categoryIdFinder ? categoryIdFinder.id : null
+
+      let subCategoryIdFinder = subCategories.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let subCategoryId = subCategoryIdFinder ? subCategoryIdFinder.id : null
+
+      let subCategory2IdFinder = subCategories2.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null
+
+
+      console.log(direction)
+      setProducts(null)
+     
+          console.log(column)
+          const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
+          .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ), {
+            sort: column ?  
+            s => direction === 'descending' ? s[column](SortDirection.DESCENDING) : s[column](SortDirection.ASCENDING) 
+            : null,
+          })
+        
+          console.log(list)
+            setProducts(list.slice(pageNumber * productsByPage, pageNumber * productsByPage + productsByPage))
+       
+    }
+
+    const sortItems_old = (list, direction, column) => {
       if (direction === 'descending'){
         list.sort(function(a, b) {
-          /*let nameA = column !== 'title' ? ( a[column] ? a[column].toUpperCase() : "" ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
-          let nameB = column !== 'title' ? ( b[column] ? b[column].toUpperCase() : "" ) : ( b.title.store ? b.title.store.toUpperCase() : "")  // ignore upper and lowercase
-          */
-          /*let nameA = column !== 'title' ? ( a[column] ? a[column] : "" ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
-          let nameB = column !== 'title' ? ( b[column] ? b[column] : "" ) : ( b.title.store ? b.title.store.toUpperCase() : "")  // ignore upper and lowercase
-          */
           
           let nameA = column !== 'title' ? ( column !== 'MSRP' ? a[column] : a.price.MSRP ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
           let nameB = column !== 'title' ? ( column !== 'MSRP' ? b[column] : b.price.MSRP ) : ( b.title.store ? b.title.store.toUpperCase() : "") // ignore upper and lowercase
@@ -1109,12 +1261,7 @@ const fetchProducts = async () => {
         });
       } else {
         list.sort(function(a, b) {
-          /*let nameA = column !== 'title' ? ( a[column] ? a[column].toUpperCase() : "" ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
-          let nameB = column !== 'title' ? ( b[column] ? b[column].toUpperCase() : "" ) : ( b.title.store ? b.title.store.toUpperCase() : "")  // ignore upper and lowercase
-          */          
-          /*let nameA = column !== 'title' ? ( a[column] ? a[column] : "" ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
-          let nameB = column !== 'title' ? ( b[column] ? b[column] : "" ) : ( b.title.store ? b.title.store.toUpperCase() : "")  // ignore upper and lowercase
-          */
+          
           let nameA = column !== 'title' ? ( column !== 'MSRP' ? a[column] : a.price.MSRP ) : ( a.title.store ? a.title.store.toUpperCase() : "") // ignore upper and lowercase
           let nameB = column !== 'title' ? ( column !== 'MSRP' ? b[column] : b.price.MSRP ) : ( b.title.store ? b.title.store.toUpperCase() : "") // ignore upper and lowercase
           
@@ -1142,13 +1289,15 @@ const fetchProducts = async () => {
       
       //console.log(products)
       //console.log(orderColumn.direction)
-      sortItems(products, orderColumn.direction, column);
-      setChunkProducts( sliceIntoChunks(products, productsByPage ))
-      setProducts(products)
+      //sortItems(products, orderColumn.direction, column)
+      sortItems(products, orderColumn.direction === 'descending' ? 'ascending' : 'descending', column)
+      
+      //setChunkProducts( sliceIntoChunks(products, productsByPage ))
+      //setProducts(products)
 
       setOrderColumn({column: column, direction: orderColumn.direction === 'descending' ? 'ascending' : 'descending' })
-      setProductsSelected([]) 
-      setProductsSelectedAll(false)
+      //setProductsSelected([]) 
+      //setProductsSelectedAll(false)
       
     }
 
@@ -1203,8 +1352,8 @@ const fetchProducts = async () => {
         ebaystorecategoryID: item.ebaystorecategoryID,
         binLocation: item.binLocation ? item.binLocation : "",
         //title: item.title,
-        sourceDropship: item.source ? item.sourceDropship : false,
-        sourceWarehouse: item.source ? item.sourceWarehouse : false,
+        sourceDropship: item.sourceDropship ? item.sourceDropship : false,
+        sourceWarehouse: item.sourceWarehouse ? item.sourceWarehouse : false,
         titleStore: item.titleStore ? item.titleStore : "",
         titleEbay: item.titleEbay ? item.titleEbay : "",
         titleAmazon: item.titleAmazon ? item.titleAmazon : "", 
@@ -1260,20 +1409,91 @@ const fetchProducts = async () => {
          
     }
 
-    const handleKeyDown = (event) => {
+    const handleKeyDown = async (event) => {
+
+      if (event.key === 'Enter') {
+        setProducts(null)
+
+      /*const list = await DataStore.query(Product, c =>
+        c.SKU("contains", search)
+      )*/
+
+      
+      /*const list = await DataStore.query(Product, c => 
+        c.or(
+        c
+          .SKU("contains", search)
+          .mpn("contains", search)), 
+        {
+          page: 0,
+        limit: productsByPage
+      });*/
+
+      if (search.length > 0) {
+
+        /*let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
+        let brandId = brandIdFinder ? brandIdFinder.id : null
+
+
+
+      const list = await DataStore.query(Product, c => c.or(
+        c => c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
+        .descriptionStore("contains", search).brandID("eq", brandId)
+      ,{
+        page: pageNumber,
+        limit: productsByPage
+      }));*/
+
+      let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
+        let brandId = brandIdFinder ? brandIdFinder.id : null
+
+        let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let manufacturerId = manufacturerIdFinder ? manufacturerIdFinder.id : null
+
+      let categoryIdFinder = categories.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let categoryId = categoryIdFinder ? categoryIdFinder.id : null
+
+      let subCategoryIdFinder = subCategories.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let subCategoryId = subCategoryIdFinder ? subCategoryIdFinder.id : null
+
+      let subCategory2IdFinder = subCategories2.find(item => item.name.toLowerCase() === search.toLowerCase())
+      let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null 
+  
+  
+       
+
+        const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
+        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ), {
+          //sort: s => direction === 'descending' ? s.SKU(SortDirection.DESCENDING) : s.SKU(SortDirection.ASCENDING) ,
+          sort: orderColumn.column ?  
+            s => orderColumn.direction !== 'descending' ? s[orderColumn.column](SortDirection.DESCENDING) : s[orderColumn.column](SortDirection.ASCENDING) 
+            : null,
+            //page: pageNumber,
+          //limit: productsByPage
+        })
+
+        console.log("LISTA: ", list)
+      
+        setProducts(list.slice(pageNumber,productsByPage))
+        //setProducts(list)
+        
+        setPageNumber(0)
+        setProductsByPage(25)
+      
+        } else {
+          setPageNumber(0)
+          fetchProductsRefresh(productsByPage)
+        }
+     }
+    }
+
+    const handleKeyDown_old = (event) => {
       if (event.key === 'Enter') {
         //console.log(search);
         
 
-        setActivePage(1); 
-      
-        /*let tempProducts = products.filter(  
-          item => item.SKU.toLowerCase().includes(search.toLowerCase()) 
-        )*/
-        //console.log(products)
-
-        //lista.filter(item => item.a.includes('1') || item.b.includes('ch'))
-        //console.log(search.toLowerCase())
+        setActivePage(1);      
+       
         
         let tempProducts1 = products.filter(itemFilter => itemFilter.SKU ? itemFilter.SKU.toLowerCase().includes(search.toLowerCase()) : "" )
 
@@ -1323,10 +1543,7 @@ const fetchProducts = async () => {
             return subCategory2Name ? subCategory2Name.toLowerCase().includes(search.toLowerCase()) : "" 
         
           }  )
-          //console.log("SOSODISODISODS: ", subCategories)
-
           
-        
 
         const mergeProducts = [...tempProducts1, ...tempProducts2, ...tempProducts3, ...tempProducts4, ...tempProducts5, ...tempProducts6, 
           ...tempProducts7, ...tempProducts8, ...tempProducts9, ...tempProducts10 ]
@@ -1341,28 +1558,7 @@ const fetchProducts = async () => {
         }, set);
 
         setProductQty(tempProducts.length)
-
-        /*let tempProductsSKU = products.filter(  
-          item => item.SKU.toLowerCase().includes(search.toLowerCase())
-        )*/
-
         
-
-       // const comparation = (item) => item.mpn.to
-       //let map = new Map()
-       
-       
-       //let tempProductsJoin = tempProductsMPN.concat(tempProductsSKU)
-       //let tempProducts = [...new Set(tempProductsJoin.map(item => item.id))]
-       
-       
-       
-       /*tempProducts.forEach(item => {
-        if(!map.has(item.id)){
-          map.set(item.id, item);
-        }
-      })*/
-      //Array.from(map.values())
 
         tempProducts = tempProducts.length > 0 ? tempProducts : products
         
@@ -2287,6 +2483,12 @@ const handleApplyCategoriesChanges = () => {
 }
 
 const handleStatusProduct = (value) => {
+  
+  
+  
+  
+  
+  
   //console.log(value)
   //console.log(products)
   let productList = []
@@ -2311,23 +2513,14 @@ const handleStatusProduct = (value) => {
 
   setStatusProduct(value)
 
-  //setProductQty(productList.length)
-
-  /*setStatusProduct(value)
-    
-  if (value === 'ACTIVE'){
-    setProducts(products.filter(item => item.status === 'Active'))  
-  }
-
-  if (value === 'DRAFT'){
-    setProducts(products.filter(item => item.status === 'Draft'))  
-  }
   
-  if (value === 'ALL'){
-    setProducts(products.filter(item => item.status))
-  }*/
 
   
+  }
+
+  const handleEditForm = async (value) => {
+    //setOpenEdit(value)
+    console.log(value)
   }
 
 const handleApplyAttributesChanges = () => {
@@ -2381,6 +2574,8 @@ const handleGenerateHandle = () => {
 
 const handleChangeProductsByPage = (e, {value}) => { 
     //setProductsByPage(value) 
+    setProducts(null)
+
     fetchProductsRefresh(value)
     //console.log(value)
   }
@@ -2403,6 +2598,8 @@ const handleChangeProductsByPage = (e, {value}) => {
             mpn: evt.target.value,
         }));
     }
+
+    //let productList = products
 
     //console.log("************************** ",productForm)
     //console.log(ProductEdit.id)
@@ -2462,7 +2659,14 @@ const handleChangeProductsByPage = (e, {value}) => {
                 onChange={handleChangeProductsByPage}
                 size='mini'
                 compact
-                text={'Page ' + (pageNumber + 1) + ' (' + (pageNumber * productsByPage + 1) + '-' + (pageNumber * productsByPage + productsByPage) + ')'}
+                
+                text={       
+                  products ?
+                  'Page ' + (pageNumber + 1) + ' (' + (pageNumber * productsByPage + 1) + '-' + (pageNumber * productsByPage + productsByPage) + ')'
+                  : 'Processing'
+                  }
+                
+                
                 options={[{ key: 25, text: '25 Per Page', value: 25 },
                 { key: 50, text: '50 Per Page', value: 50 },
                 { key: 100, text: '100 Per Page', value: 100 },
@@ -2475,7 +2679,7 @@ const handleChangeProductsByPage = (e, {value}) => {
                 selection
                 //value={value}
           />
-            <Button basic size='mini' onClick = {()=>handleMoveRight()} icon='chevron right' />
+            <Button basic disabled = {products && products.length >= productsByPage ? false : true} size='mini' onClick = {()=>handleMoveRight()} icon='chevron right' />
             
           <span style={{marginLeft: 15}}>
            Filter by Status: 
@@ -2780,6 +2984,9 @@ const handleChangeProductsByPage = (e, {value}) => {
             closeOnDimmerClick={false} 
               onClose={() => setOpenEdit(false)}
               onOpen={() => setOpenEdit(true)}
+              //onClose={() => handleEditForm(false)}
+              //onOpen={() => handleEditForm(true)}
+              
               open={openEdit}
               
             >
