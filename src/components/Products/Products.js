@@ -94,11 +94,13 @@ export default function Products() {
 
   const [findText, setFindText] = useState("")
   const [replaceText, setReplaceText] = useState("")
+
+  //const [checkedStatusForm, setCheckedStatusForm] = useState(false)
   
   
 
   
-  const [statusProduct, setStatusProduct] = useState('ALL')
+  const [statusProduct, setStatusProduct] = useState('Active')
 
   const [productQty, setProductQty] = useState(0)
 
@@ -253,7 +255,7 @@ export default function Products() {
       
       setProductForm({})
       setAttributesSelected([])
-      setStatusProduct('ALL')
+      setStatusProduct('Active')
 
         setTimeout(() => {
           toast({
@@ -270,7 +272,7 @@ export default function Products() {
     } catch (err) {
         //console.log('error creating Product:', err)
         setProductForm({})
-        setStatusProduct('ALL')
+        setStatusProduct('Active')
         setTimeout(() => {
           toast({
               type: 'error',
@@ -501,10 +503,10 @@ export default function Products() {
           setProducts(newList)
           setChunkProducts( sliceIntoChunks(newList, productsByPage ))
         
-        
+        fetchProductsRefresh(productsByPage)
         setProductForm({})
         setAttributesSelected([])
-        setStatusProduct('ALL')
+        setStatusProduct('Active')
         
         setTimeout(() => {
           toast({
@@ -522,7 +524,7 @@ export default function Products() {
     } catch (err) {
         console.log('error updating Product:', err)
         setProductForm({})
-        setStatusProduct('ALL')
+        setStatusProduct('Active')
         setTimeout(() => {
           toast({
               type: 'error',
@@ -861,7 +863,7 @@ const fetchEbayStoreCategorys = async () => {
 } catch (err) { console.log(err) }
 }
 
-const handleFilter = async (incr, productsByPage) => {
+const handleFilter = async (incr, productsByPage, statusFilter) => {
 
   let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
   let brandId = brandIdFinder ? brandIdFinder.id : null
@@ -878,7 +880,7 @@ const handleFilter = async (incr, productsByPage) => {
   let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null
 
       const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
-        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ), {
+        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId)).status("eq", statusFilter )  , {
          sort: orderColumn.column ?  
             s => orderColumn.direction === 'descending' ? s[orderColumn.column](SortDirection.DESCENDING) : s[orderColumn.column](SortDirection.ASCENDING) 
             : null,
@@ -913,7 +915,7 @@ const handleMoveRight = async() => {
       setProductsSelected([]) 
       setProductsSelectedAll(false)
     } else {
-      await handleFilter(1, productsByPage)
+      await handleFilter(1, productsByPage, statusProduct)
      /* let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
         let brandId = brandIdFinder ? brandIdFinder.id : null
 
@@ -994,7 +996,7 @@ const handleMoveLeft = async() => {
 
       } else {
 
-        await handleFilter(-1, productsByPage)
+        await handleFilter(-1, productsByPage, statusProduct)
         /*let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
         let brandId = brandIdFinder ? brandIdFinder.id : null
 
@@ -1078,43 +1080,43 @@ const handleMoveLeft = async() => {
 
 const fetchProducts = async () => {
   try {
-    /*let salida = false
-    while( !salida ){
-          console.log("ARRANCANDO EL FETCH PRODUCT!!!!!")
-         let productsStore = await DataStore.query(Product, Predicates.ALL, {
-            page: 0,
-            limit: !productsByPage ? 0 : productsByPage ,
-          })
-
-          let productsStore = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage }))
-
-          if (productsStore){
-            salida = true
-            setProductQty(productsStore.length)
-            setProducts(productsStore)
-            setPageNumber(0)
-          }
-            //let newProductStore = productsStore.map(item => item)
-            //console.log("------------- VEEEEEEEEEEEEEEEERSIA: --------------- ", productsStore)*/
+    
             
-            /*const productsStore = await DataStore.query(Product, Predicates.ALL, {
-              sort: s => s.SKU(SortDirection.DESCENDING)
-            })*/
-
-            //console.log(productsStore.length)
-            //console.log(list)
-            
-            let productList = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage }))
+            /*let productList = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage }))
             let productsStore = productList.data.listProducts.items
             setProductQty(productsStore.length)
             setProducts(productsStore)
-            setPageNumber(0)
-      
+            setPageNumber(0)*/
+            
+            setProductsByPage(productsByPage)            
 
-    
 
+           /* if (search.length === 0){
       
+              let productsStore = await DataStore.query(Product, Predicates.ALL, {
+                page: 0,
+                limit: productsByPage,
+              })
+          
+              let newProductStore = productsStore.map(item => item)
+             
+              setChunkProducts( sliceIntoChunks(newProductStore, productsByPage ))
+              setProductQty(newProductStore.length)
+              setProducts(newProductStore)
+        
+              setAttributesSelected([])
+              setProductsSelected([]) 
+              setProductsSelectedAll(false)
       
+            } else {*/
+                
+              await handleFilter(-pageNumber, productsByPage, statusProduct)  
+              //await handleFilter(1, productsByPage, statusProduct)     
+              
+            //}
+            
+
+
 
   } catch (err) { console.log(err) }}
 
@@ -1122,8 +1124,6 @@ const fetchProducts = async () => {
     try {
       
      setProductsByPage(value) 
-
-      
 
 
       if (search.length === 0){
@@ -1144,58 +1144,10 @@ const fetchProducts = async () => {
         setProductsSelectedAll(false)
 
       } else {
-        /*let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
-        let brandId = brandIdFinder ? brandIdFinder.id : null
-
-        let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let manufacturerId = manufacturerIdFinder ? manufacturerIdFinder.id : null
-
-      let categoryIdFinder = categories.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let categoryId = categoryIdFinder ? categoryIdFinder.id : null
-
-      let subCategoryIdFinder = subCategories.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let subCategoryId = subCategoryIdFinder ? subCategoryIdFinder.id : null
-
-      let subCategory2IdFinder = subCategories2.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null 
-  
-  
-       
-
-        const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
-        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ), {
-          sort: orderColumn.column ?  
-            s => orderColumn.direction !== 'descending' ? s[orderColumn.column](SortDirection.DESCENDING) : s[orderColumn.column](SortDirection.ASCENDING) 
-            : null,
-        })
-  
           
-          setProducts(list.slice(0, value))
-          setPageNumber(0) */
-          await handleFilter(-pageNumber, value)       
+        await handleFilter(-pageNumber, value, statusProduct)       
         
       }
-        
-        
-        
-        //Using datastore
-        /*let productsStore = await DataStore.query(Product, Predicates.ALL, {
-          page: pageNumber + 1,
-          limit: productsByPage,
-        })
-  
-        setPageNumber(pageNumber + 1)
-    
-        let newProductStore = productsStore.map(item => item)
-        console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMM", newProductStore[0])
-  
-        setChunkProducts( sliceIntoChunks(newProductStore, productsByPage ))
-        setProductQty(newProductStore.length)
-       
-        setProducts(newProductStore)*/
-        
-        
-      
      
     } catch (err) { console.log(err) }}
   
@@ -1230,7 +1182,7 @@ const fetchProducts = async () => {
      
           console.log(column)
           const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
-          .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ), {
+          .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ).status("eq", statusProduct ), {
             sort: column ?  
             s => direction === 'descending' ? s[column](SortDirection.DESCENDING) : s[column](SortDirection.ASCENDING) 
             : null,
@@ -1414,37 +1366,10 @@ const fetchProducts = async () => {
       if (event.key === 'Enter') {
         setProducts(null)
 
-      /*const list = await DataStore.query(Product, c =>
-        c.SKU("contains", search)
-      )*/
-
-      
-      /*const list = await DataStore.query(Product, c => 
-        c.or(
-        c
-          .SKU("contains", search)
-          .mpn("contains", search)), 
-        {
-          page: 0,
-        limit: productsByPage
-      });*/
-
       if (search.length > 0) {
 
-        /*let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
-        let brandId = brandIdFinder ? brandIdFinder.id : null
-
-
-
-      const list = await DataStore.query(Product, c => c.or(
-        c => c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
-        .descriptionStore("contains", search).brandID("eq", brandId)
-      ,{
-        page: pageNumber,
-        limit: productsByPage
-      }));*/
-
-      let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
+    
+      /*let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
         let brandId = brandIdFinder ? brandIdFinder.id : null
 
         let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
@@ -1458,27 +1383,24 @@ const fetchProducts = async () => {
 
       let subCategory2IdFinder = subCategories2.find(item => item.name.toLowerCase() === search.toLowerCase())
       let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null 
-  
-  
        
 
         const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
         .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ), {
-          //sort: s => direction === 'descending' ? s.SKU(SortDirection.DESCENDING) : s.SKU(SortDirection.ASCENDING) ,
           sort: orderColumn.column ?  
             s => orderColumn.direction !== 'descending' ? s[orderColumn.column](SortDirection.DESCENDING) : s[orderColumn.column](SortDirection.ASCENDING) 
             : null,
-            //page: pageNumber,
-          //limit: productsByPage
         })
 
         console.log("LISTA: ", list)
       
         setProducts(list.slice(pageNumber,productsByPage))
-        //setProducts(list)
         
         setPageNumber(0)
-        setProductsByPage(25)
+        setProductsByPage(25)*/
+          await handleFilter(-pageNumber, productsByPage, statusProduct )
+          //setPageNumber(0)
+          //setProductsByPage(25)
       
         } else {
           setPageNumber(0)
@@ -2190,14 +2112,17 @@ const handleSourceWarehouse = (evt) => {
   }))
 }
 
-const handleStatus = (evt) => {
+const handleStatus = (evt, {value}) => {
   evt.persist();
 
+  console.log(value)
   //console.log(!productForm.sourceWarehouse)
   //console.log(evt)
+  //setCheckedStatusForm(value)
   setProductForm((values) => ({
       ...values,
-      status: productForm.status === "Active" ? "Draft" : "Active",
+      //status: !productForm.status ? "Draft" : productForm.status === "Active" ? "Draft" : "Active",
+      status: productForm.status === 'Active' ? 'Draft' : 'Active'
   }))
 }
 
@@ -2482,7 +2407,7 @@ const handleApplyCategoriesChanges = () => {
   }
 }
 
-const handleStatusProduct = (value) => {
+const handleStatusProduct = async (value) => {
   
   
   
@@ -2491,9 +2416,9 @@ const handleStatusProduct = (value) => {
   
   //console.log(value)
   //console.log(products)
-  let productList = []
+  //let productList = []
   
-  if (value === 'ACTIVE'){
+  /*if (value === 'ACTIVE'){
     //console.log('Active')
     productList = sliceIntoChunks(products.filter(item => item.status === 'Active'), productsByPage )
     setChunkProducts( productList )
@@ -2509,9 +2434,11 @@ const handleStatusProduct = (value) => {
     //console.log('All')
     productList = sliceIntoChunks(products.filter(item => item.status === 'Draft' || item.status === 'Active'), productsByPage )
     setChunkProducts( productList )
-  }
-
+  }*/
+  console.log("VALUE ==============> ", value)
+  setProducts(null)
   setStatusProduct(value)
+  await handleFilter(pageNumber, productsByPage, value)
 
   
 
@@ -2691,11 +2618,11 @@ const handleChangeProductsByPage = (e, {value}) => {
             
             inline
             
-            defaultValue={'ALL'}
+            defaultValue={'Active'}
             options={[
-              { key: 1, text: 'All', value: 'ALL' },
-              { key: 2, text: 'Active', value: 'ACTIVE' },
-              { key: 3, text: 'Draft', value: 'DRAFT' },
+              //{ key: 1, text: 'All', value: 'ALL' },
+              { key: 1, text: 'Active', value: 'Active' },
+              { key: 2, text: 'Draft', value: 'Draft' },
             ]}
             //placeholder='Choose an option'
             //selection
@@ -2960,7 +2887,8 @@ const handleChangeProductsByPage = (e, {value}) => {
                       handleImages = {(imageList, addUpdateIndex) => handleImages(imageList, addUpdateIndex)}
                       images = {images} 
                       generateHandle = {() => handleGenerateHandle()}
-                      status = {productForm.status === 'Active' ? true : false} handleStatus = {(e) => handleStatus(e)}
+                      //status = {productForm.status === 'Active' ? true : false} handleStatus = {(e) => handleStatus(e)}
+                      status = {productForm.status} handleStatus = {(e, {value}) => handleStatus(e, {value})}
                       
                   />
                   
@@ -3054,7 +2982,9 @@ const handleChangeProductsByPage = (e, {value}) => {
                       handleImages = {(imageList, addUpdateIndex) => handleImages(imageList, addUpdateIndex)}
                       images = {images} 
                       generateHandle = {() => handleGenerateHandle()}
-                      status = {productForm.status === 'Active' ? true : false} handleStatus = {(e) => handleStatus(e)}
+                      status = {productForm.status} handleStatus = {(e, {value}) => handleStatus(e, {value})}
+                      //status = {productForm.status === 'Active' ? true : false} handleStatus = {(e) => handleStatus(e)}
+                      
                       
                   />
 

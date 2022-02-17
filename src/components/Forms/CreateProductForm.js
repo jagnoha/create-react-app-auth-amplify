@@ -141,7 +141,7 @@ export default function CreateProductForm(props) {
                     </Form.Field>
                     </Grid.Column>
                     <Grid.Column width={4}>
-                    <Form.Field style={{marginTop:30}} control={Checkbox} toggle label='Active' onChange={props.handleStatus} checked={props.status} />
+                    <Form.Field style={{marginTop:30}} control={Checkbox} toggle label='Active' onChange={props.handleStatus} checked={props.status === 'Active' ? true : false} />
                     </Grid.Column>
                     </Grid.Row>
                     </Grid>
