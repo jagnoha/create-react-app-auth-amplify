@@ -32,6 +32,7 @@ export default function Filter(props) {
         { key: 'MPN',text: 'MPN',value: 'MPN', type: 'textOptions' },
         { key: 'MSRP',text: 'MSRP',value: 'MSRP', type: 'numberOptions' },
         { key: 'Source',text: 'Source',value: 'Source', type: 'sourceOptions' },
+        { key: 'Status',text: 'Status',value: 'Status', type: 'statusOptions' },
         { key: 'Store Price',text: 'Store Price',value: 'Store Price', type: 'numberOptions' },
         { key: 'SubCategory',text: 'SubCategory',value: 'SubCategory', type: 'subCategoryList' },
         { key: 'SubCategory2',text: 'SubCategory2',value: 'SubCategory2', type: 'subCategoryList2' },
@@ -43,6 +44,11 @@ export default function Filter(props) {
     const sourceOptions = [
         { key: 'Warehouse',text: 'Warehouse', value: 'Warehouse' },
         { key: 'Dropship',text: 'Dropship', value: 'Dropship' },
+    ]
+
+    const statusOptions = [
+        { key: 'Active',text: 'Active', value: 'Active' },
+        { key: 'Draft',text: 'Draft', value: 'Draft' },
     ]
 
     const numberOptions = [
@@ -185,6 +191,8 @@ export default function Filter(props) {
             setSecondaryOption(textOptions)
         } else if (typeTemp === 'sourceOptions'){
             setSecondaryOption(sourceOptions)
+        } else if (typeTemp === 'statusOptions'){
+            setSecondaryOption(statusOptions)
         } else if (typeTemp === 'brandList'){
             setSecondaryOption(brandList)
         } else if (typeTemp === 'manufacturerList'){
@@ -231,7 +239,9 @@ export default function Filter(props) {
         } else if (field === 'Brand' || field === 'Manufacturer' || field === 'Category' || field === 'SubCategory' || field === 'SubCategory2' || field === 'eBay Category Store'){
             setFilterItem({id, field: field, comparation: 'eq', value: value, text: 'is' })
             setReadyToApply(true)
-            
+        } else if (field === 'Status'){
+            setFilterItem({id, field: field, comparation: 'eq', value: value, text: 'is' })
+            setReadyToApply(true)     
         } else {
             //setFilterList([...filterList, {id, field: field, comparation: value }])
             setFilterItem({id, field: field, comparation: value, text: text })

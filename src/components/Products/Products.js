@@ -240,12 +240,11 @@ export default function Products() {
           sourceWarehouse: productForm.sourceWarehouse,
           sourceDropship: productForm.sourceDropship,
           Attributes: productForm.Attributes,
-          status: productForm.status,          
+          status: productForm.status ? productForm.status : 'Draft',          
         }
-        //setProducts([...products, productInput])        
         let productInfo = await API.graphql(graphqlOperation(createProduct, { input: productInput }))
 
-        
+        console.log(productInput)
         console.log(productInfo.data.createProduct)
         let newList = [productInfo.data.createProduct, ...products]
 
@@ -477,10 +476,11 @@ export default function Products() {
           sourceWarehouse: productForm.sourceWarehouse,
           sourceDropship: productForm.sourceDropship,          
           Attributes: attributesSelected ? JSON.stringify(attributesSelected) : "",//productForm.Attributes,
-          status: productForm.status,
+          status: productForm.status ? productForm.status : 'Draft',
           _version: version,          
         }
         let productEdited = await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+        console.log(productEdited)
         /*console.log("PRODUCTS LIST: ", products.map(item => 
             {
               if (item.id === id) {
@@ -495,7 +495,8 @@ export default function Products() {
           let newList = products.map(item => 
             {
               if (item.id === id) {
-                return (productEdited.data.updateProduct)
+                //return (productEdited.data.updateProduct)
+                return ({...productDetails, _lastChangedAt: productEdited.data.updateProduct._lastChangedAt})
               }
               return (item)
             }            
@@ -503,7 +504,7 @@ export default function Products() {
           setProducts(newList)
           setChunkProducts( sliceIntoChunks(newList, productsByPage ))
         
-        fetchProductsRefresh(productsByPage)
+        //fetchProductsRefresh(productsByPage)
         setProductForm({})
         setAttributesSelected([])
         setStatusProduct('Active')
@@ -933,7 +934,11 @@ const parseFilterList = (list) => {
     ebaystorecategoryID: {
       comparation: '',
       value: ''
-    }
+    },
+    status: {
+      comparation: '',
+      value: ''
+    },
   }
 
   for (let item of list){
@@ -1005,6 +1010,10 @@ const parseFilterList = (list) => {
       filter.ebaystorecategoryID.comparation = item.comparation
       filter.ebaystorecategoryID.value = id
     }
+    if (item.field === 'Status'){
+      filter.status.comparation = item.comparation
+      filter.status.value = item.value
+    }
 
                  
   }
@@ -1034,7 +1043,7 @@ const handleFilter = async (incr, productsByPage, statusFilter, filterList) => {
   console.log("FILTER LIST: ", filterList)
 
       const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
-        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId)).status("eq", statusFilter )
+        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId))/*.status("eq", statusFilter )*/
         .cost(filter && filter.cost && filter.cost.value ? filter.cost.comparation : 'ne', filter && filter.cost && filter.cost.value ? filter.cost.value : 'EMPTY' )
         .priceMSRP(filter && filter.priceMSRP && filter.priceMSRP.value ? filter.priceMSRP.comparation : 'ne', filter && filter.priceMSRP && filter.priceMSRP.value ? filter.priceMSRP.value : 'EMPTY' )
         .SKU(filter && filter.SKU && filter.SKU.value ? filter.SKU.comparation : 'ne', filter && filter.SKU && filter.SKU.value ? filter.SKU.value : 'EMPTY' )
@@ -1049,6 +1058,7 @@ const handleFilter = async (incr, productsByPage, statusFilter, filterList) => {
         .subcategoryID(filter && filter.subcategoryID && filter.subcategoryID.value ? filter.subcategoryID.comparation : 'ne', filter && filter.subcategoryID && filter.subcategoryID.value ? filter.subcategoryID.value : 'EMPTY' )
         .subcategory2ID(filter && filter.subcategory2ID && filter.subcategory2ID.value ? filter.subcategory2ID.comparation : 'ne', filter && filter.subcategory2ID && filter.subcategory2ID.value ? filter.subcategory2ID.value : 'EMPTY' )
         .ebaystorecategoryID(filter && filter.ebaystorecategoryID && filter.ebaystorecategoryID.value ? filter.ebaystorecategoryID.comparation : 'ne', filter && filter.ebaystorecategoryID && filter.ebaystorecategoryID.value ? filter.ebaystorecategoryID.value : 'EMPTY' )
+        .status(filter && filter.status && filter.status.value ? filter.status.comparation : 'ne', filter && filter.status && filter.status.value ? filter.status.value : 'EMPTY' )
         
         
 
@@ -1274,7 +1284,7 @@ const fetchProducts = async () => {
   let statusFilter = statusProduct
 
       const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
-        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId)).status("eq", statusFilter )
+        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId))/*.status("eq", statusFilter )*/
         .cost(filter && filter.cost && filter.cost.value ? filter.cost.comparation : 'ne', filter && filter.cost && filter.cost.value ? filter.cost.value : 'EMPTY' )
         .priceMSRP(filter && filter.priceMSRP && filter.priceMSRP.value ? filter.priceMSRP.comparation : 'ne', filter && filter.priceMSRP && filter.priceMSRP.value ? filter.priceMSRP.value : 'EMPTY' )
         .SKU(filter && filter.SKU && filter.SKU.value ? filter.SKU.comparation : 'ne', filter && filter.SKU && filter.SKU.value ? filter.SKU.value : 'EMPTY' )
@@ -2233,6 +2243,63 @@ const handleReplaceText = (evt) => {
 /*********************************************************************** */
 
 const updateFindReplace = async (id) => {
+  try{
+    
+    //console.log(id)
+
+    let product = products.find(item => item.id === id)
+    //console.log(product)
+    let version = product._version
+    let titleStoreOld = product.titleStore ? product.titleStore : ""
+    let titleEbayOld = product.titleEbay ? product.titleEbay : ""
+    let titleAmazonOld = product.titleAmazon ? product.titleAmazon : ""
+
+    let descriptionStoreOld = product.descriptionStore ? product.descriptionStore : ""
+    let descriptionEbayOld = product.descriptionEbay ? product.descriptionEbay : ""
+    let descriptionAmazonOld = product.descriptionAmazon ? product.descriptionAmazon : ""
+
+    //let handleOld = product.handle ? product.handle : ""
+
+    let shopifyMetaTitleOld = product.shopifyMetaTitle ? product.shopifyMetaTitle : ""
+    let shopifyMetaDescriptionOld = product.shopifyMetaDescription ? product.shopifyMetaDescription : ""
+
+    let shopifyOnlyTagsOld = product.shopifyOnlyTags ? product.shopifyOnlyTags : ""
+    let shopifyFitmentTagsOld = product.shopifyFitmentTags ? product.shopifyFitmentTags : ""
+
+
+    let productDetails = {
+      id,
+        titleStore: titleStoreOld.replace(findText, replaceText),
+        titleEbay: titleEbayOld.replace(findText, replaceText),
+        titleAmazon: titleAmazonOld.replace(findText, replaceText),
+        descriptionStore: descriptionStoreOld.replace(findText, replaceText),
+        descriptionEbay: descriptionEbayOld.replace(findText, replaceText),
+        descriptionAmazon: descriptionAmazonOld.replace(findText, replaceText),
+      //handle: handleOld.replace(findText, replaceText).toLowerCase(),
+      shopifyMetaDescription: shopifyMetaDescriptionOld.replace(findText, replaceText),
+      shopifyMetaTitle: shopifyMetaTitleOld.replace(findText, replaceText),
+      shopifyOnlyTags: shopifyOnlyTagsOld.replace(findText, replaceText),
+      shopifyFitmentTags: shopifyFitmentTagsOld.replace(findText, replaceText),
+      _version: version,          
+    }
+    await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+  
+  } catch(err){
+    console.log('error updating Product:', err)
+    setTimeout(() => {
+      toast({
+          type: 'error',
+          icon: 'times',
+          size: 'tiny',              
+          title: 'Error updating Products',
+          description: err,              
+          time: 2000,              
+      });
+    }, 200);
+  }
+}
+
+const updateFindReplace_old = async (id) => {
   try {
     let product = products.find(item => item.id === id)
     let version = product._version
@@ -2296,7 +2363,43 @@ const updateFindReplace = async (id) => {
 /*********************************************************************** */
 
 const handleApplyFindText = () => {
-  //console.log(findText + ' | ' + replaceText)
+  console.log("HANDLE APPLY FIND TEXT!")
+
+  
+
+  try {
+  for (let item of productsSelected){
+    //console.log(item)
+    updateFindReplace(item)
+  }
+  
+  setFindText('')
+  setReplaceText('')
+  setFindReplaceModal(false)
+
+
+  setTimeout(() => {
+    toast({
+        type: 'success',
+        icon: 'check circle outline',
+        size: 'tiny',              
+        description: productsSelected.length + ' Products successfully updated',
+        time: 2000,              
+    })
+  }, 200
+  )  
+  
+} catch (error) {
+    console.log(error)
+    setFindText('')
+    setReplaceText('')
+    setFindReplaceModal(false)
+  }
+
+
+}
+
+const handleApplyFindText_old = () => {  
   
   
   let tempProducts1 = products.filter(itemFilter => itemFilter.title && itemFilter.title.store ? itemFilter.title.store.includes(findText) : "" )
@@ -2332,29 +2435,16 @@ const handleApplyFindText = () => {
     return false;
   }, set);
 
- /* setProductForm((values) => ({
-    ...values,
-    title: {
-      store: productForm.title && productForm.title.store ? productForm.title.store.replace(findText, replaceText) : '',
-      ebay: productForm.title && productForm.title.ebay ? productForm.title.ebay.replace(findText, replaceText) : '',
-      amazon: productForm.title && productForm.title.amazon ? productForm.title.amazon.replace(findText, replaceText) : '',      
-    },
-    description: {
-      store: productForm.description && productForm.description.store ? productForm.description.store.replace(findText, replaceText) : '',
-      ebay: productForm.description && productForm.description.ebay ? productForm.description.ebay.replace(findText, replaceText) : '',
-      amazon: productForm.description && productForm.description.amazon ? productForm.description.title.amazon.replace(findText, replaceText) : '',      
-    },
-}))*/
-
+ 
 try {
   for (let item of tempProducts){
-    //console.log("**********************************************",item)
+    
     updateFindReplace(item.id)
   }
   setTimeout(() => {
     toast({
         type: 'success',
-        //icon: 'check circle outline',
+        
         size: 'small',              
         description: `Changes applied to ${tempProducts.length} products`,
         time: 2000,              
@@ -2369,8 +2459,7 @@ try {
     console.log(error)
   }
 
-  //console.log("PRODUCTS: ", tempProducts.length)
-  //setProductQty(tempProducts.length)
+  
   
   
   
@@ -2449,7 +2538,43 @@ const updateCategories = async (id) => {
       ebaystorecategoryID: editCategoriesSelected.ebayStoreCategory.checked ? editCategoriesSelected.ebayStoreCategory.id : ebayStoreCategoryOld,
       _version: version,          
     }
-    await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+    //await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+
+    // **************************
+
+    let productEdited = await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+    console.log(productEdited)
+
+    setProductsSelected([])
+  setProductsSelectedAll(false)
+  setFilterList([])
+  setSearch("")
+  setProducts(null)
+  await handleFilter(-pageNumber, productsByPage, statusProduct, [])
+    /*console.log("PRODUCTS LIST: ", products.map(item => 
+        {
+          if (item.id === id) {
+            return (productDetails)
+          }
+          return (item)
+        }
+
+        
+      ))*/
+    
+      /*let newList = products.map(item => 
+        {
+          if (item.id === id) {
+            //return (productEdited.data.updateProduct)
+            return ({...productEdited, ...productDetails, _lastChangedAt: productEdited.data.updateProduct._lastChangedAt})
+          }
+          return (item)
+        }            
+      )
+      setProducts(newList)*/
+
+    // **************************
+
 
     
 
@@ -2468,13 +2593,20 @@ const updateCategories = async (id) => {
   }
 }
 
-const handleApplyCategoriesChanges = () => {
+const handleApplyCategoriesChanges = async () => {
   setEditCategoriesModal(false)
   try {
   for (let item of productsSelected){
     //console.log(item)
     updateCategories(item)
   }
+
+  /*setProducts(null)
+  setFilterList([])
+  setSearch("")
+  fetchProducts()*/
+
+
   setTimeout(() => {
     toast({
         type: 'success',
@@ -2485,9 +2617,19 @@ const handleApplyCategoriesChanges = () => {
     })
   }, 200
   )
-  setProductsSelected([])
+  /*setProductsSelected([])
   setProductsSelectedAll(false)
-  } catch (error) {
+  setFilterList([])
+  setSearch("")
+  setProducts(null)
+  await handleFilter(-pageNumber, productsByPage, statusProduct, [])*/
+  //fetchProductsRefresh(productsByPage)
+  //fetchProducts()
+  //handleFilter(-pageNumber, productsByPage, statusProduct, [] )
+  //setPageNumber(0)
+  //await fetchProductsRefresh(productsByPage)
+  
+} catch (error) {
     console.log(error)
   }
 }
@@ -2617,7 +2759,7 @@ const handleChangeProductsByPage = (e, {value}) => {
 
         <div style={{marginTop:10, marginBottom:10}}>
             <span>
-                  <Button onClick = {() => setFindReplaceModal(true) } name="Find and replace..." size='tiny'>
+                  <Button disabled = {productsSelected && productsSelected.length > 0 ? false : true} onClick = {() => setFindReplaceModal(true) } name="Find and replace..." size='tiny'>
                     <span>Find and Replace...</span>
                   </Button>
             </span> 
@@ -2690,7 +2832,7 @@ const handleChangeProductsByPage = (e, {value}) => {
           />
             <Button basic disabled = {products && products.length >= productsByPage ? false : true} size='mini' onClick = {()=>handleMoveRight()} icon='chevron right' />
             
-          <span style={{marginLeft: 15}}>
+          {/*<span style={{marginLeft: 15}}>
            Filter by Status: 
           <Dropdown
           style={{paddingLeft: 10}}
@@ -2710,7 +2852,7 @@ const handleChangeProductsByPage = (e, {value}) => {
             //selection
             //value={value}
           />
-          </span>
+          </span>*/}
 
           </Grid.Column>
           
