@@ -28,42 +28,149 @@ export default function Filter(props) {
         { key: 'Description',text: 'Description',value: 'Description', type: 'textOptions' },
         { key: 'eBay Category Store',text: 'ebay Category Store',value: 'eBay Category Store', type:'ebayCategoryList' },
         { key: 'eBay Price',text: 'eBay Price', value: 'eBay Price', type: 'numberOptions' },
-        { key: 'Manufacturer',text: 'Manufacturer', value: 'manufacturerList' },
+        { key: 'Manufacturer',text: 'Manufacturer', value: 'Manufacturer', type: 'manufacturerList' },
         { key: 'MPN',text: 'MPN',value: 'MPN', type: 'textOptions' },
         { key: 'MSRP',text: 'MSRP',value: 'MSRP', type: 'numberOptions' },
+        { key: 'Source',text: 'Source',value: 'Source', type: 'sourceOptions' },
         { key: 'Store Price',text: 'Store Price',value: 'Store Price', type: 'numberOptions' },
         { key: 'SubCategory',text: 'SubCategory',value: 'SubCategory', type: 'subCategoryList' },
         { key: 'SubCategory2',text: 'SubCategory2',value: 'SubCategory2', type: 'subCategoryList2' },
         { key: 'SKU',text: 'SKU',value: 'SKU', type: 'textOptions' },
         { key: 'Title',text: 'Title',value: 'Title', type: 'textOptions' },
-    ]
-
-    const numberOptions = [
-        { key: 'Equals',text: 'Equals', value: 'Equals' },
-        { key: 'Does not Equal',text: 'Does not Equal',value: 'Does not Equal' },
-        { key: 'Empty',text: 'Empty',value: 'Empty' },
-        { key: 'Not Empty',text: 'Not Empty',value: 'Not Empty' },
-        { key: 'Greater Than',text: 'Greater Than',value: 'Greater Than' },
-        { key: 'Greater Than Or Equal To',text: 'Greater Than Or Equal To',value: 'Greater Than Or Equal To' },
-        { key: 'Less Than',text: 'Less Than',value: 'Less Than' },
-        { key: 'Less Than Or Equal To',text: 'Less Than Or Equal To',value: 'Less Than Or Equal To' },
-    ]
-
-    const textOptions = [
-        { key: 'Exact Match',text: 'Exact Match', value: 'Exact Match' },
-        { key: 'Contains',text: 'Contains',value: 'Contains' },
-        { key: 'Starts With',text: 'Starts With',value: 'Starts With' },
-        { key: 'Ends With',text: 'Ends With',value: 'Ends With' },
-        { key: 'Empty',text: 'Empty',value: 'Empty' },
-        { key: 'Not Empty',text: 'Not Empty',value: 'Not Empty' },
-        { key: 'Does Not Contain',text: 'Does Not Contain',value: 'Does Not Contain' },
         
     ]
 
+    const sourceOptions = [
+        { key: 'Warehouse',text: 'Warehouse', value: 'Warehouse' },
+        { key: 'Dropship',text: 'Dropship', value: 'Dropship' },
+    ]
+
+    const numberOptions = [
+        { key: 'Equals',text: 'Equals', value: 'eq' },
+        { key: 'Does not Equal',text: 'Does not Equal',value: 'ne' },
+        //{ key: 'Empty',text: 'Empty',value: 'Empty' },
+        //{ key: 'Not Empty',text: 'Not Empty',value: 'Not Empty' },
+        { key: 'Greater Than',text: 'Greater Than',value: 'gt' },
+        { key: 'Greater Than Or Equal To',text: 'Greater Than Or Equal To',value: 'ge' },
+        { key: 'Less Than',text: 'Less Than',value: 'lt' },
+        { key: 'Less Than Or Equal To',text: 'Less Than Or Equal To',value: 'le' },
+    ]
+
+    const textOptions = [
+        { key: 'Exact Match',text: 'Exact Match', value: 'eq' },
+        { key: 'Contains',text: 'Contains',value: 'contains' },
+        { key: 'Starts With',text: 'Starts With',value: 'beginsWith' },
+        //{ key: 'Ends With',text: 'Ends With',value: 'Ends With' },
+        //{ key: 'Empty',text: 'Empty',value: 'Empty' },
+        //{ key: 'Not Empty',text: 'Not Empty',value: 'Not Empty' },
+        { key: 'Does Not Contain',text: 'Does Not Contain',value: 'notContains' },
+        
+    ]
+
+    const brandList = props.brands.map(item => {
+        return (
+            { key: item.id, text: item.name, value: item.name }
+        )
+    }).sort( (a,b) => {
+        let nameA = a.text.toUpperCase()
+        let nameB = b.text.toUpperCase()
+        if (nameA < nameB){
+          return -1                                      
+        }
+        if (nameA > nameB){
+          return 1
+        }
+        return 0
+      })
+
+      const manufacturerList = props.manufacturers.map(item => {
+        return (
+            { key: item.id, text: item.name, value: item.name }
+        )
+    }).sort( (a,b) => {
+        let nameA = a.text.toUpperCase()
+        let nameB = b.text.toUpperCase()
+        if (nameA < nameB){
+          return -1                                      
+        }
+        if (nameA > nameB){
+          return 1
+        }
+        return 0
+      })
+
+      const categoryList = props.categories.map(item => {
+        return (
+            { key: item.id, text: item.name, value: item.name }
+        )
+    }).sort( (a,b) => {
+        let nameA = a.text.toUpperCase()
+        let nameB = b.text.toUpperCase()
+        if (nameA < nameB){
+          return -1                                      
+        }
+        if (nameA > nameB){
+          return 1
+        }
+        return 0
+      })
+
+      const subCategoryList = props.subCategories.map(item => {
+        return (
+            { key: item.id, text: item.name, value: item.name }
+        )
+    }).sort( (a,b) => {
+        let nameA = a.text.toUpperCase()
+        let nameB = b.text.toUpperCase()
+        if (nameA < nameB){
+          return -1                                      
+        }
+        if (nameA > nameB){
+          return 1
+        }
+        return 0
+      })
+
+      const subCategoryList2 = props.subCategories2.map(item => {
+        return (
+            { key: item.id, text: item.name, value: item.name }
+        )
+    }).sort( (a,b) => {
+        let nameA = a.text.toUpperCase()
+        let nameB = b.text.toUpperCase()
+        if (nameA < nameB){
+          return -1                                      
+        }
+        if (nameA > nameB){
+          return 1
+        }
+        return 0
+      })
+
+    const ebayCategoryList = props.ebayStoreCategorys.map(item => {
+        return (
+            { key: item.id, text: item.name, value: item.name }
+        )
+    }).sort( (a,b) => {
+        let nameA = a.text.toUpperCase()
+        let nameB = b.text.toUpperCase()
+        if (nameA < nameB){
+          return -1                                      
+        }
+        if (nameA > nameB){
+          return 1
+        }
+        return 0
+      })
+
+
+      
+    
     
 
-    const handleFilterOptions = (e, {value}) => {
+    const handleFilterOptions = (e, data) => {
         //console.log(e.target)
+        const value = data.value
         setReadyToApply(false)
         setOpenFormField(false)
         console.log(value)
@@ -76,14 +183,34 @@ export default function Filter(props) {
             setSecondaryOption(numberOptions)
         } else if (typeTemp === 'textOptions') {
             setSecondaryOption(textOptions)
-        } else {
+        } else if (typeTemp === 'sourceOptions'){
+            setSecondaryOption(sourceOptions)
+        } else if (typeTemp === 'brandList'){
+            setSecondaryOption(brandList)
+        } else if (typeTemp === 'manufacturerList'){
+            setSecondaryOption(manufacturerList)
+        } else if (typeTemp === 'categoryList'){
+            setSecondaryOption(categoryList)
+        } else if (typeTemp === 'subCategoryList'){
+            setSecondaryOption(subCategoryList)
+        } else if (typeTemp === 'subCategoryList2'){
+            setSecondaryOption(subCategoryList2)
+        } else if (typeTemp === 'ebayCategoryList'){
+            setSecondaryOption(ebayCategoryList)
+        }
+        else {
             setSecondaryOption(null)
         }
         
     }
 
-    const handleSecondaryFilterOptions = (value) => {
-        //console.log(e.target)
+    const handleSecondaryFilterOptions = (data) => {
+        let textTemp = data.options.find(item => item.value === data.value)
+        let text = textTemp && textTemp.text ? textTemp.text : ''
+        console.log("**********************", text)
+        //.filter(item => item.value === data.value).text)
+        const value = data.value
+        const key = data.id
         setReadyToApply(false)
         setOpenFormField(false)
         console.log(value)
@@ -92,15 +219,22 @@ export default function Filter(props) {
 
         if (value === 'Empty'){
             //setFilterList([...filterList, {id, field: field, comparation: value, value: 'Empty' }])
-            setFilterItem({id, field: field, comparation: value, value: 'Empty' })
+            setFilterItem({id, field: field, comparation: value, value: 'Empty', text: text })
             setReadyToApply(true)
         } else if (value === 'Not Empty'){
             //setFilterList([...filterList, {id, field: field, comparation: value, value: 'Not Empty' }])
-            setFilterItem({id, field: field, comparation: value, value: 'Not Empty' })
+            setFilterItem({id, field: field, comparation: value, value: 'Not Empty', text: text })
             setReadyToApply(true)            
+        } else if (value === 'Warehouse' || value === 'Dropship'){
+            setFilterItem({id, field: field, comparation: 'eq', value: value, text: 'is' })
+            setReadyToApply(true) 
+        } else if (field === 'Brand' || field === 'Manufacturer' || field === 'Category' || field === 'SubCategory' || field === 'SubCategory2' || field === 'eBay Category Store'){
+            setFilterItem({id, field: field, comparation: 'eq', value: value, text: 'is' })
+            setReadyToApply(true)
+            
         } else {
             //setFilterList([...filterList, {id, field: field, comparation: value }])
-            setFilterItem({id, field: field, comparation: value })
+            setFilterItem({id, field: field, comparation: value, text: text })
             setOpenFormField(true)
         }
 
@@ -126,7 +260,7 @@ export default function Filter(props) {
                         selection
                         options={option}
                         search
-                        onChange={ /*(e,{value}) => console.log(value)*/ (e,{value}) => handleSecondaryFilterOptions(value)}
+                        onChange={ /*(e,{value}) => console.log(value)*/ (e,data) => handleSecondaryFilterOptions(data)}
                     />
             </Segment>
         )
@@ -147,6 +281,7 @@ export default function Filter(props) {
 
     const handleAddFilter = () => {
         setFilterList([...filterList, filterItem])
+        props.handleFilterList([...filterList, filterItem])
         setCheckedOR(!checkedOR)
         setOpenPopup(false)
         //setFilterList([])
@@ -185,6 +320,8 @@ export default function Filter(props) {
     const handleDeleteItem = (id) => {
         console.log(id)
         setFilterList(filterList.filter(item => item.id !== id))
+
+        props.handleFilterList(filterList.filter(item => item.id !== id))
     }
 
     
@@ -194,7 +331,7 @@ export default function Filter(props) {
         let test = filterList.map(item => {
             return (
             <Label color='blue' key={item.id}>
-                <Icon name='delete' onClick = {()=>handleDeleteItem(item.id)} /> {`${item.field} ${item.comparation} 
+                <Icon name='delete' onClick = {()=>handleDeleteItem(item.id)} /> {`${item.field} ${item.text}
                 ${   (item.comparation !== 'Empty' && item.comparation !== 'Not Empty') ? item.value : '' }`}
             </Label>
             )
@@ -209,6 +346,8 @@ export default function Filter(props) {
 
     console.log(filterList)
     console.log(filterItem)
+    //console.log(manufacturerList_test)
+    //console.log
 
     return (
     
@@ -242,7 +381,7 @@ export default function Filter(props) {
                         selection
                         options={filterOptions}
                         search
-                        onChange={(e, {value}) => handleFilterOptions(e, {value})}
+                        onChange={(e, data) => handleFilterOptions(e, data)}
                     />
                     </Segment>
                     

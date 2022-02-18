@@ -39,7 +39,7 @@ export default function Products() {
 
   //const [productsLessFields, setProductsLessFields] = useState([])
 
-
+  const [filterList, setFilterList] = useState([])
 
   //const [images, setImages] = React.useState([{"data_url":"https://cdn.shopify.com/s/files/1/0338/9682/4876/products/28890339_600x.jpg?v=1627667600"}]);
   //const [productStore, setProductStore] = useState([]) 
@@ -762,7 +762,7 @@ const fetchManufacturers = async () => {
     
     })
     
-    const manufacturersTemp = await API.graphql(graphqlOperation(listManufacturers, { limit: 2000})) 
+    const manufacturersTemp = await API.graphql(graphqlOperation(listManufacturers, { limit: 1000})) 
     const manufacturers = manufacturersTemp.data.listManufacturers.items.filter(item => !item._deleted)
       
 
@@ -863,8 +863,160 @@ const fetchEbayStoreCategorys = async () => {
 } catch (err) { console.log(err) }
 }
 
-const handleFilter = async (incr, productsByPage, statusFilter) => {
+const parseFilterList = (list) => {
+  
+  let filter = {
+    sourceWarehouse: {
+      comparation: '',
+      value: '',  
+    },
+    sourceDropship: {
+      comparation: '',
+      value: '',  
+    },
+    SKU: {
+      comparation: '',
+      value: '',  
+    },
+    mpn: {
+      comparation: '',
+      value: '',  
+    },
+    cost: {
+      comparation: '',
+      value: '',  
+    },
+    priceMSRP: {
+      comparation: '',
+      value: '',
+    },
+    priceAmazon: {
+      comparation: '',
+      value: '',
+    },
+    priceStore: {
+      comparation: '',
+      value: '',
+    },
+    priceEbay: {
+      comparation: '',
+      value: ''
+    },
+    descriptionStore: {
+      comparation: '',
+      value: ''
+    },
+    titleStore: {
+      comparation: '',
+      value: ''
+    },
+    brandID: {
+      comparation: '',
+      value: ''
+    },
+    manufacturerID: {
+      comparation: '',
+      value: ''
+    },
+    categoryID: {
+      comparation: '',
+      value: ''
+    },
+    subcategoryID: {
+      comparation: '',
+      value: ''
+    },
+    subcategory2ID: {
+      comparation: '',
+      value: ''
+    },
+    ebaystorecategoryID: {
+      comparation: '',
+      value: ''
+    }
+  }
 
+  for (let item of list){
+    if (item.field === 'Cost'){
+      filter.cost.comparation = item.comparation
+      filter.cost.value = item.value
+    }  
+    if (item.field === 'MSRP'){
+      filter.priceMSRP.comparation = item.comparation
+      filter.priceMSRP.value = item.value
+    }
+    if (item.field === 'SKU'){
+      filter.SKU.comparation = item.comparation
+      filter.SKU.value = item.value
+    }
+    if (item.field === 'MPN'){
+      filter.mpn.comparation = item.comparation
+      filter.mpn.value = item.value
+    }
+    if (item.field === 'Source' && item.value === 'Warehouse'){
+      filter.sourceWarehouse.comparation = item.comparation
+      filter.sourceWarehouse.value = true
+    }
+    if (item.field === 'Source' && item.value === 'Dropship'){
+      filter.sourceDropship.comparation = item.comparation
+      filter.sourceDropship.value = true
+    }
+    if (item.field === 'Title'){
+      filter.titleStore.comparation = item.comparation
+      filter.titleStore.value = item.value
+    }
+    if (item.field === 'Description'){
+      filter.descriptionStore.comparation = item.comparation
+      filter.descriptionStore.value = item.value
+    }
+    if (item.field === 'Brand'){
+      let brandIdFinder = brands.find(itemBrand => itemBrand.name.toLowerCase() === item.value.toLowerCase())
+      let brandId = brandIdFinder ? brandIdFinder.id : null
+      filter.brandID.comparation = item.comparation
+      filter.brandID.value = brandId
+    }
+    if (item.field === 'Manufacturer'){
+      let idFinder = manufacturers.find(itemFinder => itemFinder.name.toLowerCase() === item.value.toLowerCase())
+      let id = idFinder ? idFinder.id : null
+      filter.manufacturerID.comparation = item.comparation
+      filter.manufacturerID.value = id
+    }
+    if (item.field === 'Category'){
+      let idFinder = categories.find(itemFinder => itemFinder.name.toLowerCase() === item.value.toLowerCase())
+      let id = idFinder ? idFinder.id : null
+      filter.categoryID.comparation = item.comparation
+      filter.categoryID.value = id
+    }
+    if (item.field === 'SubCategory'){
+      let idFinder = subCategories.find(itemFinder => itemFinder.name.toLowerCase() === item.value.toLowerCase())
+      let id = idFinder ? idFinder.id : null
+      filter.subcategoryID.comparation = item.comparation
+      filter.subcategoryID.value = id
+    }
+    if (item.field === 'SubCategory2'){
+      let idFinder = subCategories2.find(itemFinder => itemFinder.name.toLowerCase() === item.value.toLowerCase())
+      let id = idFinder ? idFinder.id : null
+      filter.subcategory2ID.comparation = item.comparation
+      filter.subcategory2ID.value = id
+    }
+    if (item.field === 'eBay Category Store'){
+      let idFinder = ebayStoreCategorys.find(itemFinder => itemFinder.name.toLowerCase() === item.value.toLowerCase())
+      let id = idFinder ? idFinder.id : null
+      filter.ebaystorecategoryID.comparation = item.comparation
+      filter.ebaystorecategoryID.value = id
+    }
+
+                 
+  }
+
+  return filter
+}
+
+const handleFilter = async (incr, productsByPage, statusFilter, filterList) => {
+
+  let filter = parseFilterList(filterList)
+
+  
   let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
   let brandId = brandIdFinder ? brandIdFinder.id : null
   let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
@@ -879,8 +1031,28 @@ const handleFilter = async (incr, productsByPage, statusFilter) => {
   let subCategory2IdFinder = subCategories2.find(item => item.name.toLowerCase() === search.toLowerCase())
   let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null
 
+  console.log("FILTER LIST: ", filterList)
+
       const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
-        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId)).status("eq", statusFilter )  , {
+        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId)).status("eq", statusFilter )
+        .cost(filter && filter.cost && filter.cost.value ? filter.cost.comparation : 'ne', filter && filter.cost && filter.cost.value ? filter.cost.value : 'EMPTY' )
+        .priceMSRP(filter && filter.priceMSRP && filter.priceMSRP.value ? filter.priceMSRP.comparation : 'ne', filter && filter.priceMSRP && filter.priceMSRP.value ? filter.priceMSRP.value : 'EMPTY' )
+        .SKU(filter && filter.SKU && filter.SKU.value ? filter.SKU.comparation : 'ne', filter && filter.SKU && filter.SKU.value ? filter.SKU.value : 'EMPTY' )
+        .mpn(filter && filter.mpn && filter.mpn.value ? filter.mpn.comparation : 'ne', filter && filter.mpn && filter.mpn.value ? filter.mpn.value : 'EMPTY' )
+        .sourceWarehouse(filter && filter.sourceWarehouse && filter.sourceWarehouse.value ? filter.sourceWarehouse.comparation : 'ne', filter && filter.sourceWarehouse && filter.sourceWarehouse.value ? filter.sourceWarehouse.value : 'EMPTY' )
+        .sourceDropship(filter && filter.sourceDropship && filter.sourceDropship.value ? filter.sourceDropship.comparation : 'ne', filter && filter.sourceDropship && filter.sourceDropship.value ? filter.sourceDropship.value : 'EMPTY' )
+        .titleStore(filter && filter.titleStore && filter.titleStore.value ? filter.titleStore.comparation : 'ne', filter && filter.titleStore && filter.titleStore.value ? filter.titleStore.value : 'EMPTY' )
+        .descriptionStore(filter && filter.descriptionStore && filter.descriptionStore.value ? filter.descriptionStore.comparation : 'ne', filter && filter.descriptionStore && filter.descriptionStore.value ? filter.descriptionStore.value : 'EMPTY' )
+        .brandID(filter && filter.brandID && filter.brandID.value ? filter.brandID.comparation : 'ne', filter && filter.brandID && filter.brandID.value ? filter.brandID.value : 'EMPTY' )
+        .manufacturerID(filter && filter.manufacturerID && filter.manufacturerID.value ? filter.manufacturerID.comparation : 'ne', filter && filter.manufacturerID && filter.manufacturerID.value ? filter.manufacturerID.value : 'EMPTY' )
+        .categoryID(filter && filter.categoryID && filter.categoryID.value ? filter.categoryID.comparation : 'ne', filter && filter.categoryID && filter.categoryID.value ? filter.categoryID.value : 'EMPTY' )
+        .subcategoryID(filter && filter.subcategoryID && filter.subcategoryID.value ? filter.subcategoryID.comparation : 'ne', filter && filter.subcategoryID && filter.subcategoryID.value ? filter.subcategoryID.value : 'EMPTY' )
+        .subcategory2ID(filter && filter.subcategory2ID && filter.subcategory2ID.value ? filter.subcategory2ID.comparation : 'ne', filter && filter.subcategory2ID && filter.subcategory2ID.value ? filter.subcategory2ID.value : 'EMPTY' )
+        .ebaystorecategoryID(filter && filter.ebaystorecategoryID && filter.ebaystorecategoryID.value ? filter.ebaystorecategoryID.comparation : 'ne', filter && filter.ebaystorecategoryID && filter.ebaystorecategoryID.value ? filter.ebaystorecategoryID.value : 'EMPTY' )
+        
+        
+
+        /*.titleStore("contains", titleStore)*/  , {
          sort: orderColumn.column ?  
             s => orderColumn.direction === 'descending' ? s[orderColumn.column](SortDirection.DESCENDING) : s[orderColumn.column](SortDirection.ASCENDING) 
             : null,
@@ -896,7 +1068,7 @@ const handleMoveRight = async() => {
   setProducts(null)
  
 
-      if (search.length === 0){
+     /* if (search.length === 0){
 
       let productsStore = await DataStore.query(Product, Predicates.ALL, {
         page: pageNumber + 1,
@@ -914,68 +1086,28 @@ const handleMoveRight = async() => {
       setAttributesSelected([])
       setProductsSelected([]) 
       setProductsSelectedAll(false)
-    } else {
-      await handleFilter(1, productsByPage, statusProduct)
-     /* let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
-        let brandId = brandIdFinder ? brandIdFinder.id : null
-
-        let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let manufacturerId = manufacturerIdFinder ? manufacturerIdFinder.id : null
-
-      let categoryIdFinder = categories.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let categoryId = categoryIdFinder ? categoryIdFinder.id : null
-
-      let subCategoryIdFinder = subCategories.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let subCategoryId = subCategoryIdFinder ? subCategoryIdFinder.id : null
-
-      let subCategory2IdFinder = subCategories2.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null
-        
-
-      const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
-        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ), {
-         sort: orderColumn.column ?  
-            s => orderColumn.direction !== 'descending' ? s[orderColumn.column](SortDirection.DESCENDING) : s[orderColumn.column](SortDirection.ASCENDING) 
-            : null,
-        })
-
-
-        setProducts(list.slice((pageNumber + 1) * productsByPage, (pageNumber + 1) * productsByPage + productsByPage))
-        setPageNumber(pageNumber + 1)*/
+    } else {*/
+      
+      
+      await handleFilter(1, productsByPage, statusProduct, filterList)
+      setAttributesSelected([])
+        setProductsSelected([]) 
+        setProductsSelectedAll(false)
        
       
-    }
+   // } 
       
-      
-      
-      //Using datastore
-      /*let productsStore = await DataStore.query(Product, Predicates.ALL, {
-        page: pageNumber + 1,
-        limit: productsByPage,
-      })
-
-      setPageNumber(pageNumber + 1)
-  
-      let newProductStore = productsStore.map(item => item)
-      console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMM", newProductStore[0])
-
-      setChunkProducts( sliceIntoChunks(newProductStore, productsByPage ))
-      setProductQty(newProductStore.length)
-     
-      setProducts(newProductStore)*/
       
       
 
 }
 
-const handleMoveLeft = async() => {
+const handleMoveLeft = async() => {  
 
-  
 
-//if (pageNumber > 0){
   setProducts(null)
 
-   if (search.length === 0){
+   /*if (search.length === 0){
 
       let productsStore = await DataStore.query(Product, Predicates.ALL, {
         page: pageNumber > 0 ? pageNumber - 1 : 0,
@@ -994,87 +1126,17 @@ const handleMoveLeft = async() => {
       setProductsSelected([]) 
       setProductsSelectedAll(false)
 
-      } else {
+      } else {*/
 
-        await handleFilter(-1, productsByPage, statusProduct)
-        /*let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
-        let brandId = brandIdFinder ? brandIdFinder.id : null
-
-        let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let manufacturerId = manufacturerIdFinder ? manufacturerIdFinder.id : null
-
-      let categoryIdFinder = categories.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let categoryId = categoryIdFinder ? categoryIdFinder.id : null
-
-      let subCategoryIdFinder = subCategories.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let subCategoryId = subCategoryIdFinder ? subCategoryIdFinder.id : null
-
-      let subCategory2IdFinder = subCategories2.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null
-  
-  
-        const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
-        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ), {
-          //sort: s => direction === 'descending' ? s.SKU(SortDirection.DESCENDING) : s.SKU(SortDirection.ASCENDING) ,
-          //sort: s => orderColumn.direction !== 'descending' ? s[orderColumn.column](SortDirection.DESCENDING) : s[orderColumn.column](SortDirection.ASCENDING) ,
-          sort: orderColumn.column ?  
-            s => orderColumn.direction !== 'descending' ? s[orderColumn.column](SortDirection.DESCENDING) : s[orderColumn.column](SortDirection.ASCENDING) 
-            : null,
-          //page: pageNumber,
-          //limit: productsByPage
-        })
-  
-          //console.log("LISTA: ", list)
-          
-          //setProducts(list.slice((pageNumber - 1) * productsByPage + 1, (pageNumber - 1) * productsByPage + productsByPage))
-          setProducts(list.slice( (pageNumber - 1) * productsByPage, (pageNumber - 1) * productsByPage + productsByPage  ))
-          setPageNumber(pageNumber > 0 ? pageNumber - 1 : 0)
-          //setActivePage(0)
-          //setProductsByPage(25)*/
+        await handleFilter(-1, productsByPage, statusProduct, filterList)
+        setAttributesSelected([])
+        setProductsSelected([]) 
+        setProductsSelectedAll(false)
         
-      }
+      //}
 
 
-      /*
-
-       let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let brandId = brandIdFinder ? brandIdFinder.id : null
-      
-      let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let manufacturerId = manufacturerIdFinder ? manufacturerIdFinder.id : null
-
-      let categoryIdFinder = categories.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let categoryId = categoryIdFinder ? categoryIdFinder.id : null
-
-      let subCategoryIdFinder = subCategories.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let subCategoryId = subCategoryIdFinder ? subCategoryIdFinder.id : null
-
-      let subCategory2IdFinder = subCategories2.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null
-
-
-      console.log(direction)
-      setProducts(null)
      
-      //if (direction === 'descending'){
-        //if (column === 'SKU'){
-          console.log(column)
-          const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
-          .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ), {
-            //sort: s => direction === 'descending' ? s.SKU(SortDirection.DESCENDING) : s.SKU(SortDirection.ASCENDING) ,
-            sort: s => direction === 'descending' ? s[column](SortDirection.DESCENDING) : s[column](SortDirection.ASCENDING) ,
-            //page: pageNumber,
-            //limit: productsByPage
-          })
-        
-          console.log(list)
-            setProducts(list.slice(pageNumber * productsByPage, pageNumber * productsByPage + productsByPage))
-
-      */
-    
-    
-    //}
-  
 
 }
 
@@ -1110,7 +1172,7 @@ const fetchProducts = async () => {
       
             } else {*/
                 
-              await handleFilter(-pageNumber, productsByPage, statusProduct)  
+              await handleFilter(0, productsByPage, statusProduct, filterList)  
               //await handleFilter(1, productsByPage, statusProduct)     
               
             //}
@@ -1126,7 +1188,7 @@ const fetchProducts = async () => {
      setProductsByPage(value) 
 
 
-      if (search.length === 0){
+      /*if (search.length === 0){
 
         let productsStore = await DataStore.query(Product, Predicates.ALL, {
           page: 0,
@@ -1143,11 +1205,11 @@ const fetchProducts = async () => {
         setProductsSelected([]) 
         setProductsSelectedAll(false)
 
-      } else {
+      } else {*/
           
-        await handleFilter(-pageNumber, value, statusProduct)       
+        await handleFilter(-pageNumber, value, statusProduct, filterList)       
         
-      }
+      //}
      
     } catch (err) { console.log(err) }}
   
@@ -1161,7 +1223,7 @@ const fetchProducts = async () => {
     
     const sortItems = async (listProducts, direction, column) => {
       
-      let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
+      /*let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
       let brandId = brandIdFinder ? brandIdFinder.id : null
       
       let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
@@ -1183,10 +1245,55 @@ const fetchProducts = async () => {
           console.log(column)
           const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
           .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ).status("eq", statusProduct ), {
+            
+            
+            
+            
             sort: column ?  
             s => direction === 'descending' ? s[column](SortDirection.DESCENDING) : s[column](SortDirection.ASCENDING) 
             : null,
-          })
+          })*/
+
+          let filter = parseFilterList(filterList)
+
+  let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
+  let brandId = brandIdFinder ? brandIdFinder.id : null
+  let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
+  let manufacturerId = manufacturerIdFinder ? manufacturerIdFinder.id : null
+
+  let categoryIdFinder = categories.find(item => item.name.toLowerCase() === search.toLowerCase())
+  let categoryId = categoryIdFinder ? categoryIdFinder.id : null
+
+  let subCategoryIdFinder = subCategories.find(item => item.name.toLowerCase() === search.toLowerCase())
+  let subCategoryId = subCategoryIdFinder ? subCategoryIdFinder.id : null
+
+  let subCategory2IdFinder = subCategories2.find(item => item.name.toLowerCase() === search.toLowerCase())
+  let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null
+
+  console.log("FILTER LIST: ", filterList)
+  let statusFilter = statusProduct
+
+      const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
+        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId)).status("eq", statusFilter )
+        .cost(filter && filter.cost && filter.cost.value ? filter.cost.comparation : 'ne', filter && filter.cost && filter.cost.value ? filter.cost.value : 'EMPTY' )
+        .priceMSRP(filter && filter.priceMSRP && filter.priceMSRP.value ? filter.priceMSRP.comparation : 'ne', filter && filter.priceMSRP && filter.priceMSRP.value ? filter.priceMSRP.value : 'EMPTY' )
+        .SKU(filter && filter.SKU && filter.SKU.value ? filter.SKU.comparation : 'ne', filter && filter.SKU && filter.SKU.value ? filter.SKU.value : 'EMPTY' )
+        .mpn(filter && filter.mpn && filter.mpn.value ? filter.mpn.comparation : 'ne', filter && filter.mpn && filter.mpn.value ? filter.mpn.value : 'EMPTY' )
+        .sourceWarehouse(filter && filter.sourceWarehouse && filter.sourceWarehouse.value ? filter.sourceWarehouse.comparation : 'ne', filter && filter.sourceWarehouse && filter.sourceWarehouse.value ? filter.sourceWarehouse.value : 'EMPTY' )
+        .sourceDropship(filter && filter.sourceDropship && filter.sourceDropship.value ? filter.sourceDropship.comparation : 'ne', filter && filter.sourceDropship && filter.sourceDropship.value ? filter.sourceDropship.value : 'EMPTY' )
+        .titleStore(filter && filter.titleStore && filter.titleStore.value ? filter.titleStore.comparation : 'ne', filter && filter.titleStore && filter.titleStore.value ? filter.titleStore.value : 'EMPTY' )
+        .descriptionStore(filter && filter.descriptionStore && filter.descriptionStore.value ? filter.descriptionStore.comparation : 'ne', filter && filter.descriptionStore && filter.descriptionStore.value ? filter.descriptionStore.value : 'EMPTY' )
+        .brandID(filter && filter.brandID && filter.brandID.value ? filter.brandID.comparation : 'ne', filter && filter.brandID && filter.brandID.value ? filter.brandID.value : 'EMPTY' )
+        .manufacturerID(filter && filter.manufacturerID && filter.manufacturerID.value ? filter.manufacturerID.comparation : 'ne', filter && filter.manufacturerID && filter.manufacturerID.value ? filter.manufacturerID.value : 'EMPTY' )
+        .categoryID(filter && filter.categoryID && filter.categoryID.value ? filter.categoryID.comparation : 'ne', filter && filter.categoryID && filter.categoryID.value ? filter.categoryID.value : 'EMPTY' )
+        .subcategoryID(filter && filter.subcategoryID && filter.subcategoryID.value ? filter.subcategoryID.comparation : 'ne', filter && filter.subcategoryID && filter.subcategoryID.value ? filter.subcategoryID.value : 'EMPTY' )
+        .subcategory2ID(filter && filter.subcategory2ID && filter.subcategory2ID.value ? filter.subcategory2ID.comparation : 'ne', filter && filter.subcategory2ID && filter.subcategory2ID.value ? filter.subcategory2ID.value : 'EMPTY' )
+        .ebaystorecategoryID(filter && filter.ebaystorecategoryID && filter.ebaystorecategoryID.value ? filter.ebaystorecategoryID.comparation : 'ne', filter && filter.ebaystorecategoryID && filter.ebaystorecategoryID.value ? filter.ebaystorecategoryID.value : 'EMPTY' )
+        ,{ 
+          sort: column ?  
+          s => direction === 'descending' ? s[column](SortDirection.DESCENDING) : s[column](SortDirection.ASCENDING) 
+          : null,
+        })
         
           console.log(list)
             setProducts(list.slice(pageNumber * productsByPage, pageNumber * productsByPage + productsByPage))
@@ -1369,49 +1476,21 @@ const fetchProducts = async () => {
       if (search.length > 0) {
 
     
-      /*let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
-        let brandId = brandIdFinder ? brandIdFinder.id : null
-
-        let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let manufacturerId = manufacturerIdFinder ? manufacturerIdFinder.id : null
-
-      let categoryIdFinder = categories.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let categoryId = categoryIdFinder ? categoryIdFinder.id : null
-
-      let subCategoryIdFinder = subCategories.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let subCategoryId = subCategoryIdFinder ? subCategoryIdFinder.id : null
-
-      let subCategory2IdFinder = subCategories2.find(item => item.name.toLowerCase() === search.toLowerCase())
-      let subCategory2Id = subCategory2IdFinder ? subCategory2IdFinder.id : null 
-       
-
-        const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
-        .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId) ), {
-          sort: orderColumn.column ?  
-            s => orderColumn.direction !== 'descending' ? s[orderColumn.column](SortDirection.DESCENDING) : s[orderColumn.column](SortDirection.ASCENDING) 
-            : null,
-        })
-
-        console.log("LISTA: ", list)
-      
-        setProducts(list.slice(pageNumber,productsByPage))
-        
-        setPageNumber(0)
-        setProductsByPage(25)*/
-          await handleFilter(-pageNumber, productsByPage, statusProduct )
-          //setPageNumber(0)
-          //setProductsByPage(25)
+          await handleFilter(-pageNumber, productsByPage, statusProduct, filterList )
+          
       
         } else {
           setPageNumber(0)
           fetchProductsRefresh(productsByPage)
         }
+        setAttributesSelected([])
+        setProductsSelected([]) 
+        setProductsSelectedAll(false)
      }
     }
 
     const handleKeyDown_old = (event) => {
       if (event.key === 'Enter') {
-        //console.log(search);
         
 
         setActivePage(1);      
@@ -1502,8 +1581,14 @@ const fetchProducts = async () => {
       }*/
       setProductsSelectedAll(value)
 
-      if (value) {
+      /*if (value) {
         setProductsSelected(chunckProducts[activePage - 1].map(item => item.id))
+      } else {
+        setProductsSelected([])
+      }*/
+
+      if (value) {
+        setProductsSelected(products.map(item => item.id))
       } else {
         setProductsSelected([])
       }
@@ -2407,38 +2492,18 @@ const handleApplyCategoriesChanges = () => {
   }
 }
 
-const handleStatusProduct = async (value) => {
+const handleStatusProduct = async (value) => {  
   
   
   
-  
-  
-  
-  //console.log(value)
-  //console.log(products)
-  //let productList = []
-  
-  /*if (value === 'ACTIVE'){
-    //console.log('Active')
-    productList = sliceIntoChunks(products.filter(item => item.status === 'Active'), productsByPage )
-    setChunkProducts( productList )
-  }
-
-  if (value === 'DRAFT'){
-    //console.log('Draft')
-    productList = sliceIntoChunks(products.filter(item => item.status === 'Draft'), productsByPage )
-    setChunkProducts( productList )
-  }
-
-  if (value === 'ALL'){
-    //console.log('All')
-    productList = sliceIntoChunks(products.filter(item => item.status === 'Draft' || item.status === 'Active'), productsByPage )
-    setChunkProducts( productList )
-  }*/
   console.log("VALUE ==============> ", value)
   setProducts(null)
   setStatusProduct(value)
-  await handleFilter(pageNumber, productsByPage, value)
+  await handleFilter(pageNumber, productsByPage, value, filterList)
+
+  setAttributesSelected([])
+        setProductsSelected([]) 
+        setProductsSelectedAll(false)
 
   
 
@@ -2507,6 +2572,15 @@ const handleChangeProductsByPage = (e, {value}) => {
     //console.log(value)
   }
 
+  const handleFilterList = async (value) => {
+    //console.log(value)
+    setProducts(null)
+    setFilterList(value)
+    //parseFilterList(value)
+    await handleFilter(pageNumber, productsByPage, statusProduct, value)
+  
+  }
+
               
 
     const handleEditSKU = (evt) => {
@@ -2548,7 +2622,15 @@ const handleChangeProductsByPage = (e, {value}) => {
                   </Button>
             </span> 
             <span>
-              <Filter />             
+              <Filter 
+                    handleFilterList = {(value) => handleFilterList(value)} 
+                    brands = {brands} 
+                    manufacturers = {manufacturers} 
+                    categories = {categories}
+                    subCategories = {subCategories}
+                    ebayStoreCategorys = {ebayStoreCategorys}
+                    subCategories2 = {subCategories2}
+                />             
             </span>
             
           </div>                      
@@ -2791,12 +2873,12 @@ const handleChangeProductsByPage = (e, {value}) => {
                   <Popup content='Edit Product Attributes in bulk' position='top center' offset={[0, 15]} inverted trigger={<Icon name='sliders horizontal' />} />
                   </Button>
                   
-                  <Button onClick = {() => setEditPricesModal(true)} disabled = {productsSelected.length > 0 ? false : true} icon>
+                  {/*<Button onClick = {() => setEditPricesModal(true)} disabled = {productsSelected.length > 0 ? false : true} icon>
                   <Popup content='Edit Prices' position='top center' offset={[0, 15]} inverted trigger={<Icon name='money bill alternate' />} />
                   </Button>
                   <Button onClick = {() => setEditStatusModal(true)} disabled = {productsSelected.length > 0 ? false : true} icon>
                   <Popup content='Change Status' position='top center' offset={[0, 15]} inverted trigger={<Icon name='checkmark' />} />
-                  </Button>
+                  </Button>*/}
                   {/*<Button disabled = {productsSelected.length > 0 ? false : true} icon>
                   <Popup content='Remove Products' position='top center' offset={[0, 15]} inverted trigger={<Icon name='delete' />} />
           </Button>*/}
