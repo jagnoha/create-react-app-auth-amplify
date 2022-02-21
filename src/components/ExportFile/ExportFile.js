@@ -11,10 +11,16 @@ import {ExcelToJson} from 'excel-to-json-in-react-js'
 import xlsx from 'xlsx'
 import { v4 as uuidv4 } from 'uuid'
 import { createCategory, createSubCategory, createManufacturer, createProduct, updateProduct } from '../../graphql/mutations'
-
+import { DataStore, Predicates, SortDirection } from 'aws-amplify'
+import { Product } from '../../models'
 //import Attributes from '../Attributes/Attributes'
 
 Amplify.configure(aws_exports)
+
+DataStore.configure({
+  maxRecordsToSync: 30000,
+  syncPageSize: 1000
+})
 
 
 export default function ExportFile(props) {
@@ -164,10 +170,29 @@ export default function ExportFile(props) {
     const fetchProducts = async () => {
         try {
             //fetchAttributes()
-            const productData = await API.graphql({
+
+
+            /*let productList = await API.graphql(graphqlOperation(listProducts, {limit: productsByPage }))
+            let products = productList.data.listProducts.items.filter(item => !item._deleted)*/
+            
+
+            /*const products = await DataStore.query(Product, c => c.updateFlag("eq", 'false')
+            //.status("eq", "Active")
+            )/*
+            .filter(item => !item._deleted)*/
+
+            const productList = await DataStore.query(Product, c=> c.updateFlag("eq",true).status("eq", 'Active'))
+            const products = productList ? productList.filter(item => !item._deleted) : []
+
+            console.log(products)
+
+            //.filter(item2 => item2.updateFlag) 
+
+            /*const productData = await API.graphql({
               query: listProducts,
             })      
-            const products = await productData.data.listProducts.items.filter(item => !item._deleted)   
+            const products = await productData.data.listProducts.items.filter(item => !item._deleted)*/   
+
             setProducts(products)
 
             
@@ -176,52 +201,28 @@ export default function ExportFile(props) {
             
 
             for (let item of products){
-                //console.log(item)
                 
                 let brand = props.brands.find(itemBrand => itemBrand.id === item.brandID) 
                 let brandName = brand ? brand.name : ""
-                let title = item.title && item.title.store ? item.title.store : ""
-                let description = item.description && item.description.store ? item.description.store : ""
+                let title = item.titleStore ? item.titleStore : ""
+                let description = item.descriptionStore ? item.descriptionStore : ""
                 let category = props.categories.find(itemCategory => itemCategory.id === item.categoryID)
                 let categoryName = category ? category.name : ""
                 let subcategory = props.subCategories.find(itemSubCategory => itemSubCategory.id === item.subcategoryID)
                 let subCategoryName = subcategory ? subcategory.name : ""
                 let subcategory2 = props.subCategories2.find(itemSubCategory2 => itemSubCategory2.id === item.subcategory2ID)
                 let subCategory2Name = subcategory2 && subcategory2.id !== '3dc30aff-66a5-49fa-9f20-49c76031a994' ? subcategory2.name : ""
-                let height = item.dimensions && item.dimensions.height ? item.dimensions.height : "" 
-                let length = item.dimensions && item.dimensions.length ? item.dimensions.length : ""
-                let width = item.dimensions && item.dimensions.width ? item.dimensions.width : ""
+                let height = item.dimensionHeight ? item.dimensionHeight : "" 
+                let length = item.dimensionLength ? item.dimensionLength : ""
+                let width = item.dimensionWidth ? item.dimensionWidth : ""
                 let image = item.images && item.images.image1 ? JSON.parse(item.images.image1).data_url : ""
-                let MSRP = item.price && item.price.MSRP ? item.price.MSRP : ""
+                let MSRP = item.priceMSRP ? item.priceMSRP : ""
                 let listPrice = ""
-                let myStore = item.price && item.price.store ? item.price.store : ""
-                let sourceWarehouse = item.source && item.source.warehouse ? item.source.warehouse : false
-                let sourceDropship = item.source && item.source.dropship ? item.source.dropship : false
+                let myStore = item.priceStore ? item.priceStore : ""
+                let sourceWarehouse = item.sourceWarehouse ? item.sourceWarehouse : false
+                let sourceDropship = item.sourceDropship ? item.sourceDropship : false
                 let attributesParse = item.Attributes ? JSON.parse(item.Attributes) : []
-                //console.log("********* ITEM:", item)
-
-               /*let product = { 
-                    SKU: item.SKU, MPN: item.mpn, BinLocation: item.binLocation,
-                    Brand: brandName, PartsSKU: '', TuckerSKU: '', WPSSKU: '', ItemName: title,
-                    BodyDescription: description, Handle: item.handle, Category: categoryName, SubCategory: subCategoryName,
-                    SubCategory2: subCategory2Name, Weight: item.appliedWeight, Height: height, Length: length, Width: width,
-                    ShopifyFitmentTags: item.shopifyFitmentTags, ShopifyOnlyTags: item.shopifyOnlyTags, Image: image, ApparelGender: '',
-                    ApparelMaterial: '', ApparelSize: '', ApparelSizeSegment: '', ApparelSizeModifier: '',
-                    ApparelStyle: '', BatteryCode: '', BearingSize: '', BoltPattern: '', Bore: '',
-                    Compression: '', ContainerSize: '', Diameter: '', HandlebarBlinkers: '', 
-                    HandlebarClampingDiameter: '', HandlebarConfiguration: '', HandlebarControlColor: '',
-                    HandlebarPullback: '', HandlebarRise: '', HandlebarDiameter: '', HandlebarSwitchColor: '',
-                    HandlebarStyle: '', HandlebarWidth: '', LensStyle: '', LoadRating: '', Material: '',
-                    Pitch: '', SeatStyle: '', SeatWidthDriver: '', SeatWidthPassenger: '', Shape: '',
-                    Sizing: '', SpringRate: '', SprocketPosition: '', SprocketTeeth: '', SprocketSize: '',
-                    Thickness: '', Speed: '', TireApplication: '', TireConstruction: '', TirePly: '',
-                    TireRimOffset: '', TireSpeedRating: '', TireType: '', WheelDiameter: '', WheelDisc: '',
-                    WheelSpokeCount: '', WheelSpokeFinish: '', WheelWidth: '', OptionName1: '', OptionValue1: '',
-                    OptionName2: '', OptionValue2: '', OptionName3: '', OptionValue3: '', OptionName4: '',
-                    OptionValue4: '', OptionName5: '', OptionValue5: '', MSRP: MSRP, Cost: item.cost, ListPrice: listPrice,
-                    MyStorePrice: myStore, SellPrice: '', UpdateFlag: '0'
-                }*/
-
+                
                 let product = { 
                     SKU: item.SKU, MPN: item.mpn, BinLocation: item.parentSKU,
                     Brand: brandName, PartsSKU: '', TuckerSKU: '', WPSSKU: '', ItemName: title,
@@ -246,9 +247,16 @@ export default function ExportFile(props) {
                         product[`OptionValue${n}`] = itemList.value
                     }
                     product[`${name.split(' ').join('')}`] = itemList.value
+
+                    /*let productDetails = {
+                      id: itemList.id,
+                      updateFlag: false,
+                      _version: itemList._version,          
+                    }
+                    await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))*/
                 }
 
-                console.log(product)
+                //console.log(product)
 
                 if (sourceWarehouse) {
                     //product.Source = 'DEMONS'
@@ -267,6 +275,20 @@ export default function ExportFile(props) {
             setData(result)
       
         } catch (err) { console.log(err) }
+    }
+
+    const handleUpdateFlag = async () => {
+      console.log("Click!!!!!!!!!!!!!")
+      console.log(products)
+      for (let item of products){
+        let productDetails = {
+                      id: item.id,
+                      updateFlag: false,
+                      _version: item._version,          
+                    }
+                    await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+      }
+      setProducts([])
     }
 
     /*const fetchBrands = async () => {
@@ -714,6 +736,8 @@ export default function ExportFile(props) {
         <div style={divStyle}>
         <SemanticToastContainer position="top-center" />
         <h1>Export File</h1>
+        
+        { products && products.length > 0 ?
         <CSVLink
             enclosingCharacter={`'`} 
             data={data} 
@@ -721,11 +745,15 @@ export default function ExportFile(props) {
             filename={"flxpoint_export_file.csv"}
             className="btn btn-primary"
             target="_blank"
+            onClick={() => handleUpdateFlag()}
             >
             <Icon name='download' size='huge' />
-            Create export file for FlxPoint
+            Create export file from updated products - FlxPoint
             
-        </CSVLink>
+        </CSVLink> :
+        <p>No updated or new products</p>
+        }
+        
         {/*<hr></hr>
         <label htmlFor="upload">Upload to AWS</label><br></br>
           <input

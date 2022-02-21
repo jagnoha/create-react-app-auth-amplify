@@ -240,6 +240,7 @@ export default function Products() {
           sourceWarehouse: productForm.sourceWarehouse,
           sourceDropship: productForm.sourceDropship,
           Attributes: productForm.Attributes,
+          updateFlag: true,
           status: productForm.status ? productForm.status : 'Draft',          
         }
         let productInfo = await API.graphql(graphqlOperation(createProduct, { input: productInput }))
@@ -477,6 +478,7 @@ export default function Products() {
           sourceDropship: productForm.sourceDropship,          
           Attributes: attributesSelected ? JSON.stringify(attributesSelected) : "",//productForm.Attributes,
           status: productForm.status ? productForm.status : 'Draft',
+          updateFlag: true,
           _version: version,          
         }
         let productEdited = await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
