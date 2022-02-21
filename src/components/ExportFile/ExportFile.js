@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Amplify, { API, graphqlOperation, Storage } from 'aws-amplify'
 import { SemanticToastContainer, toast } from 'react-semantic-toasts'
 import { Pagination, Input, Segment, Button, Icon, Grid, Modal, Header, Form, ItemContent, Item} from 'semantic-ui-react'
-import { listProducts, listBrands, listCategorys, listSubCategorys, listSubCategory2s, listEbayStoreCategorys, listAttributes } from '../../graphql/queries'
+import { listProducts, listBrands, listCategorys, listSubCategorys, listSubCategory2s, listEbayStoreCategorys, listAttributes, getProduct } from '../../graphql/queries'
 import aws_exports from '../../aws-exports'
 import { CSVLink } from 'react-csv'
 import { attachEventProps } from '@aws-amplify/ui-react/lib-esm/react-component-lib/utils'
@@ -13,14 +13,15 @@ import { v4 as uuidv4 } from 'uuid'
 import { createCategory, createSubCategory, createManufacturer, createProduct, updateProduct } from '../../graphql/mutations'
 import { DataStore, Predicates, SortDirection } from 'aws-amplify'
 import { Product } from '../../models'
+import { ConsoleLogger } from '@aws-amplify/core'
 //import Attributes from '../Attributes/Attributes'
 
 Amplify.configure(aws_exports)
 
-DataStore.configure({
-  maxRecordsToSync: 30000,
+/*DataStore.configure({
+  maxRecordsToSync: 100000,
   syncPageSize: 1000
-})
+})*/
 
 
 export default function ExportFile(props) {
@@ -163,9 +164,9 @@ export default function ExportFile(props) {
           onPageRendered()
     }, [])
 
-    const getProducts = (event, done) => {
+    /*const getProducts = (event, done) => {
         
-    }
+    }*/
 
     const fetchProducts = async () => {
         try {
@@ -719,11 +720,141 @@ export default function ExportFile(props) {
     //console.log(productsTemp)
     try {
 
-      for (let item of productList.slice(33500,34000)){
+      for (let item of productList.slice(0,5)){
         n++
         console.log(n)
         updateItem(item)
       }
+
+    } catch(error) {
+      console.log(error)
+    }
+  }
+
+  const readUploadUpdateProducts = (e) => {
+    e.preventDefault();
+    if (e.target.files) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = e.target.result;
+            const workbook = xlsx.read(data, { type: "array" });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const json = xlsx.utils.sheet_to_json(worksheet);
+            //console.log(json);
+            handleUpdateFieldsFromExcel(json)
+        };
+        reader.readAsArrayBuffer(e.target.files[0]);
+    }
+}
+
+const updateHandlebar = async (item) => {
+  try {
+    //console.log(item.id)
+    //console.log(item._version)
+
+    let productDetails = {
+      id: item.id,
+      /*sourceDropship: item.source ? item.source.dropship : '',
+      sourceWarehouse: item.source ? item.source.warehouse : '',
+      titleStore: item.title ? item.title.store : '',
+      titleEbay: item.title ? item.title.ebay : '',
+      titleAmazon: item.title ? item.title.amazon : '',
+      descriptionStore: item.description ? item.description.store : '',
+      descriptionEbay: item.description ? item.description.ebay : '',
+      descriptionAmazon: item.description ? item.description.amazon : '',
+      priceMSRP: item.price ? item.price.MSRP : 0,
+      dimensionHeight: item.dimensions ? item.dimensions.height : 0,
+      dimensionLength: item.dimensions ? item.dimensions.length : 0,
+      dimensionWidth: item.dimensions ? item.dimensions.width : 0,*/
+      handle: item.handle, 
+      _version: item.version
+    }
+    console.log("=================", productDetails, "========================")
+    let result = await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+    console.log(result)
+
+
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+  const handleUpdateFieldsFromExcel = async (excelFile) => {
+    /*let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: 1000 }))
+    let productList = productsTemp.data.listProducts.items   
+    let token = productsTemp.data.listProducts.nextToken
+    console.log("ESSSSSSSSSSTE ES EL TOKEN: ", token)*/
+    
+    /*const productList = await DataStore.query(Product, c=> c.sourceWarehouse("eq", true),{
+      //page: 2,
+      //limit: 500,
+    })*/
+
+    //const productList = await DataStore.query(Product, Predicates.ALL)
+
+    //const products = productList ? productList.filter(item => !item._deleted) : []
+
+    /*while (token) {
+
+      let productsPart = await API.graphql(graphqlOperation(listProducts, {limit: 1000, nextToken: token }))
+      token = productsPart.data.listProducts.nextToken
+      productList = productList.concat(productsPart.data.listProducts.items)
+
+    }*/
+
+    //console.log(productList.length)
+    //console.log(products[0])
+    
+    //let n = 0
+    try {
+      let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: 1000 }))
+      let productList = productsTemp.data.listProducts.items   
+      let token = productsTemp.data.listProducts.nextToken
+      console.log("ESSSSSSSSSSTE ES EL TOKEN: ", token)
+      let n = 0
+      while (token) {
+
+        let productsPart = await API.graphql(graphqlOperation(listProducts, {limit: 1000, nextToken: token }))
+        token = productsPart.data.listProducts.nextToken
+        productList = productList.concat(productsPart.data.listProducts.items)
+  
+      }
+
+      for (let item of excelFile.slice(2500,2853)){
+        n++
+        console.log(n)
+        let product = productList.filter(itemProduct => itemProduct.SKU.toString() === item.SKU.toString())[0]
+        //console.log(product)
+        let id = product.id
+        let version = product._version 
+        let handle = item.handle
+        console.log({ id, handle, version })
+        updateHandlebar({ id, handle, version })
+
+      
+      }
+      /*console.log("***************************************")
+      for (let item of excelFile.slice(0,1)){
+        const productItem = await DataStore.query(Product, c=> c.SKU("eq", item.SKU))
+        console.log(productItem)
+        n++
+        //let id = '0' //productList[0].id
+        console.log(n)
+        //console.log( product.id + ' - ' + item.SKU + ' - ' + ' - ' + item.handle)
+        //updateHandlebar(item)
+      }*/
+      //const productItem = await DataStore.query(Product, c=> c.SKU("eq", item.SKU))
+      //console.log(productItem)
+      /*let filter = {
+        'SKU': {
+          eq: '126051'
+        }
+      }
+
+      const oneProduct = await API.graphql({ query: listProducts, variables: { filter: filter }})
+      ConsoleLogger.LOG_LEVEL(oneProduct)*/
 
     } catch(error) {
       console.log(error)
@@ -778,6 +909,13 @@ export default function ExportFile(props) {
           >Update Products</button>
         
         */}
+        {/*<label htmlFor="upload">Update products handle</label><br></br>
+          <input
+              type="file"
+              name="upload"
+              id="upload"
+              onChange={readUploadUpdateProducts}
+      />*/}
       </div>    
     );
     

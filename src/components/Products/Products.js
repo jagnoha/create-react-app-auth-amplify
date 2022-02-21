@@ -559,31 +559,47 @@ export default function Products() {
     error: error => console.warn(error)
 });
 
-const subscriptionUpdate = async () => await API.graphql(
+const subscriptionUpdate = async (products) => await API.graphql(
   graphqlOperation(subscriptions.onUpdateProduct)
 ).subscribe({
   next: (item) => { 
-    //fetchProducts()
-    //console.log(item)
-    let productTemp = item.value.data.onUpdateProduct;
-    //console.log("PRODUCT TEMP >>>>>>>>>>>>>>>>>>>>>>>>>>>", productTemp.title.store)
-    //console.log("KKKKKKKKKKKKKKKKKKKKKKK ", products)
+    
+    /*let productTemp = item.value.data.onUpdateProduct;
     let tempProductList = products.filter(item => item.id !== productTemp.id)
-    //console.log(tempProductList)
+       
+    setProducts(tempProductList.concat(productTemp)) */
+   
+    //fetchProductsRefresh(productsByPage)
+    let productEdited = item.value.data.onUpdateProduct
+        console.log(productEdited)
+        console.log(products)
+        /*console.log("PRODUCTS LIST: ", products.map(item => 
+            {
+              if (item.id === id) {
+                return (productDetails)
+              }
+              return (item)
+            }
+
+            
+          ))
+        */
+          let newList = products.map(item => 
+            {
+              if (item.id === productEdited.id) {
+                //return (productEdited.data.updateProduct)
+                return (productEdited)
+              }
+              return (item)
+            }            
+          )
+
+
+
+          //console.log(newList)
+          setProducts(newList)
+          setChunkProducts( sliceIntoChunks(newList, productsByPage ))
         
-    setProducts(tempProductList.concat(productTemp)) 
-    //setChunkProducts( sliceIntoChunks(tempProductList.concat(productTemp), productsByPage ))
-    //setProductQty(tempProductList.concat(productTemp).length)
-    
-    //console.log("PRODUCT TEMP ****************", productTemp)
-    
-    /*let tempProducts = [...products]
-    let index = tempProducts.findIndex(item => item.id === productTemp.id)
-    
-    if (tempProducts) {
-      tempProducts[index] = productTemp
-      setProducts(tempProducts)
-    }*/
 
     
 
@@ -1070,6 +1086,7 @@ const handleFilter = async (incr, productsByPage, statusFilter, filterList) => {
             : null,
         })
 
+        //subscriptionUpdate(list)
         
         setProducts(list.slice((pageNumber + incr) * productsByPage, (pageNumber + incr) * productsByPage + productsByPage))
         setPageNumber(pageNumber + incr)
@@ -2284,7 +2301,53 @@ const updateFindReplace = async (id) => {
       shopifyFitmentTags: shopifyFitmentTagsOld.replace(findText, replaceText),
       _version: version,          
     }
-    await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+
+    let productEdited = await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+    
+    /*let prodTemp = products.filter(item => item.id !== productEdited.data.updateProduct.id)
+    prodTemp.push({...productDetails, 
+                          
+      SKU: productEdited.data.updateProduct.SKU,
+      brandID: productEdited.data.updateProduct.brandID,
+      manufacturerID: productEdited.data.updateProduct.manufacturerID,
+      categoryID: productEdited.data.updateProduct.categoryID,
+      subcategoryID: productEdited.data.updateProduct.subcategoryID,
+      subcategory2ID: productEdited.data.updateProduct.subcategory2ID,
+      status: productEdited.data.updateProduct.status, 
+      images: productEdited.data.updateProduct.images,
+      sourceWarehouse: productEdited.data.updateProduct.sourceWarehouse,
+      sourceDropship: productEdited.data.updateProduct.sourceDropship,
+      _lastChangedAt: productEdited.data.updateProduct._lastChangedAt,
+  
+    })*/
+    //******************************* */
+    /*let newList = await products.map(item => 
+      {
+        if (item.id === id) {
+          //return (productEdited.data.updateProduct)
+          return ({...productDetails, 
+                          
+                          SKU: productEdited.data.updateProduct.SKU,
+                          brandID: productEdited.data.updateProduct.brandID,
+                          manufacturerID: productEdited.data.updateProduct.manufacturerID,
+                          categoryID: productEdited.data.updateProduct.categoryID,
+                          subcategoryID: productEdited.data.updateProduct.subcategoryID,
+                          subcategory2ID: productEdited.data.updateProduct.subcategory2ID,
+                          status: productEdited.data.updateProduct.status, 
+                          images: productEdited.data.updateProduct.images,
+                          sourceWarehouse: productEdited.data.updateProduct.sourceWarehouse,
+                          sourceDropship: productEdited.data.updateProduct.sourceDropship,
+                          _lastChangedAt: productEdited.data.updateProduct._lastChangedAt,
+                      
+                        })
+        }
+        return (item)
+      }            
+    )*/
+    return (productEdited.data.updateProduct)
+    //setProducts(prodTemp)
+    //setChunkProducts( sliceIntoChunks(newList, productsByPage ))
+    //****************************************** */
   
   } catch(err){
     console.log('error updating Product:', err)
@@ -2364,20 +2427,25 @@ const updateFindReplace_old = async (id) => {
 
 /*********************************************************************** */
 
-const handleApplyFindText = () => {
+const handleApplyFindText = async () => {
   console.log("HANDLE APPLY FIND TEXT!")
 
   
 
   try {
+    let tempList = []
   for (let item of productsSelected){
     //console.log(item)
-    updateFindReplace(item)
+    //console.log( await updateFindReplace(item))
+    tempList.push(await updateFindReplace(item))
   }
-  
+  console.log(tempList)
+  setProducts(tempList)
   setFindText('')
   setReplaceText('')
   setFindReplaceModal(false)
+  setProductsSelected([])
+  setProductsSelectedAll(false)
 
 
   setTimeout(() => {
@@ -2456,6 +2524,8 @@ try {
   setFindText('')
   setReplaceText('')
   setFindReplaceModal(false)
+  setProductsSelected([])
+  setProductsSelectedAll(false)
   
   } catch (error) {
     console.log(error)
