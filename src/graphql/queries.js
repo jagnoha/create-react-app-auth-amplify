@@ -129,41 +129,6 @@ export const listProducts = /* GraphQL */ `
         subcategory2ID
         ebaystorecategoryID
         binLocation
-        source {
-          warehouse
-          dropship
-        }
-        title {
-          store
-          ebay
-          amazon
-        }
-        description {
-          store
-          ebay
-          amazon
-        }
-        bulletPoints {
-          bullet1
-          bullet2
-          bullet3
-          bullet4
-          bullet5
-          bullet6
-          bullet7
-        }
-        images {
-          image1
-          image2
-          image3
-          image4
-          image5
-          image6
-          image7
-          image8
-          image9
-          image10
-        }        
         handle
         weight
         dimensionalWeight
@@ -171,22 +136,6 @@ export const listProducts = /* GraphQL */ `
         shopifyFitmentTags
         shopifyOnlyTags
         cost
-        dimensions {
-          height
-          length
-          width
-        }
-        price {
-          MSRP
-          MAP
-          store
-          ebay
-          amazon
-          wholesaleLow
-          wholesaleHigh
-          scratchLow
-          scratchHigh
-        }
         options
         updateFlag
         status

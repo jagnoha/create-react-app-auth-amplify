@@ -56,7 +56,7 @@ type SourceType {
   dropship: Boolean
 }
 
-type Product @model @key(name: "byBrand", fields: ["brandID"]) @key(name: "byManufacturer", fields: ["manufacturerID"]) @key(name: "byCategory", fields: ["categoryID"]) @key(name: "bySubCategory", fields: ["subcategoryID"]) @key(name: "bySubCategory2", fields: ["subcategory2ID"]) @key(name: "byEbayStoreCategory", fields: ["ebaystorecategoryID"]) @auth(rules: [{allow: public}, {allow: owner, operations: [create]}]) {
+type Product @model @searchable @key(name: "byBrand", fields: ["brandID"]) @key(name: "byManufacturer", fields: ["manufacturerID"]) @key(name: "byCategory", fields: ["categoryID"]) @key(name: "bySubCategory", fields: ["subcategoryID"]) @key(name: "bySubCategory2", fields: ["subcategory2ID"]) @key(name: "byEbayStoreCategory", fields: ["ebaystorecategoryID"]) @auth(rules: [{allow: public}]) {
   id: ID!
   SKU: String
   legacyID: String

@@ -14,7 +14,7 @@ import SubCategories2 from '../SubCategories2/SubCategories2'
 import EbayStoreCategories from '../EbayStoreCategories/EbayStoreCategories'
 import Attributes from '../Attributes/Attributes'
 import ExportFile from '../ExportFile/ExportFile'
-import Amplify, { API, graphqlOperation, Storage } from 'aws-amplify'
+import Amplify, { API, graphqlOperation, Storage, DataStore } from 'aws-amplify'
 import { listAttributes, listBrands, listCategorys, listSubCategorys, listSubCategory2s, listProducts } from '../../graphql/queries'
 import aws_exports from '../../aws-exports'
 
@@ -24,6 +24,8 @@ import aws_exports from '../../aws-exports'
 const style = {
   opacity: 0.8,
 }
+
+
 
 export default function Main(props) {
 
@@ -140,6 +142,12 @@ export default function Main(props) {
         
         return newTitle;
       }
+
+      /*useEffect(() => {
+        DataStore.clear()       
+        
+        
+    }, [])*/
 
       let newTitle = getTitle();
 

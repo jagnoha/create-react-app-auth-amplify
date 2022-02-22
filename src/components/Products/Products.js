@@ -21,12 +21,13 @@ import FindReplaceForm from '../Forms/FindReplaceForm'
 import Filter from '../Filter/Filter'
 import { DataStore, Predicates, SortDirection } from 'aws-amplify'
 import { Product } from '../../models'
+import { ConsoleLogger } from '@aws-amplify/core'
 
 Amplify.configure(aws_exports)
 
 DataStore.configure({
-  maxRecordsToSync: 30000,
-  syncPageSize: 1000
+  maxRecordsToSync: 50000,
+  fullSyncInterval: 10
 })
 
 
@@ -1041,9 +1042,33 @@ const parseFilterList = (list) => {
 
 const handleFilter = async (incr, productsByPage, statusFilter, filterList) => {
 
+  
+  
+  const listProductsQuery = `query listProducts {
+    listProducts(
+      filter: { SKU: { eq: "101532" } },
+    ) {
+      items {
+        id
+        SKU
+        titleStore
+      }
+    }
+  }`
+
+  const allProducts = await API.graphql(graphqlOperation(listProductsQuery))
+  console.log("ALL PRODUCTS: ***************** ", allProducts)
+  
+  
+  /*//const testList =  await DataStore.query(Product, c => c.SKU("eq", '101531'))
+  const testList = await DataStore.query(Product, Predicates.ALL, {
+    page: 0,
+    limit: 100
+  });
+  console.log("TAMANO DE LA LISTA: *********************", testList.length)*/
+  
   let filter = parseFilterList(filterList)
 
-  
   let brandIdFinder = brands.find(item => item.name.toLowerCase() === search.toLowerCase())
   let brandId = brandIdFinder ? brandIdFinder.id : null
   let manufacturerIdFinder = manufacturers.find(item => item.name.toLowerCase() === search.toLowerCase())
@@ -1084,11 +1109,14 @@ const handleFilter = async (incr, productsByPage, statusFilter, filterList) => {
          sort: orderColumn.column ?  
             s => orderColumn.direction === 'descending' ? s[orderColumn.column](SortDirection.DESCENDING) : s[orderColumn.column](SortDirection.ASCENDING) 
             : null,
+          page: pageNumber + incr,
+          limit: productsByPage,
         })
 
         //subscriptionUpdate(list)
-        
-        setProducts(list.slice((pageNumber + incr) * productsByPage, (pageNumber + incr) * productsByPage + productsByPage))
+        //console.log("TAMANO DE LA LISTA: ", list.length)
+        //setProducts(list.slice((pageNumber + incr) * productsByPage, (pageNumber + incr) * productsByPage + productsByPage))
+        setProducts(list)
         setPageNumber(pageNumber + incr)
 
 }
@@ -2264,10 +2292,8 @@ const handleReplaceText = (evt) => {
 const updateFindReplace = async (id) => {
   try{
     
-    //console.log(id)
-
+    
     let product = products.find(item => item.id === id)
-    //console.log(product)
     let version = product._version
     let titleStoreOld = product.titleStore ? product.titleStore : ""
     let titleEbayOld = product.titleEbay ? product.titleEbay : ""
@@ -2276,8 +2302,6 @@ const updateFindReplace = async (id) => {
     let descriptionStoreOld = product.descriptionStore ? product.descriptionStore : ""
     let descriptionEbayOld = product.descriptionEbay ? product.descriptionEbay : ""
     let descriptionAmazonOld = product.descriptionAmazon ? product.descriptionAmazon : ""
-
-    //let handleOld = product.handle ? product.handle : ""
 
     let shopifyMetaTitleOld = product.shopifyMetaTitle ? product.shopifyMetaTitle : ""
     let shopifyMetaDescriptionOld = product.shopifyMetaDescription ? product.shopifyMetaDescription : ""
@@ -2294,7 +2318,6 @@ const updateFindReplace = async (id) => {
         descriptionStore: descriptionStoreOld.replace(findText, replaceText),
         descriptionEbay: descriptionEbayOld.replace(findText, replaceText),
         descriptionAmazon: descriptionAmazonOld.replace(findText, replaceText),
-      //handle: handleOld.replace(findText, replaceText).toLowerCase(),
       shopifyMetaDescription: shopifyMetaDescriptionOld.replace(findText, replaceText),
       shopifyMetaTitle: shopifyMetaTitleOld.replace(findText, replaceText),
       shopifyOnlyTags: shopifyOnlyTagsOld.replace(findText, replaceText),
@@ -2304,51 +2327,9 @@ const updateFindReplace = async (id) => {
 
     let productEdited = await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
     
-    /*let prodTemp = products.filter(item => item.id !== productEdited.data.updateProduct.id)
-    prodTemp.push({...productDetails, 
-                          
-      SKU: productEdited.data.updateProduct.SKU,
-      brandID: productEdited.data.updateProduct.brandID,
-      manufacturerID: productEdited.data.updateProduct.manufacturerID,
-      categoryID: productEdited.data.updateProduct.categoryID,
-      subcategoryID: productEdited.data.updateProduct.subcategoryID,
-      subcategory2ID: productEdited.data.updateProduct.subcategory2ID,
-      status: productEdited.data.updateProduct.status, 
-      images: productEdited.data.updateProduct.images,
-      sourceWarehouse: productEdited.data.updateProduct.sourceWarehouse,
-      sourceDropship: productEdited.data.updateProduct.sourceDropship,
-      _lastChangedAt: productEdited.data.updateProduct._lastChangedAt,
-  
-    })*/
-    //******************************* */
-    /*let newList = await products.map(item => 
-      {
-        if (item.id === id) {
-          //return (productEdited.data.updateProduct)
-          return ({...productDetails, 
-                          
-                          SKU: productEdited.data.updateProduct.SKU,
-                          brandID: productEdited.data.updateProduct.brandID,
-                          manufacturerID: productEdited.data.updateProduct.manufacturerID,
-                          categoryID: productEdited.data.updateProduct.categoryID,
-                          subcategoryID: productEdited.data.updateProduct.subcategoryID,
-                          subcategory2ID: productEdited.data.updateProduct.subcategory2ID,
-                          status: productEdited.data.updateProduct.status, 
-                          images: productEdited.data.updateProduct.images,
-                          sourceWarehouse: productEdited.data.updateProduct.sourceWarehouse,
-                          sourceDropship: productEdited.data.updateProduct.sourceDropship,
-                          _lastChangedAt: productEdited.data.updateProduct._lastChangedAt,
-                      
-                        })
-        }
-        return (item)
-      }            
-    )*/
+    
     return (productEdited.data.updateProduct)
-    //setProducts(prodTemp)
-    //setChunkProducts( sliceIntoChunks(newList, productsByPage ))
-    //****************************************** */
-  
+    
   } catch(err){
     console.log('error updating Product:', err)
     setTimeout(() => {
@@ -2574,8 +2555,9 @@ const updateAttributes = async (id) => {
       Attributes: attributes, 
       _version: version,          
     }
-    await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+    let productEdited = await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
 
+    return (productEdited.data.updateProduct)
     
 
   } catch (err) {
@@ -2595,6 +2577,9 @@ const updateAttributes = async (id) => {
 
 const updateCategories = async (id) => {
   try {
+    
+    // ******************************
+
     let product = products.find(item => item.id === id)
     let version = product._version
     let categoryOld = product.categoryID
@@ -2610,48 +2595,16 @@ const updateCategories = async (id) => {
       ebaystorecategoryID: editCategoriesSelected.ebayStoreCategory.checked ? editCategoriesSelected.ebayStoreCategory.id : ebayStoreCategoryOld,
       _version: version,          
     }
-    //await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
-
-    // **************************
+    
 
     let productEdited = await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
-    console.log(productEdited)
-
-    setProductsSelected([])
-  setProductsSelectedAll(false)
-  setFilterList([])
-  setSearch("")
-  setProducts(null)
-  await handleFilter(-pageNumber, productsByPage, statusProduct, [])
-    /*console.log("PRODUCTS LIST: ", products.map(item => 
-        {
-          if (item.id === id) {
-            return (productDetails)
-          }
-          return (item)
-        }
-
-        
-      ))*/
     
-      /*let newList = products.map(item => 
-        {
-          if (item.id === id) {
-            //return (productEdited.data.updateProduct)
-            return ({...productEdited, ...productDetails, _lastChangedAt: productEdited.data.updateProduct._lastChangedAt})
-          }
-          return (item)
-        }            
-      )
-      setProducts(newList)*/
-
-    // **************************
-
-
+    
+    return (productEdited.data.updateProduct)
+    
     
 
   } catch (err) {
-    //console.log('error creating Product:', err)
     setTimeout(() => {
       toast({
           type: 'error',
@@ -2666,17 +2619,33 @@ const updateCategories = async (id) => {
 }
 
 const handleApplyCategoriesChanges = async () => {
-  setEditCategoriesModal(false)
+  /*setEditCategoriesModal(false)
   try {
   for (let item of productsSelected){
     //console.log(item)
     updateCategories(item)
-  }
+  }*/
 
   /*setProducts(null)
   setFilterList([])
   setSearch("")
   fetchProducts()*/
+  try {
+  setEditCategoriesModal(false)
+
+  let tempList = []
+  for (let item of productsSelected){
+    //console.log(item)
+    //console.log( await updateFindReplace(item))
+    tempList.push(await updateCategories(item))
+  }
+  console.log(tempList)
+  setProducts(tempList)
+  setFindText('')
+  setReplaceText('')
+  setFindReplaceModal(false)
+  setProductsSelected([])
+  setProductsSelectedAll(false)
 
 
   setTimeout(() => {
@@ -2729,8 +2698,8 @@ const handleStatusProduct = async (value) => {
     console.log(value)
   }
 
-const handleApplyAttributesChanges = () => {
-  setEditAttributesModal(false)
+const handleApplyAttributesChanges = async () => {
+  /*setEditAttributesModal(false)
   try {
   for (let item of productsSelected){
     //console.log(item)
@@ -2748,7 +2717,27 @@ const handleApplyAttributesChanges = () => {
   )
   setProductsSelected([])
   setAttributesSelected([])
+  setProductsSelectedAll(false)*/
+  try {
+    setEditAttributesModal(false)
+
+  let tempList = []
+  for (let item of productsSelected){
+    //console.log(item)
+    //console.log( await updateFindReplace(item))
+    tempList.push(await updateAttributes(item))
+  }
+  console.log(tempList)
+  setProducts(tempList)
+  setFindText('')
+  setReplaceText('')
+  setFindReplaceModal(false)
+  setProductsSelected([])
   setProductsSelectedAll(false)
+
+
+
+
   } catch (error) {
     console.log(error)
   }
