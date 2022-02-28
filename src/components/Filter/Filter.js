@@ -64,12 +64,12 @@ export default function Filter(props) {
 
     const textOptions = [
         { key: 'Exact Match',text: 'Exact Match', value: 'eq' },
-        { key: 'Contains',text: 'Contains',value: 'contains' },
-        { key: 'Starts With',text: 'Starts With',value: 'beginsWith' },
+        { key: 'Contains',text: 'Contains',value: 'matchPhrase' },
+        { key: 'Starts With',text: 'Starts With',value: 'matchPhrasePrefix' },
         //{ key: 'Ends With',text: 'Ends With',value: 'Ends With' },
         //{ key: 'Empty',text: 'Empty',value: 'Empty' },
         //{ key: 'Not Empty',text: 'Not Empty',value: 'Not Empty' },
-        { key: 'Does Not Contain',text: 'Does Not Contain',value: 'notContains' },
+        { key: 'Does Not Contain',text: 'Does Not Contain',value: 'ne' },
         
     ]
 

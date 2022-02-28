@@ -129,9 +129,14 @@ export default function ProductTable(props) {
             <Table.HeaderCell sorted={props.orderColumn.column === 'cost' ? props.orderColumn.direction : null}
                 onClick={() => props.handleOrder('cost')}>Cost</Table.HeaderCell>
             {/*<Table.HeaderCell width={1} sorted={props.orderColumn.column === 'createdAt' ? props.orderColumn.direction : null}
-                onClick={() => props.handleOrder('createdAt')}>Created</Table.HeaderCell>*/}
-            <Table.HeaderCell width={1} /*sorted={props.orderColumn.column === 'updatedAt' ? props.orderColumn.direction : null}
-                onClick={() => props.handleOrder('_lastChangedAt')}*/>Updated</Table.HeaderCell>
+                onClick={() => props.handleOrder('createdAt')}>Created</Table.HeaderCell>
+            <Table.HeaderCell width={1} sorted={props.orderColumn.column === 'updatedAt' ? props.orderColumn.direction : null}
+                onClick={() => props.handleOrder('updatedAt')}>Updated</Table.HeaderCell>*/}
+                <Table.HeaderCell width={1} 
+                >Created</Table.HeaderCell>
+                <Table.HeaderCell width={1} 
+                >Updated</Table.HeaderCell>
+            
             
           </Table.Row>
         </Table.Header>
@@ -189,7 +194,9 @@ export default function ProductTable(props) {
                 <Table.Cell onClick = {()=>props.openForm(item)}> {item.priceMSRP ? '$'+item.priceMSRP : ""}</Table.Cell>
                 <Table.Cell onClick = {()=>props.openForm(item)}> {item.cost ? '$'+item.cost : ""}</Table.Cell>
                 {/*<Table.Cell onClick = {()=>props.openForm(item)} >{new Date(item._lastChangedAt).toString().split(' GMT')[0]}</Table.Cell>*/}
-                <Table.Cell onClick = {()=>props.openForm(item)} >{new Date(item._lastChangedAt).toString().split(' GMT')[0]}</Table.Cell>
+                {/*<Table.Cell onClick = {()=>props.openForm(item)} >{new Date(item._lastChangedAt).toString().split(' GMT')[0]}</Table.Cell>*/}
+                <Table.Cell onClick = {()=>props.openForm(item)} >{item.createdAt}</Table.Cell>
+                <Table.Cell onClick = {()=>props.openForm(item)} >{item.updatedAt}</Table.Cell>
 
 
           </Table.Row>

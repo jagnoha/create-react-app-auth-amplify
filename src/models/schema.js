@@ -385,7 +385,14 @@ export const schema = {
             "syncable": true,
             "pluralName": "Products",
             "attributes": [
-                {},                                
+                {
+                    "type": "model",
+                    "properties": {}
+                },
+                {
+                    "type": "searchable",
+                    "properties": {}
+                },
                 {
                     "type": "key",
                     "properties": {
@@ -452,16 +459,7 @@ export const schema = {
                                     "delete",
                                     "read"
                                 ]
-                            },
-                            /*{
-                                "provider": "userPools",
-                                "ownerField": "owner",
-                                "allow": "owner",
-                                "operations": [
-                                    "create"
-                                ],
-                                "identityClaim": "cognito:username"
-                            }*/
+                            }
                         ]
                     }
                 }

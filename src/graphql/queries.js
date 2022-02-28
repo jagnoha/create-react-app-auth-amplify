@@ -138,6 +138,18 @@ export const listProducts = /* GraphQL */ `
         cost
         options
         updateFlag
+        images {
+          image1
+          image2
+          image3
+          image4
+          image5
+          image6
+          image7
+          image8
+          image9
+          image10
+        }
         status
         shopifyMetaTitle
         shopifyMetaDescription
@@ -169,6 +181,90 @@ export const listProducts = /* GraphQL */ `
       }
       nextToken
       startedAt
+    }
+  }
+`;
+export const searchProducts = /* GraphQL */ `
+  query SearchProducts(
+    $filter: SearchableProductFilterInput
+    $sort: SearchableProductSortInput
+    $limit: Int
+    $nextToken: String
+    $from: Int
+  ) {
+    searchProducts(
+      filter: $filter
+      sort: $sort
+      limit: $limit
+      nextToken: $nextToken
+      from: $from
+    ) {
+      items {
+        id
+        SKU
+        legacyID
+        mpn
+        Attributes
+        parentSKU
+        brandID
+        manufacturerID
+        categoryID
+        subcategoryID
+        subcategory2ID
+        ebaystorecategoryID
+        binLocation
+        handle
+        weight
+        dimensionalWeight
+        appliedWeight
+        shopifyFitmentTags
+        shopifyOnlyTags
+        cost
+        options
+        updateFlag
+        images {
+          image1
+          image2
+          image3
+          image4
+          image5
+          image6
+          image7
+          image8
+          image9
+          image10
+        }
+        status
+        shopifyMetaTitle
+        shopifyMetaDescription
+        sourceDropship
+        sourceWarehouse
+        titleStore
+        titleEbay
+        titleAmazon
+        descriptionStore
+        descriptionEbay
+        descriptionAmazon
+        dimensionHeight
+        dimensionLength
+        dimensionWidth
+        priceMSRP
+        priceMAP
+        priceStore
+        priceEbay
+        priceAmazon
+        priceWholesaleLow
+        priceWholesaleHigh
+        priceScratchLow
+        priceScratchHigh
+        _version
+        _deleted
+        _lastChangedAt
+        createdAt
+        updatedAt
+      }
+      nextToken
+      total
     }
   }
 `;
@@ -215,6 +311,18 @@ export const syncProducts = /* GraphQL */ `
         sourceWarehouse
         titleStore
         titleEbay
+        images {
+          image1
+          image2
+          image3
+          image4
+          image5
+          image6
+          image7
+          image8
+          image9
+          image10
+        }
         titleAmazon
         descriptionStore
         descriptionEbay

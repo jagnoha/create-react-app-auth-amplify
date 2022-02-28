@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Amplify, { API, graphqlOperation, Storage } from 'aws-amplify'
 import { SemanticToastContainer, toast } from 'react-semantic-toasts'
 import { Pagination, Input, Segment, Button, Icon, Grid, Modal, Header, Form, ItemContent, Item} from 'semantic-ui-react'
-import { listProducts, listBrands, listCategorys, listSubCategorys, listSubCategory2s, listEbayStoreCategorys, listAttributes, getProduct } from '../../graphql/queries'
+import { listProducts, listBrands, syncProducts, listCategorys, listSubCategorys, listSubCategory2s, listEbayStoreCategorys, listAttributes, getProduct } from '../../graphql/queries'
 import aws_exports from '../../aws-exports'
 import { CSVLink } from 'react-csv'
 import { attachEventProps } from '@aws-amplify/ui-react/lib-esm/react-component-lib/utils'
@@ -155,7 +155,9 @@ export default function ExportFile(props) {
         //fetchSubCategories()
         //fetchSubCategories2()
         //fetchAttributes()
+        DataStore.clear()
         fetchProducts()
+       
           
     }
 
@@ -182,10 +184,58 @@ export default function ExportFile(props) {
             )/*
             .filter(item => !item._deleted)*/
 
-            const productList = await DataStore.query(Product, c=> c.updateFlag("eq",true).status("eq", 'Active'))
-            const products = productList ? productList.filter(item => !item._deleted) : []
+            const listProductsQuery = `query syncProducts {
+              syncProducts(filter: {updateFlag: {eq: true}, status: {eq: "Active"}}) {
+                items {
+                  SKU
+                  id
+                  titleStore
+                  _deleted
+                  Attributes
+                  brandID
+                  categoryID
+                  cost
+                  _version
+                  appliedWeight
+                  descriptionStore
+                  dimensionHeight
+                  dimensionLength
+                  dimensionWidth
+                  dimensionalWeight
+                  handle
+                  images {
+                    image1
+                  }
+                  mpn
+                  parentSKU
+                  priceStore
+                  priceMSRP
+                  shopifyFitmentTags
+                  shopifyMetaTitle
+                  shopifyOnlyTags
+                  shopifyMetaDescription
+                  sourceDropship
+                  sourceWarehouse
+                  subcategory2ID
+                  subcategoryID
+                  weight
+                  updateFlag
+                  status        
+                }
+              }
+            }`
+          
+            const allProducts = await API.graphql(graphqlOperation(listProductsQuery))
+            //const products = allProducts ? allProducts.filter(item => !item._deleted) : []
+            const products = allProducts.data.syncProducts.items ? allProducts.data.syncProducts.items.filter(item => !item._deleted) : []
 
-            console.log(products)
+            //console.log("ALL PRODUCTS: ", allProducts)
+
+
+            //const productList = await DataStore.query(Product, c=> c.updateFlag("eq",true).status("eq", 'Active'))
+            //const products = productList ? productList.filter(item => !item._deleted) : []
+
+            console.log("PRODUCTS: " ,products)
 
             //.filter(item2 => item2.updateFlag) 
 
@@ -435,14 +485,14 @@ export default function ExportFile(props) {
 
     const updateProducts = async (item) => {
       try {
-        console.log(item)
+        //console.log(item)
         let id = uuidv4()
         
         let itemDetails = {
           id,
           SKU: item.SKU,
-          title: item.title,
-          source: item.source,
+          sourceWarehouse: item.sourceWarehouse,
+          sourceDropship: item.sourceDropship,
           status: item.status,
           legacyID: item.legacyID,
           mpn: item.mpn,
@@ -455,16 +505,20 @@ export default function ExportFile(props) {
           subcategory2ID: item.subcategory2ID,
           ebaystorecategoryID: item.ebaystorecategoryID,
           binLocation: item.binLocation,
-          title: item.title,
-          description: item.description,
+          titleStore: item.titleStore,
+          descriptionStore: item.descriptionStore,
           handle: item.handle,
           weight: item.weight,
           dimensionalWeight: item.dimensionalWeight,
           appliedWeight: item.appliedWeight,
-          dimensions: item.dimensions,
+          //dimensions: item.dimensions,
+          dimensionHeight: item.dimensionHeight,
+          dimensionLength: item.dimensionLength,
+          dimensionWidth: item.dimensionWidth,
           shopifyFitmentTags: item.shopifyFitmentTags,
           shopifyOnlyTags: item.shopifyOnlyTags,
-          price: item.price,
+          //priceMSRP: item.price,
+          priceMSRP: item.priceMSRP,
           cost: item.cost,
           shopifyMetaTitle: item.shopifyMetaTitle,
           shopifyMetaDescription: item.shopifyMetaDescription,
@@ -495,10 +549,12 @@ export default function ExportFile(props) {
       }
     }
 
-    const handleApplyProductsChanges = (excelFile) => {
+    const handleApplyProductsChanges = async (excelFile) => {
       try {
-      for (let item of excelFile){
-        //console.log(item.SKU + ' - ', item.OptionName1)
+        let n = 0
+      for (let item of excelFile.slice(32000,33699)){
+        n++
+        console.log('********* ',n,' ********')  
         
         let options = []
         let attributesProduct = []
@@ -604,7 +660,9 @@ export default function ExportFile(props) {
           mpn: item.MPN,
           Attributes: attributesString ? attributesString : '',
           parentSKU: item.BinLocation ? item.BinLocation: '',
-          source: {"warehouse":  item.Source === 'DEMONS' ? true : false ,"dropship": item.Source === 'DROPSHIP' ? true : false},
+          //source: {"warehouse":  item.Source === 'DEMONS' ? true : false ,"dropship": item.Source === 'DROPSHIP' ? true : false},
+          sourceWarehouse: item.Source === 'DEMONS' ? true : false,
+          sourceDropship: item.Source === 'DROPSHIP' ? true : false,
           brandID: item.BrandID ? item.BrandID : '',
           manufacturerID: item.ManufacturerID ? item.ManufacturerID : "" ,
           categoryID: item.CategoryID ? item.CategoryID : undefined,
@@ -612,16 +670,22 @@ export default function ExportFile(props) {
           subcategory2ID: item.SubCategory2ID ? item.SubCategory2ID : undefined,
           ebaystorecategoryID: undefined,
           binLocation: '',
-          title: { store: item.ItemName ? item.ItemName : '' },
-          description: { store: item.BodyDescription ? item.BodyDescription : ''},
-          handle: item.Handle ? item.handle : '',
+          //title: { store: item.ItemName ? item.ItemName : '' },
+          titleStore: item.ItemName ? item.ItemName : '', 
+          descriptionStore: item.BodyDescription ? item.BodyDescription : '',
+          //description: { store: item.BodyDescription ? item.BodyDescription : ''},
+          handle: item.Handle ? item.Handle : '',
           weight: item.Weight ? item.Weight : 0,
           dimensionalWeight: item.Weight ? item.Weight : 0,
           appliedWeight: item.Weight ? item.Weight : 0,
-          dimensions: {height: item.Height ? item.Height : 0, length: item.Length ? item.Length : 0, width: item.Width ? item.Width : 0},
+          //dimensions: {height: item.Height ? item.Height : 0, length: item.Length ? item.Length : 0, width: item.Width ? item.Width : 0},
+          dimensionHeight: item.Height ? item.Height : 0,
+          dimensionLength: item.Length ? item.Length : 0,
+          dimensionWidth: item.Width ? item.Width : 0,          
           shopifyFitmentTags: item.ShopifyFitmentTags ? item.ShopifyFitmentTags : '',
           shopifyOnlyTags: item.ShopifyOnlyTags ? item.ShopifyOnlyTags : '',
-          price: {"MSRP": item.MSRP ? item.MSRP : 0},
+          //price: {"MSRP": item.MSRP ? item.MSRP : 0},
+          priceMSRP: item.MSRP ? item.MSRP : 0,
           cost: item.Cost ? item.Cost : 0,
           status: 'Active',
           shopifyMetaTitle: '',
@@ -633,7 +697,7 @@ export default function ExportFile(props) {
 
         //}
 
-        updateProducts(product)
+        await updateProducts(product)
       }
       setTimeout(() => {
         toast({
@@ -809,7 +873,7 @@ const updateHandlebar = async (item) => {
     
     //let n = 0
     try {
-      let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: 1000 }))
+      /*let productsTemp = await API.graphql(graphqlOperation(listProducts, {limit: 1000 }))
       let productList = productsTemp.data.listProducts.items   
       let token = productsTemp.data.listProducts.nextToken
       console.log("ESSSSSSSSSSTE ES EL TOKEN: ", token)
@@ -820,18 +884,57 @@ const updateHandlebar = async (item) => {
         token = productsPart.data.listProducts.nextToken
         productList = productList.concat(productsPart.data.listProducts.items)
   
-      }
+      }*/
+      let n = 1
 
-      for (let item of excelFile.slice(2500,2853)){
-        n++
+      
+
+      for (let item of excelFile.slice(2600,2868)){
+        console.log(" **************** ",n++," *************")
+        console.log(item.SKU)
+        console.log(" ***********************************")
+        
+
+        const listProductsQuery = `query syncProducts {
+          syncProducts(filter: {SKU: {eq: "${item.SKU}"}}) {
+            items {
+              id,
+              handle,
+              _version        
+            }
+          }
+        }`
+      
+        const allProducts = await API.graphql(graphqlOperation(listProductsQuery))
+        //console.log("TOTAL PRODUCTS: ***************** ", allProducts.data.syncProducts.items)
+
+        /*const listProductsQuery = `query listProducts {
+          listProducts(
+            filter: { SKU: { eq: "90000030313" } },
+          ) {
+            items {
+              id              
+              _version
+            }
+          }
+        }`
+      
+        const allProducts = await API.graphql(graphqlOperation(listProductsQuery))
+        console.log("product: ", allProducts.data.listProducts.items)*/
+
+
+        /*n++
+        console.log(n)
         console.log(n)
         let product = productList.filter(itemProduct => itemProduct.SKU.toString() === item.SKU.toString())[0]
-        //console.log(product)
+
+        //console.log(product)*/
+        let product = allProducts.data.syncProducts.items[0]
         let id = product.id
         let version = product._version 
-        let handle = item.handle
-        console.log({ id, handle, version })
-        updateHandlebar({ id, handle, version })
+        let handle = item.Handle
+        //console.log({ id, handle, version })
+        await updateHandlebar({ id, handle, version })
 
       
       }
@@ -892,16 +995,16 @@ const updateHandlebar = async (item) => {
               name="upload"
               id="upload"
               onChange={readUploadFile}
-          />
+        />*/}
         <hr></hr>
-        <label htmlFor="upload">Upload New Products</label><br></br>
+        {/*<label htmlFor="upload">Upload New Products</label><br></br>
           <input
               type="file"
               name="upload"
               id="upload"
               onChange={readUploadNewProducts}
           />          
-        */}
+      */}
         {/*<hr></hr>
           <label htmlFor="upload">Update products</label><br></br>
           <button
