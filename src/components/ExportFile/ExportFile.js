@@ -155,7 +155,7 @@ export default function ExportFile(props) {
         //fetchSubCategories()
         //fetchSubCategories2()
         //fetchAttributes()
-        DataStore.clear()
+        //DataStore.clear()
         fetchProducts()
        
           
@@ -812,6 +812,21 @@ export default function ExportFile(props) {
     }
 }
 
+const updateFields = async (item) => {
+  try {
+    let productDetails = {
+      id: item.id,     
+      options: item.options, 
+      _version: item.version
+    }
+    console.log("=================", productDetails, "========================")
+    let result = await API.graphql(graphqlOperation(updateProduct, { input: productDetails }))
+    console.log(result)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 const updateHandlebar = async (item) => {
   try {
     //console.log(item.id)
@@ -889,7 +904,7 @@ const updateHandlebar = async (item) => {
 
       
 
-      for (let item of excelFile.slice(2600,2868)){
+      for (let item of excelFile.slice(0,2)){
         console.log(" **************** ",n++," *************")
         console.log(item.SKU)
         console.log(" ***********************************")
@@ -932,9 +947,10 @@ const updateHandlebar = async (item) => {
         let product = allProducts.data.syncProducts.items[0]
         let id = product.id
         let version = product._version 
-        let handle = item.Handle
+        let options = item.options
         //console.log({ id, handle, version })
-        await updateHandlebar({ id, handle, version })
+        //await updateHandlebar({ id, handle, version })
+        await updateFields({ id, options, version })
 
       
       }
@@ -1012,13 +1028,14 @@ const updateHandlebar = async (item) => {
           >Update Products</button>
         
         */}
-        {/*<label htmlFor="upload">Update products handle</label><br></br>
+        <br />
+        <label htmlFor="upload">Update products options</label><br></br>
           <input
               type="file"
               name="upload"
               id="upload"
               onChange={readUploadUpdateProducts}
-      />*/}
+      />
       </div>    
     );
     

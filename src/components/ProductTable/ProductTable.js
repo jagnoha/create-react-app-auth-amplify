@@ -76,7 +76,7 @@ export default function ProductTable(props) {
     
         } 
 
-    //console.log("ESTA ES LA DATA: ",props.data)
+    console.log("ESTA ES LA DATA: ",props.data)
 
 
     return (

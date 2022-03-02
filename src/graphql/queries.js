@@ -263,8 +263,7 @@ export const searchProducts = /* GraphQL */ `
         createdAt
         updatedAt
       }
-      nextToken
-      total
+      nextToken      
     }
   }
 `;

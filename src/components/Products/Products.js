@@ -3,7 +3,8 @@ import Amplify, { API, graphqlOperation, Storage } from 'aws-amplify'
 import { Pagination, Input, Button, Icon, Grid, Modal, Dropdown, Form, Popup, Label} from 'semantic-ui-react'
 import { SemanticToastContainer, toast } from 'react-semantic-toasts'
 import 'react-semantic-toasts/styles/react-semantic-alert.css'
-import { listProducts, syncProducts, searchProducts, listBrands, listManufacturers, listCategorys, listSubCategorys, listSubCategory2s, listEbayStoreCategorys, listAttributes } from '../../graphql/queries'
+import { listProducts, syncProducts, searchProducts, listBrands, listManufacturers, listCategorys, listSubCategorys, 
+  listSubCategory2s, listEbayStoreCategorys, listAttributes, getProduct } from '../../graphql/queries'
 import { createProduct, updateProduct } from '../../graphql/mutations'
 import * as subscriptions from '../../graphql/subscriptions'
 import { v4 as uuidv4 } from 'uuid'
@@ -133,11 +134,21 @@ export default function Products() {
   
   const addProduct = async (imageList) => {
     try {
-        
-        const product = productForm
+      const productSearch = await API.graphql(
+        graphqlOperation(syncProducts, {
+          filter: { SKU: { eq: `${productForm.sku}` } },
+      }))
+
+      //console.log("PRODUCT FORM:", productForm)
+
+      const productInSystem = productSearch.data.syncProducts.items
+      console.log("PRODUCT IN SYSTEM *******:", productInSystem.length)
+
+        //const product = productForm
         //console.log(productForm);
-        if (products.find(item => item.SKU.toUpperCase() === product.sku.toUpperCase() ))  {
-          setTimeout(() => {
+        //if (products.find(item => item.SKU.toUpperCase() === product.sku.toUpperCase() ))  {
+          if (productInSystem.length > 0)  {
+            setTimeout(() => {
             toast({
                 type: 'error',
                 icon: 'check circle outline',
@@ -373,9 +384,6 @@ export default function Products() {
       const productSearch = await API.graphql(
         graphqlOperation(syncProducts, {
           filter: { id: { eq: `${productForm.id}` } },
-          //nextToken: tokenList[pageNumber], //nextTokenProduct,     
-          //sort: { field: orderColumn.column, direction: orderColumn.direction === 'descending' ? 'desc' : 'asc' },
-          //limit: productsByPage,
       }))
 
       console.log("PRODUCT SEARCH: ", productSearch)
@@ -1274,11 +1282,32 @@ if ( tokenList.length !== (pageNumber + incr) ) {
   list = allProducts.data.searchProducts.items
 
 }
-  
+
+let newListProducts = []
+let n = 0
+
+for (let item of list){
+  n++
+  console.log(item.id)
+  console.log(" ***********************************")
+  let product = await API.graphql(
+    graphqlOperation(getProduct, {
+      id: item.id
+  }))
+  console.log(product.data.getProduct)
+  if (product.data.getProduct){
+    newListProducts.push(product.data.getProduct)
+  } else {
+    newListProducts.push({id: `${n}`, options: '0'})
+  }
+}
+
+
   //console.log("TOKEN: ", nextTokenProduct)
 
-  setProducts(list)
+  setProducts(newListProducts)
   setPageNumber(pageNumber + incr)
+  console.log(newListProducts)
 
       /*const list = await DataStore.query(Product, c => c.or ( c=> c.SKU("contains", search).mpn("contains", search).titleStore("contains", search)
         .descriptionStore("contains", search).brandID("eq", brandId).manufacturerID("eq", manufacturerId))
@@ -1563,6 +1592,26 @@ let list = []
   list = allProducts.data.searchProducts.items
   //console.log(list)
 
+  let newListProducts = []
+let n = 0
+for (let item of list){
+  n++
+  console.log(item.id)
+  console.log(" ***********************************")
+  let product = await API.graphql(
+    graphqlOperation(getProduct, {
+      id: item.id
+  }))
+  console.log(product.data.getProduct)
+  if (product.data.getProduct){
+    newListProducts.push(product.data.getProduct)
+  } else {
+    newListProducts.push({id: `${n}`, options: '0'})
+  }
+}
+
+  
+
 //}
 
 
@@ -1585,9 +1634,9 @@ console.log(allProducts)
   console.log("FILTER LIST: ", filterList)*/
 
         
-          console.log(list)
+          console.log(newListProducts)
           //setProducts(list.slice(pageNumber * productsByPage, pageNumber * productsByPage + productsByPage))
-          setProducts(list)
+          setProducts(newListProducts)
        
     }
 
@@ -3493,7 +3542,7 @@ const handleChangeProductsByPage = (e, {value}) => {
         {/*console.log(brands)*/}
         <ProductTable 
               //data = {dataChunks[activePage - 1]}
-              data = {products}
+              data = {products ? products.filter(item => item.options !== '0') : products}
               //products = {products} 
               categories = {categories}
               subCategories = {subCategories}
